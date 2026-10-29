@@ -975,6 +975,11 @@
 
     <!-- JAVASCRIPT LOGIC & ENGINE -->
     <script>
+        // --- SUPABASE CLIENT SETUP ---
+        const SUPABASE_URL = "https://vraarxgciqaybkbjzwii.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_sP5Uzrl2cRF06qIUVqXbSA_-Id9Rv9d";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         function handleInputFocus(el) {
             if (!el) return;
             const val = el.value ? el.value.trim() : "";
@@ -1202,7 +1207,7 @@
 
         let costChartInstance = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('quote-date').value = today;
 
@@ -1218,7 +1223,58 @@
 
             setJobMode('insurance');
             checkURLParamsForSharedQuote();
+
+            // Load shared company settings from Supabase
+            await syncGlobalSettingsFromCloud();
         });
+
+        // Pull company materials, crew rates, and pitch specs from cloud
+        async function syncGlobalSettingsFromCloud() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('app_settings')
+                    .select('*')
+                    .eq('id', 'global_config')
+                    .single();
+
+                if (data && data.data) {
+                    const cfg = data.data;
+                    if (cfg.materials) state.materials = cfg.materials;
+                    if (cfg.crewLeaders) state.crewLeaders = cfg.crewLeaders;
+                    if (cfg.bundleSpecs) state.bundleSpecs = cfg.bundleSpecs;
+                    if (cfg.pitchRates) state.pitchRates = cfg.pitchRates;
+
+                    syncBundleTabUI();
+                    syncPitchTabUI();
+                    renderMaterialDropdown();
+                    renderMasterTable();
+                    renderCrewTable();
+                    renderCrewLeaderMultiSelect();
+                    calculateEstimate();
+                }
+            } catch (e) {
+                console.log("Using local offline configuration.");
+            }
+        }
+
+        // Push company settings to Supabase
+        async function pushGlobalSettingsToCloud() {
+            try {
+                const payload = {
+                    id: 'global_config',
+                    data: {
+                        materials: state.materials,
+                        crewLeaders: state.crewLeaders,
+                        bundleSpecs: state.bundleSpecs,
+                        pitchRates: state.pitchRates
+                    },
+                    updated_at: new Date().toISOString()
+                };
+                await supabaseClient.from('app_settings').upsert(payload);
+            } catch (e) {
+                console.error("Cloud push failed:", e);
+            }
+        }
 
         function switchTab(tabId) {
             ['calculator', 'mastersheet', 'crews'].forEach(id => {
@@ -1384,7 +1440,7 @@
             document.getElementById('pitch-rate-13-plus').value = p.pitch_13_plus.toFixed(2);
         }
 
-        function savePitchRates() {
+        async function savePitchRates() {
             state.pitchRates = {
                 pitch_0_2: parseCleanFloat(document.getElementById('pitch-rate-0-2').value),
                 pitch_3_6: parseCleanFloat(document.getElementById('pitch-rate-3-6').value),
@@ -1395,8 +1451,9 @@
             try {
                 localStorage.setItem('360_roofing_pitch_rates', JSON.stringify(state.pitchRates));
             } catch (e) {}
+            await pushGlobalSettingsToCloud();
             calculateEstimate();
-            showToast('Pitch Extra Charge Rates Saved!');
+            showToast('Pitch Extra Charge Rates Saved to Cloud!');
         }
 
         function renderMaterialDropdown() {
@@ -1455,7 +1512,7 @@
             document.getElementById('tab-bundle-ridge-equiv').value = b.ridgeEquiv.toFixed(2);
         }
 
-        function saveBundleSettings() {
+        async function saveBundleSettings() {
             state.bundleSpecs = {
                 starterCoverage: parseCleanFloat(document.getElementById('tab-bundle-starter-coverage').value) || 120.00,
                 starterEquiv: parseCleanFloat(document.getElementById('tab-bundle-starter-equiv').value) || 225.00,
@@ -1465,8 +1522,9 @@
             try {
                 localStorage.setItem('360_roofing_bundle_specs', JSON.stringify(state.bundleSpecs));
             } catch (e) {}
+            await pushGlobalSettingsToCloud();
             calculateEstimate();
-            showToast('Bundle Coverage Specs Saved!');
+            showToast('Bundle Coverage Specs Saved to Cloud!');
         }
 
         function triggerPrintQuote() {
@@ -1688,7 +1746,7 @@
             container.innerHTML = `
                 <div class="text-center py-10 text-slate-400">
                     <i data-lucide="loader" class="w-8 h-8 mx-auto mb-2 animate-spin text-sky-500"></i>
-                    <p class="text-xs">Fetching quotes from cloud...</p>
+                    <p class="text-xs">Fetching quotes from Supabase cloud...</p>
                 </div>
             `;
             lucide.createIcons();
@@ -1721,11 +1779,14 @@
                         </div>
                         <p class="text-xs text-slate-500">${item.roof_sqft || 0} SQs • Waste: ${item.waste_pct || 10}% • Date: ${createdDate}</p>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="font-black text-lg text-sky-900">${contractTotal}</span>
-                        <button onclick="loadHistoryItem(${index})" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl transition flex items-center space-x-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-black text-lg text-sky-900 mr-2">${contractTotal}</span>
+                        <button onclick="loadHistoryItem(${index})" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl transition flex items-center space-x-1" title="Load Quote">
                             <i data-lucide="download" class="w-3.5 h-3.5"></i>
                             <span>Load</span>
+                        </button>
+                        <button onclick="deleteQuoteFromCloud('${item.id}', ${index})" class="p-2 text-rose-500 hover:bg-rose-100 rounded-xl transition" title="Delete Quote from Cloud">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
                 `;
@@ -1744,6 +1805,24 @@
             loadSnapshotData(item.quote_data);
             closeHistoryModal();
             showToast(`Loaded calculation for "${item.customer_name}"!`);
+        }
+
+        async function deleteQuoteFromCloud(quoteId, index) {
+            if (!confirm("Are you sure you want to permanently delete this quote from Supabase?")) return;
+
+            const { error } = await supabaseClient
+                .from("quotes")
+                .delete()
+                .eq("id", quoteId);
+
+            if (error) {
+                console.error("Delete error:", error);
+                showToast("Could not delete quote. Check Supabase permissions.");
+            } else {
+                cloudHistoryCache.splice(index, 1);
+                renderHistoryList();
+                showToast("Quote deleted successfully from cloud!");
+            }
         }
 
         // --- MATERIALS SHEET RENDER & CRUD ---
@@ -1826,13 +1905,14 @@
             showToast('Material option removed.');
         }
 
-        function saveMasterMaterials() {
+        async function saveMasterMaterials() {
             try {
                 localStorage.setItem('360_roofing_materials', JSON.stringify(state.materials));
             } catch (e) {}
+            await pushGlobalSettingsToCloud();
             renderMaterialDropdown();
             onMaterialChange();
-            showToast('Materials Price Sheet Saved!');
+            showToast('Materials Price Sheet Saved to Cloud!');
         }
 
         function renderCrewTable() {
@@ -1955,11 +2035,12 @@
             showToast('Crew leader removed.');
         }
 
-        function saveCrewLeaders() {
+        async function saveCrewLeaders() {
             try {
                 localStorage.setItem('360_roofing_crews', JSON.stringify(state.crewLeaders));
             } catch (e) {}
-            showToast('Crew Leaders & Rates Saved!');
+            await pushGlobalSettingsToCloud();
+            showToast('Crew Leaders & Rates Saved to Cloud!');
         }
 
         function resetCalculator() {
@@ -2557,11 +2638,6 @@
                 toast.classList.add('opacity-0', 'pointer-events-none');
             }, 3000);
         }
-
-        // --- Supabase Cloud Client & Operations ---
-        const SUPABASE_URL = "https://vraarxgciqaybkbjzwii.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_sP5Uzrl2cRF06qIUVqXbSA_-Id9Rv9d";
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Saves current quote to Supabase with full snapshot data
         async function saveQuoteToCloud(customerName, createdByName = "Team Member") {
