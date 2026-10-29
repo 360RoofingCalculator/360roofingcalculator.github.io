@@ -1,0 +1,2605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360 Roofing Price Calculator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js for breakdown visualizer -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            opacity: 1;
+        }
+
+        @media print {
+            .no-print, header, nav, button, #toast, #history-modal { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+            main { max-width: 100% !important; padding: 0 !important; }
+            .shadow-xl, .shadow-md, .shadow-sm, .shadow-2xl { box-shadow: none !important; }
+            .border { border-color: #cbd5e1 !important; }
+            .page-break-avoid { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-sky-500 p-2 rounded-lg text-white">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">360 Roofing Price Calculator</h1>
+                    <p class="text-xs text-slate-400">Precision Roof Price, Materials & Bundle Engine</p>
+                </div>
+            </div>
+
+            <!-- Tab Switcher -->
+            <nav class="flex space-x-1 bg-slate-800 p-1 rounded-xl">
+                <button id="tab-calculator-btn" onclick="switchTab('calculator')" class="px-3.5 py-2 text-xs font-medium rounded-lg bg-sky-600 text-white transition-colors flex items-center space-x-1.5">
+                    <i data-lucide="calculator" class="w-4 h-4"></i>
+                    <span>1. Calculator & Quote</span>
+                </button>
+                <button id="tab-mastersheet-btn" onclick="switchTab('mastersheet')" class="px-3.5 py-2 text-xs font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-colors flex items-center space-x-1.5">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    <span>2. Materials Price Sheet</span>
+                </button>
+                <button id="tab-crews-btn" onclick="switchTab('crews')" class="px-3.5 py-2 text-xs font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-colors flex items-center space-x-1.5">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <span>3. Crew Rates</span>
+                </button>
+            </nav>
+
+            <div class="flex items-center space-x-2">
+                <button onclick="newCalculation()" class="px-2.5 py-1.5 text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Start a fresh clear job">
+                    <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
+                    <span>New</span>
+                </button>
+                <button onclick="saveCurrentCalculation()" class="px-2.5 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Save current job to History">
+                    <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                    <span>Save</span>
+                </button>
+                <button onclick="openHistoryModal()" class="px-2.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="View saved calculation history">
+                    <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                    <span>History</span>
+                </button>
+                <button onclick="resetCalculator()" class="px-2.5 py-1.5 text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Reset to default inputs">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    <span>Reset</span>
+                </button>
+                <button onclick="triggerPrintQuote()" class="px-2.5 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg flex items-center space-x-1 transition" title="Print or save PDF quote">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                    <span>Print</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: CALCULATOR VIEW -->
+        <div id="tab-calculator" class="space-y-6">
+            
+            <!-- Top Controls Bar -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 no-print">
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl">
+                    <button id="mode-retail" onclick="setJobMode('retail')" class="px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition">
+                        RETAIL JOB
+                    </button>
+                    <button id="mode-insurance" onclick="setJobMode('insurance')" class="px-4 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-emerald-700 transition">
+                        INSURANCE CLAIM
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 text-xs flex-1 max-w-2xl">
+                    <div class="flex-1 min-w-[150px]">
+                        <label class="block text-slate-500 font-medium mb-0.5">Customer / Job Name</label>
+                        <input type="text" id="client-name" value="Smith Residence - Full Replacement" oninput="calculateEstimate()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                    <div class="w-36">
+                        <label class="block text-slate-500 font-medium mb-0.5">Quote Date</label>
+                        <input type="date" id="quote-date" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="bg-sky-50 border border-sky-200 rounded-xl px-4 py-2 text-right">
+                    <div class="text-xs uppercase tracking-wider text-sky-700 font-semibold">Total Contract Price</div>
+                    <div class="text-2xl font-black text-sky-900" id="header-total-price">$0.00</div>
+                </div>
+            </div>
+
+            <!-- Main Grid Split -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- LEFT COLUMN -->
+                <div class="lg:col-span-7 space-y-6">
+
+                    <!-- CARD 1: BRAND & MATERIAL TYPE -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3">
+                            <h2 class="font-semibold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="layers" class="w-5 h-5 text-sky-600"></i>
+                                1. Roof Material & Brand Component
+                            </h2>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">System Specs</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Component Brand</label>
+                                <select id="select-brand" onchange="calculateEstimate()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                    <option value="IKO Cambridge">IKO Cambridge</option>
+                                    <option value="CertainTeed">CertainTeed</option>
+                                    <option value="Owens Corning">Owens Corning</option>
+                                    <option value="GAF">GAF Materials</option>
+                                    <option value="Generic Metal">Generic Metal / Rollformer</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Type of Roof</label>
+                                <select id="select-material" onchange="onMaterialChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: JOB INPUTS -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-emerald-200 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3">
+                            <h2 class="font-semibold text-emerald-900 flex items-center gap-2">
+                                <i data-lucide="ruler" class="w-5 h-5 text-emerald-600"></i>
+                                2. Job Inputs (Measurements & Pricing)
+                            </h2>
+                            <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">Job Measurements</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Main Roof Squares</label>
+                                <input type="text" id="input-sqs" value="20.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Hip & Ridge LF</label>
+                                <input type="text" id="input-ridge" value="180.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Starter)</label>
+                                <input type="text" id="input-starter" value="250.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            </div>
+
+                            <!-- ROOF PITCH SELECTOR -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Roof Pitch</label>
+                                <select id="select-roof-pitch" onchange="calculateEstimate()" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-2 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <option value="pitch_0_2">0/12 - 2/12 (Flat / Low Slope)</option>
+                                    <option value="pitch_3_6" selected>3/12 - 6/12 (Walkable / Standard)</option>
+                                    <option value="pitch_7_9">7/12 - 9/12 (Steep Slope)</option>
+                                    <option value="pitch_10_12">10/12 - 12/12 (Very Steep / Walk-Off)</option>
+                                    <option value="pitch_13_plus">13/12+ (Mansard / Extreme Pitch)</option>
+                                </select>
+                            </div>
+
+                            <!-- DYNAMIC STEEP PITCH SQS INPUT -->
+                            <div id="container-pitch-sqs" class="hidden">
+                                <label class="block text-xs font-medium text-amber-700 mb-1">Affected Pitch SQs</label>
+                                <input type="text" id="input-pitch-sqs" value="0.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/50 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Leave blank or 0 to apply pitch charge to total roof squares">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Waste %</label>
+                                <div class="relative">
+                                    <input type="text" id="input-waste" value="10.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Selling Price / SQ</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
+                                    <input type="text" id="input-selling-price" value="450.00" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="onSellingPriceInputBlur(this)" onkeydown="handleSellingPriceKeydown(event, this, 25)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Sales Commission %</label>
+                                <div class="relative">
+                                    <input type="text" id="input-commission-rate" value="15.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
+                                </div>
+                            </div>
+
+                            <!-- ADDITIONAL ROOFS INPUTS -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Additional Roofs (SQs)</label>
+                                <input type="text" id="input-extra-sqs" value="0.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Additional Roof Type</label>
+                                <select id="select-extra-roof-type" onchange="calculateEstimate()" class="w-full border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-semibold focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                </select>
+                            </div>
+
+                            <!-- DYNAMIC ADDITIONAL ROOFS COST CELL -->
+                            <div id="container-extra-roof-cost" class="hidden">
+                                <label class="block text-xs font-medium text-amber-800 mb-1">Add'l Roofs Cost ($)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
+                                    <input type="text" id="input-extra-roof-cost" value="0.00" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <!-- RENAMABLE DIRECT COSTS FIELD -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span id="label-other-direct" onclick="renameOtherDirectLabel()" class="text-xs font-medium text-slate-600 cursor-pointer hover:text-sky-600 transition flex items-center gap-1" title="Click to rename this cost field">
+                                        Other Direct Costs ($)
+                                        <i data-lucide="edit-2" class="w-3 h-3 text-slate-400"></i>
+                                    </span>
+                                </div>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
+                                    <input type="text" id="input-other-direct" value="0.00" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div class="col-span-2 md:col-span-3">
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Project Notes</label>
+                                <input type="text" id="input-notes" value="Standard replacement" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3: MATERIAL & PRODUCTION ASSUMPTIONS -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-200 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3">
+                            <h2 class="font-semibold text-amber-900 flex items-center gap-2">
+                                <i data-lucide="sliders" class="w-5 h-5 text-amber-600"></i>
+                                3. Material & Production Assumptions
+                            </h2>
+                            <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded">Material Rates</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+                            <div>
+                                <label class="block font-medium text-slate-600 mb-1">Base Material / SQ ($)</label>
+                                <input type="text" id="cost-base-material" value="92.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                            </div>
+
+                            <div>
+                                <label class="block font-medium text-slate-600 mb-1">Misc Material / SQ ($)</label>
+                                <input type="text" id="cost-misc-material" value="20.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                            </div>
+
+                            <div>
+                                <label class="block font-medium text-slate-600 mb-1">Starter Cost / Bundle ($)</label>
+                                <input type="text" id="starter-cost-bundle" value="50.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                            </div>
+
+                            <div>
+                                <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Cost / Bundle ($)</label>
+                                <input type="text" id="ridge-cost-bundle" value="65.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                            </div>
+
+                            <div>
+                                <label class="block font-medium text-slate-600 mb-1">Target Margin %</label>
+                                <div class="relative">
+                                    <input type="text" id="cost-target-margin" value="35.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-800">
+                                    <span class="absolute right-3 top-2 text-xs text-slate-400">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 4: CREW LEADERS ASSIGNMENT -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-sky-200 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3">
+                            <h2 class="font-semibold text-sky-900 flex items-center gap-2">
+                                <i data-lucide="users" class="w-5 h-5 text-sky-600"></i>
+                                4. Crew Leaders & Labor Allocation
+                            </h2>
+                            <div class="flex items-center space-x-2">
+                                <label for="select-crew-calc-mode" class="text-xs text-slate-500 font-medium hidden sm:inline">Calculation Mode:</label>
+                                <select id="select-crew-calc-mode" onchange="calculateEstimate()" class="text-xs bg-sky-50 text-sky-900 border border-sky-200 rounded-lg px-2 py-1 font-bold focus:outline-none">
+                                    <option value="average">Average Selected Rates</option>
+                                    <option value="cumulative">Combined / Cumulative Rates</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-slate-500">Select one or multiple crew leaders assigned to this job and adjust their individual pay rates:</p>
+
+                        <div id="crew-leader-multiselect-container" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex justify-between items-center text-xs">
+                            <span class="text-slate-600 font-medium">Applied Crew Labor Cost / SQ:</span>
+                            <span class="font-extrabold text-sky-800 text-sm" id="calc-effective-crew-rate">$0.00 / SQ</span>
+                        </div>
+                    </div>
+
+                    <!-- QUICK PRICE SCENARIO COMPARISON TABLE -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
+                        <div class="border-b pb-2 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xs uppercase tracking-wider font-bold text-slate-800 flex items-center gap-2">
+                                    <i data-lucide="table" class="w-4 h-4 text-sky-600"></i>
+                                    QUICK PRICE SCENARIOS
+                                </h3>
+                                <p class="text-xs text-slate-500">Click any row to instantly apply its Selling Price / SQ to your quote</p>
+                            </div>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded uppercase">Interactive</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs font-medium">
+                                <thead>
+                                    <tr class="text-slate-400 uppercase tracking-wider border-b text-[11px]">
+                                        <th class="pb-3 pt-2 font-bold">PRICE / SQ</th>
+                                        <th class="pb-3 pt-2 font-bold">CONTRACT TOTAL</th>
+                                        <th class="pb-3 pt-2 font-bold">TOTAL JOB COST</th>
+                                        <th class="pb-3 pt-2 font-bold">COMMISSION</th>
+                                        <th class="pb-3 pt-2 font-bold">PROFIT</th>
+                                        <th class="pb-3 pt-2 font-bold text-right">GROSS MARGIN</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scenario-table-body" class="divide-y divide-slate-100 text-slate-800 font-bold">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: OUTPUTS & CHART -->
+                <div class="lg:col-span-5 space-y-6">
+
+                    <!-- MEASUREMENT OUTPUTS CARD -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
+                            <span>Measurement Outputs</span>
+                            <span class="text-xs bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">Live Values</span>
+                        </h3>
+
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between text-slate-600"><span>Main Squares:</span><span class="font-bold text-slate-900" id="out-main-sqs">20.00</span></div>
+                            <div class="flex justify-between text-slate-600"><span>Waste Squares:</span><span class="font-bold text-slate-900" id="out-waste-sqs">2.00</span></div>
+                            <div class="flex justify-between text-slate-600"><span>Starter Squares:</span><span class="font-bold text-slate-900" id="out-starter-sqs">1.33</span></div>
+                            <div class="flex justify-between text-slate-600"><span>Hip & Ridge Squares:</span><span class="font-bold text-slate-900" id="out-ridge-sqs">2.66</span></div>
+                            
+                            <!-- Dynamic Additional Roofs SQs line -->
+                            <div id="row-out-extra-sqs" class="flex justify-between text-slate-600 hidden">
+                                <span id="label-out-extra-sqs">Additional Roofs SQs:</span>
+                                <span class="font-bold text-slate-900" id="out-extra-sqs">0.00</span>
+                            </div>
+
+                            <div class="flex justify-between font-extrabold text-slate-900 bg-slate-100 p-2 rounded-lg text-sm mt-1">
+                                <span>TOTAL SQUARES:</span><span id="out-total-sqs">26.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COST BREAKDOWN OUTPUTS CARD -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
+                            <span>Cost Breakdown Outputs</span>
+                            <span class="text-xs bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">Live Values</span>
+                        </h3>
+
+                        <div class="space-y-2 text-xs">
+                            <!-- Crew Labor Line -->
+                            <div class="flex justify-between text-slate-700 font-medium">
+                                <span>Crew Labor Total:</span>
+                                <span class="font-bold text-slate-900" id="out-labor-total">$0.00</span>
+                            </div>
+
+                            <!-- Materials Parent Group -->
+                            <div class="pt-1 space-y-1">
+                                <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider text-sky-700">Materials</div>
+                                
+                                <div class="pl-3 space-y-1 text-[11px] text-slate-600">
+                                    <div class="flex justify-between">
+                                        <span>Base Materials Total:</span>
+                                        <span class="font-medium text-slate-800" id="out-base-mat-total">$0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Misc. Materials Total:</span>
+                                        <span class="font-medium text-slate-800" id="out-misc-mat-total">$0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span id="label-starter-bundles">Starter Bundles Cost:</span>
+                                        <span class="font-medium text-slate-800" id="out-starter-bundle-cost">$0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span id="label-ridge-bundles">Hip & Ridge Bundles Cost:</span>
+                                        <span class="font-medium text-slate-800" id="out-ridge-bundle-cost">$0.00</span>
+                                    </div>
+
+                                    <!-- DYNAMIC NON-SHINGLE ADD'L ROOF COST LINE ITEM -->
+                                    <div id="row-extra-roof-cost-card" class="flex justify-between text-slate-700 font-medium hidden">
+                                        <span id="label-extra-roof-cost-card">Add'l Roofs Cost:</span>
+                                        <span class="font-bold text-slate-900" id="out-extra-roof-cost">$0.00</span>
+                                    </div>
+
+                                    <!-- PITCH SURCHARGE SUB-LINE ITEM -->
+                                    <div id="row-pitch-surcharge-card" class="flex justify-between text-amber-800 font-medium hidden">
+                                        <span id="label-pitch-surcharge">Pitch Surcharge Cost:</span>
+                                        <span class="font-bold text-amber-900" id="out-pitch-surcharge-cost">$0.00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Total Materials Subtotal -->
+                                <div class="flex justify-between font-bold text-slate-900 bg-sky-50/60 p-1.5 rounded-md text-xs border border-sky-100 mt-1">
+                                    <span>Total Material Costs:</span>
+                                    <span id="out-total-mat-costs">$0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Other Direct Costs Line -->
+                            <div id="row-other-direct-card" class="flex justify-between text-slate-700 font-medium pt-1 hidden">
+                                <span id="display-label-other-direct">Other Direct Costs:</span>
+                                <span class="font-bold text-slate-900" id="out-other-direct-total">$0.00</span>
+                            </div>
+
+                            <!-- Commission Line -->
+                            <div class="flex justify-between text-slate-700 font-medium pt-1">
+                                <span>Commission:</span>
+                                <span class="font-bold text-slate-900" id="out-card-commission-total">$0.00</span>
+                            </div>
+
+                            <!-- Overall Total Bar -->
+                            <div class="flex justify-between font-black text-slate-900 bg-slate-100 p-2 rounded-lg text-sm border-t border-slate-200 mt-2">
+                                <span>OVERALL TOTAL JOB COST:</span>
+                                <span id="out-overall-job-total">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FINAL PRICING OUTPUTS CARD -->
+                    <div class="bg-slate-900 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs uppercase tracking-widest text-sky-400 font-semibold flex items-center gap-1.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                Final Pricing Outputs
+                            </span>
+                            <span id="out-margin-status" class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full transition-all duration-300">
+                                GOOD
+                            </span>
+                        </div>
+
+                        <!-- CONTRACT PRICE DISPLAY & OVERRIDE EDIT BOX -->
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-3xl font-black text-white">$</span>
+                                <input type="text" id="override-contract-price" value="0.00" onwheel="handleWheelScrollOverride(event, this, 100)" onfocus="handleInputFocus(this)" onblur="onOverridePriceBlur(this)" onkeydown="handleOverrideKeydown(event, this, 100)" class="bg-slate-800 text-3xl font-black text-white border border-slate-700 focus:border-sky-400 rounded-xl px-2 py-1 w-full max-w-[260px] focus:outline-none tracking-tight">
+                                <label class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/80 px-2.5 py-2 rounded-xl border border-slate-700 cursor-pointer hover:text-white transition" title="Check to manually set or lock Contract Price">
+                                    <input type="checkbox" id="chk-lock-contract" onchange="toggleContractLock(this.checked)" class="w-3.5 h-3.5 text-sky-500 rounded border-slate-600 bg-slate-900 cursor-pointer">
+                                    <span class="font-semibold text-[11px]">Override</span>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 text-xs text-slate-400 mt-1 font-medium">
+                                <span>Final Selling Price / SQ: $</span>
+                                <input type="text" id="out-interactive-selling-price" value="0.00" onwheel="handleWheelScrollSellingPriceOutput(event, this, 25)" onfocus="handleInputFocus(this)" onblur="onSellingPriceOutputBlur(this)" onkeydown="handleSellingPriceOutputKeydown(event, this, 25)" class="bg-transparent border border-slate-700 focus:border-sky-400 text-slate-400 focus:text-white text-xs font-medium rounded px-1.5 py-0.5 w-20 focus:outline-none transition">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 border-t border-slate-800 pt-4 text-xs">
+                            <div class="flex justify-between text-slate-300 font-normal">
+                                <span>Job Materials:</span>
+                                <span class="text-slate-300 font-normal" id="out-job-materials-total">$0.00</span>
+                            </div>
+
+                            <div class="flex justify-between text-slate-300 font-normal">
+                                <span>Crew Labor:</span>
+                                <span class="text-slate-300 font-normal" id="out-crew-total-display">$0.00</span>
+                            </div>
+
+                            <div id="row-other-direct-display" class="flex justify-between text-slate-300 font-normal hidden">
+                                <span id="display-label-other-direct-summary">Other Direct Costs:</span>
+                                <span class="text-slate-300 font-normal" id="out-other-direct-display">$0.00</span>
+                            </div>
+
+                            <div class="flex justify-between text-slate-200 font-semibold border-t border-slate-800/60 pt-2">
+                                <span>Sub Total Before Commission:</span>
+                                <span class="text-slate-200 font-semibold" id="out-subtotal-before-comm">$0.00</span>
+                            </div>
+
+                            <div class="flex justify-between text-slate-300 font-normal">
+                                <span>Commission:</span>
+                                <span class="text-slate-300 font-normal" id="out-commission-amount">$0.00</span>
+                            </div>
+                            
+                            <div class="flex justify-between text-white font-bold border-t border-slate-800/80 pt-2 text-sm">
+                                <span>Total Job Cost:</span>
+                                <span class="font-extrabold text-white" id="out-total-job-cost">$0.00</span>
+                            </div>
+                            
+                            <!-- GROSS PROFIT & MARGIN CONTAINER -->
+                            <div id="profit-container-box" class="p-2 rounded-xl transition-all duration-300 space-y-1 mt-1">
+                                <div class="flex justify-between text-slate-200 font-semibold">
+                                    <span>Gross Profit:</span>
+                                    <span class="font-bold text-sm transition-colors duration-300" id="out-profit-amount">$0.00</span>
+                                </div>
+
+                                <div class="flex justify-between text-slate-200 font-bold">
+                                    <span>Gross Profit Margin:</span>
+                                    <span class="font-bold text-sm transition-colors duration-300" id="out-gross-margin">0.00%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TARGET VS ACTUAL COMPARISONS -->
+                        <div class="border-t border-slate-800 pt-3 space-y-2 text-[11px] text-slate-400">
+                            <div class="flex justify-between">
+                                <span>Cost Per Total SQ:</span>
+                                <span class="font-semibold text-slate-200" id="out-cost-per-total-sq">$0.00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Break-Even Price / SQ:</span>
+                                <span class="font-semibold text-slate-200" id="out-breakeven-price">$0.00</span>
+                            </div>
+
+                            <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800 space-y-1.5 mt-2">
+                                <div class="flex justify-between items-center text-orange-400 font-medium">
+                                    <span>Target Price / SQ:</span>
+                                    <span class="font-bold text-xs text-orange-400" id="out-target-price-per-sq">$0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">vs Actual ($<span id="actual-price-sq-num">0</span>):</span>
+                                    <span id="diff-price-per-sq" class="font-extrabold text-[10px] px-2 py-0.5 rounded">-$0.00 / SQ</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800 space-y-1.5">
+                                <div class="flex justify-between items-center text-orange-400 font-bold">
+                                    <span>Target Contract Price:</span>
+                                    <span class="font-black text-xs text-orange-400" id="out-target-contract-price">$0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400">vs Actual Contract Total:</span>
+                                    <span id="diff-contract-price" class="font-extrabold text-[10px] px-2 py-0.5 rounded">-$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons including Share -->
+                        <div class="mt-4 pt-4 border-t border-slate-800 grid grid-cols-3 gap-2 no-print">
+                            <button onclick="triggerPrintQuote()" class="w-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 transition">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                                <span>Export/Print</span>
+                            </button>
+                            <button onclick="copyQuoteSummary()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 transition border border-slate-700">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <span>Copy Text</span>
+                            </button>
+                            <button onclick="shareCalculationLink()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center space-x-1 transition">
+                                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- VISUAL DOUGHNUT CHART -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 no-print">
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-sky-600"></i>
+                            Cost & Profit Visualizer
+                        </h3>
+                        <div class="h-48 relative">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- PRINT-ONLY PROPOSAL SHEET -->
+            <div id="print-proposal-document" class="hidden print-only mt-6 border-2 border-slate-300 rounded-2xl p-6 bg-white space-y-6 page-break-avoid">
+                
+                <div class="flex justify-between items-start border-b-2 border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-900 uppercase">360 Roofing Proposal</h2>
+                        <p class="text-xs text-slate-600 font-semibold" id="print-sheet-client">Client: -</p>
+                    </div>
+                    <div class="text-right text-xs space-y-0.5">
+                        <p class="font-bold text-slate-900">Contractor Proposal</p>
+                        <p id="print-sheet-date">Date: -</p>
+                        <p id="print-sheet-mode">Mode: Insurance Claim</p>
+                    </div>
+                </div>
+
+                <!-- Scope Summary Grid -->
+                <div class="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                    <div>
+                        <span class="block text-slate-500 font-medium">Selected Material:</span>
+                        <span class="font-bold text-slate-900" id="print-sheet-mat">-</span>
+                    </div>
+                    <div>
+                        <span class="block text-slate-500 font-medium">Component Brand:</span>
+                        <span class="font-bold text-slate-900" id="print-sheet-brand">-</span>
+                    </div>
+                    <div>
+                        <span class="block text-slate-500 font-medium">Total Work Squares:</span>
+                        <span class="font-extrabold text-sky-900" id="print-sheet-sqs">-</span>
+                    </div>
+                </div>
+
+                <!-- Detailed Line Items Table -->
+                <table class="w-full text-xs text-left border-collapse">
+                    <thead>
+                        <tr class="border-b-2 border-slate-800 font-bold uppercase tracking-wider text-slate-700 bg-slate-100">
+                            <th class="py-2 px-3">Item Description</th>
+                            <th class="py-2 px-3">Specification / Details</th>
+                            <th class="py-2 px-3 text-right">Quantity</th>
+                            <th class="py-2 px-3 text-right">Cost Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-800">
+                        <tr>
+                            <td class="py-2 px-3 font-semibold">Base & Misc Roofing Material</td>
+                            <td class="py-2 px-3" id="print-table-mat-spec">Main Roof Material</td>
+                            <td class="py-2 px-3 text-right" id="print-table-mat-qty">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-mat-subtotal">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-semibold">Perimeter Starter Shingles</td>
+                            <td class="py-2 px-3">Starter Course Bundles</td>
+                            <td class="py-2 px-3 text-right" id="print-table-starter-qty">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-starter-cost">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-semibold">Hip & Ridge Cap Shingles</td>
+                            <td class="py-2 px-3">Hip & Ridge Capping Bundles</td>
+                            <td class="py-2 px-3 text-right" id="print-table-ridge-qty">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-ridge-cost">-</td>
+                        </tr>
+                        <tr id="print-row-extra-roof" class="hidden">
+                            <td class="py-2 px-3 font-semibold" id="print-table-extra-roof-title">Additional Roof Material</td>
+                            <td class="py-2 px-3" id="print-table-extra-roof-spec">Add'l Roof Option</td>
+                            <td class="py-2 px-3 text-right" id="print-table-extra-roof-qty">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-extra-roof-cost">-</td>
+                        </tr>
+                        <tr id="print-row-pitch-surcharge" class="hidden">
+                            <td class="py-2 px-3 font-semibold">Roof Pitch Surcharge</td>
+                            <td class="py-2 px-3" id="print-table-pitch-desc">Pitch Surcharge</td>
+                            <td class="py-2 px-3 text-right" id="print-table-pitch-qty">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-pitch-cost">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-semibold">Labor & Crew Allocation</td>
+                            <td class="py-2 px-3" id="print-table-crews">Assigned Crew Leads</td>
+                            <td class="py-2 px-3 text-right" id="print-table-crew-rate">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-labor-subtotal">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-semibold" id="print-table-other-label">Site Logistics & Disposal</td>
+                            <td class="py-2 px-3">Permits, Dumpsters & Direct Expenses</td>
+                            <td class="py-2 px-3 text-right">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-other-cost">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Grand Total Banner -->
+                <div class="border-t-2 border-slate-900 pt-4 flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl">
+                    <div>
+                        <span class="text-xs uppercase font-extrabold text-sky-400 tracking-wider">Final Quoted Contract Total</span>
+                        <p class="text-[10px] text-slate-400">Includes materials, labor, waste allocation, and sales commission</p>
+                    </div>
+                    <span class="text-3xl font-black" id="print-table-contract-total">$0.00</span>
+                </div>
+
+                <!-- Footer Terms -->
+                <div class="border-t pt-4 text-[10px] text-slate-500 space-y-1">
+                    <p class="font-bold text-slate-700">Terms & Authorization:</p>
+                    <p>This estimate is based on precise roof measurement specifications and active material pricing at the date of issuance. Changes to original scope will be quoted prior to work execution.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- TAB 2: MATERIALS PRICE SHEET -->
+        <div id="tab-mastersheet" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                
+                <!-- TOP SECTION: MATERIALS PRICE TABLE -->
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="database" class="w-5 h-5 text-sky-600"></i>
+                            Materials Price Sheet
+                        </h2>
+                        <p class="text-xs text-slate-500">Configure base unit prices, material suppliers, and update dates. Add or delete custom roof material options.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="saveMasterMaterials()" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition shadow">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span>Save Materials Sheet</span>
+                        </button>
+                        <button onclick="addMaterialRow()" class="px-3 py-2 text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                            <span>Add Material</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b">
+                            <tr>
+                                <th class="p-3 rounded-l-lg">Material Name</th>
+                                <th class="p-3">Brand Name</th>
+                                <th class="p-3">Primary Supplier</th>
+                                <th class="p-3">Unit</th>
+                                <th class="p-3">Base Cost / Unit ($)</th>
+                                <th class="p-3">Last Updated</th>
+                                <th class="p-3 rounded-r-lg text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="master-material-table-body" class="divide-y divide-slate-100">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- MIDDLE SECTION: BUNDLE LOGIC COVERAGE & CONVERSIONS -->
+                <div class="border-t pt-6 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-md font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="sliders" class="w-4 h-4 text-amber-600"></i>
+                                Bundle Logic & Coverage Specifications
+                            </h3>
+                            <p class="text-xs text-slate-500">Configure coverage per bundle and LF conversions for Starter and Hip & Ridge caps.</p>
+                        </div>
+                        <button onclick="saveBundleSettings()" class="px-3.5 py-1.5 text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition shadow">
+                            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                            <span>Save Bundle Specs</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Starter Specs Box -->
+                        <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
+                            <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="box" class="w-3.5 h-3.5 text-amber-600"></i>
+                                Starter Shingles Coverage
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div>
+                                    <label class="block font-medium text-slate-600 mb-1">Starter Coverage / Bundle LF</label>
+                                    <input type="text" id="tab-bundle-starter-coverage" value="120.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-slate-600 mb-1">Starter LF / SQ Equivalent</label>
+                                    <input type="text" id="tab-bundle-starter-equiv" value="225.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hip & Ridge Specs Box -->
+                        <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
+                            <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-600"></i>
+                                Hip & Ridge Caps Coverage
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div>
+                                    <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Coverage / Bundle LF</label>
+                                    <input type="text" id="tab-bundle-ridge-coverage" value="24.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-slate-600 mb-1">Hip & Ridge LF / SQ Equivalent</label>
+                                    <input type="text" id="tab-bundle-ridge-equiv" value="72.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROOF PITCH EXTRA CHARGES TABLE -->
+                <div class="border-t pt-6 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-md font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i>
+                                Roof Pitch Extra Charges ($ / SQ)
+                            </h3>
+                            <p class="text-xs text-slate-500">Configure additional material or handling costs per square based on roof pitch steepness.</p>
+                        </div>
+                        <button onclick="savePitchRates()" class="px-3.5 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition shadow">
+                            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                            <span>Save Pitch Rates</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1">
+                            <label class="block font-bold text-slate-700">0/12 - 2/12 (Flat / Low Slope)</label>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-slate-400 font-bold">$</span>
+                                <input type="text" id="pitch-rate-0-2" value="0.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <span class="text-slate-400 font-medium">/ SQ</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1">
+                            <label class="block font-bold text-slate-700">3/12 - 6/12 (Walkable / Standard)</label>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-slate-400 font-bold">$</span>
+                                <input type="text" id="pitch-rate-3-6" value="0.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <span class="text-slate-400 font-medium">/ SQ</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1">
+                            <label class="block font-bold text-slate-700">7/12 - 9/12 (Steep Slope)</label>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-slate-400 font-bold">$</span>
+                                <input type="text" id="pitch-rate-7-9" value="15.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <span class="text-slate-400 font-medium">/ SQ</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1">
+                            <label class="block font-bold text-slate-700">10/12 - 12/12 (Very Steep / Walk-Off)</label>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-slate-400 font-bold">$</span>
+                                <input type="text" id="pitch-rate-10-12" value="30.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <span class="text-slate-400 font-medium">/ SQ</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1">
+                            <label class="block font-bold text-slate-700">13/12+ (Mansard / Extreme Pitch)</label>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-slate-400 font-bold">$</span>
+                                <input type="text" id="pitch-rate-13-plus" value="45.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <span class="text-slate-400 font-medium">/ SQ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 3: CREW LEADERS & LABOR RATES TAB -->
+        <div id="tab-crews" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                <div class="border-b pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="users" class="w-5 h-5 text-sky-600"></i>
+                            Crew Leader Labor Rates Database
+                        </h2>
+                        <p class="text-xs text-slate-500">Configure crew leader names, assigned roof specialties, pay rates ($/SQ), and display order.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="saveCrewLeaders()" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition shadow">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span>Save Crew Settings</span>
+                        </button>
+                        <button onclick="addCrewLeader()" class="px-3 py-2 text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                            <span>Add Crew Leader</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b">
+                            <tr>
+                                <th class="p-3">Crew Leader Name</th>
+                                <th class="p-3">Roof Specialty</th>
+                                <th class="p-3">Labor Rate / SQ ($)</th>
+                                <th class="p-3 rounded-r-lg text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crew-rate-table-body" class="divide-y divide-slate-100">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- CALCULATION HISTORY MODAL -->
+    <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="history" class="w-5 h-5 text-indigo-600"></i>
+                    <h3 class="font-bold text-lg text-slate-900">Saved Calculation History</h3>
+                </div>
+                <button onclick="closeHistoryModal()" class="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="history-list-container" class="overflow-y-auto flex-grow space-y-3 pr-1"></div>
+
+            <div class="border-t pt-3 flex justify-between items-center">
+                <button onclick="clearAllHistory()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold px-2 py-1 rounded hover:bg-rose-50 transition">
+                    Clear All History
+                </button>
+                <button onclick="closeHistoryModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none flex items-center space-x-2 z-50">
+        <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-message">Notification message</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & ENGINE -->
+    <script>
+        function handleInputFocus(el) {
+            if (!el) return;
+            const val = el.value ? el.value.trim() : "";
+            if (parseFloat(val) === 0 || val === "0" || val === "0.00" || val === "0.0") {
+                el.select();
+            }
+        }
+
+        function parseCleanFloat(val) {
+            if (val === undefined || val === null) return 0;
+            if (typeof val === 'number') return isNaN(val) ? 0 : val;
+            const cleanStr = String(val).replace(/,/g, '').trim();
+            const result = parseFloat(cleanStr);
+            return isNaN(result) ? 0 : result;
+        }
+
+        // SCROLL-WHEEL NUMERICAL INCREMENT LOGIC
+        function handleWheelScroll(event, el, step) {
+            if (document.activeElement !== el) return;
+            event.preventDefault();
+            let currentVal = parseCleanFloat(el.value);
+            if (event.deltaY < 0) {
+                currentVal += step;
+            } else if (event.deltaY > 0) {
+                currentVal = Math.max(0, currentVal - step);
+            }
+            el.value = currentVal.toFixed(2);
+            calculateEstimate();
+        }
+
+        function handleWheelScrollOverride(event, el, step) {
+            if (document.activeElement !== el) return;
+            event.preventDefault();
+            let currentVal = parseCleanFloat(el.value);
+            if (event.deltaY < 0) {
+                currentVal += step;
+            } else if (event.deltaY > 0) {
+                currentVal = Math.max(0, currentVal - step);
+            }
+            el.value = currentVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            state.isOverrideLocked = true;
+            document.getElementById('chk-lock-contract').checked = true;
+            evaluateOverrideMath();
+        }
+
+        function handleWheelScrollSellingPriceOutput(event, el, step) {
+            if (document.activeElement !== el) return;
+            event.preventDefault();
+            let currentVal = parseCleanFloat(el.value);
+            if (event.deltaY < 0) {
+                currentVal += step;
+            } else if (event.deltaY > 0) {
+                currentVal = Math.max(0, currentVal - step);
+            }
+            el.value = currentVal.toFixed(2);
+            onSellingPriceOutputBlur(el);
+        }
+
+        // KEYBOARD ARROW UP / DOWN HANDLERS
+        function handleInputKeydown(event, el, step) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal += step;
+                el.value = currentVal.toFixed(2);
+                calculateEstimate();
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal = Math.max(0, currentVal - step);
+                el.value = currentVal.toFixed(2);
+                calculateEstimate();
+            } else if (event.key === 'Enter') {
+                evaluateMathExpression(el);
+            }
+        }
+
+        function handleSellingPriceKeydown(event, el, step) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal += step;
+                el.value = currentVal.toFixed(2);
+                onSellingPriceInputBlur(el);
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal = Math.max(0, currentVal - step);
+                el.value = currentVal.toFixed(2);
+                onSellingPriceInputBlur(el);
+            } else if (event.key === 'Enter') {
+                onSellingPriceInputBlur(el);
+            }
+        }
+
+        function handleSellingPriceOutputKeydown(event, el, step) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal += step;
+                el.value = currentVal.toFixed(2);
+                onSellingPriceOutputBlur(el);
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal = Math.max(0, currentVal - step);
+                el.value = currentVal.toFixed(2);
+                onSellingPriceOutputBlur(el);
+            } else if (event.key === 'Enter') {
+                onSellingPriceOutputBlur(el);
+            }
+        }
+
+        function handleOverrideKeydown(event, el, step) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal += step;
+                el.value = currentVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                state.isOverrideLocked = true;
+                document.getElementById('chk-lock-contract').checked = true;
+                evaluateOverrideMath();
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value);
+                currentVal = Math.max(0, currentVal - step);
+                el.value = currentVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                state.isOverrideLocked = true;
+                document.getElementById('chk-lock-contract').checked = true;
+                evaluateOverrideMath();
+            } else if (event.key === 'Enter') {
+                onOverridePriceBlur(el);
+            }
+        }
+
+        function evaluateMathExpression(el) {
+            if (!el || !el.value) return;
+            let val = el.value.trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
+            try {
+                if (/^[0-9.+\-*/\s()]+$/.test(val)) {
+                    let result = Function('"use strict"; return (' + val + ')')();
+                    if (!isNaN(result) && isFinite(result)) {
+                        el.value = parseFloat(result).toFixed(2);
+                    }
+                }
+            } catch (e) {}
+            calculateEstimate();
+        }
+
+        const DEFAULT_MATERIALS = [
+            { id: 'shingles', name: 'Shingles', brand: 'IKO Cambridge', supplier: 'ABC Supply Co.', unit: 'SQ', cost: 92.00, updated: '2026-10-01' },
+            { id: 'TPO', name: 'TPO', brand: 'CertainTeed', supplier: 'Beacon Building', unit: 'SQ', cost: 165.00, updated: '2026-09-20' },
+            { id: 'flat_roof', name: 'Flat Roof', brand: 'CertainTeed', supplier: 'ABC Supply Co.', unit: 'SQ', cost: 140.00, updated: '2026-10-10' },
+            { id: 'metal_roof', name: 'Metal Roof', brand: 'Generic Metal', supplier: 'Metal Direct', unit: 'SQ', cost: 210.00, updated: '2026-08-15' },
+            { id: 'rpanel', name: 'R - Panel (Metal Roof)', brand: 'Generic Metal', supplier: 'Metal Direct', unit: 'SQ', cost: 195.00, updated: '2026-08-15' },
+            { id: 'upanel', name: 'U - Panel (Metal Roof)', brand: 'Generic Metal', supplier: 'Metal Direct', unit: 'SQ', cost: 205.00, updated: '2026-08-15' },
+            { id: 'standing_seam', name: 'Standing Seam (Metal Roof)', brand: 'Sheffield Metals', supplier: 'Roofing Supply Corp', unit: 'SQ', cost: 320.00, updated: '2026-10-05' }
+        ];
+
+        const DEFAULT_CREWS = [
+            { id: 'leader_1', name: 'Roger', specialty: 'Shingles Specialist', rate: 80.00, selected: true },
+            { id: 'leader_2', name: 'Crew 2', specialty: '', rate: 0.00, selected: false }
+        ];
+
+        const DEFAULT_BUNDLE_SPECS = {
+            starterCoverage: 120.00,
+            starterEquiv: 225.00,
+            ridgeCoverage: 24.00,
+            ridgeEquiv: 72.00
+        };
+
+        const DEFAULT_PITCH_RATES = {
+            pitch_0_2: 0.00,
+            pitch_3_6: 0.00,
+            pitch_7_9: 15.00,
+            pitch_10_12: 30.00,
+            pitch_13_plus: 45.00
+        };
+
+        function loadStoredMaterials() {
+            try {
+                const stored = localStorage.getItem('360_roofing_materials');
+                return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+            } catch (e) {
+                return JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+            }
+        }
+
+        function loadStoredCrews() {
+            try {
+                const stored = localStorage.getItem('360_roofing_crews');
+                return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_CREWS));
+            } catch (e) {
+                return JSON.parse(JSON.stringify(DEFAULT_CREWS));
+            }
+        }
+
+        function loadStoredBundleSpecs() {
+            try {
+                const stored = localStorage.getItem('360_roofing_bundle_specs');
+                return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
+            } catch (e) {
+                return JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
+            }
+        }
+
+        function loadStoredPitchRates() {
+            try {
+                const stored = localStorage.getItem('360_roofing_pitch_rates');
+                return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_PITCH_RATES));
+            } catch (e) {
+                return JSON.parse(JSON.stringify(DEFAULT_PITCH_RATES));
+            }
+        }
+
+        function loadStoredHistory() {
+            try {
+                const stored = localStorage.getItem('360_roofing_history');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        let state = {
+            jobMode: 'insurance',
+            isOverrideLocked: false,
+            otherDirectLabel: 'Other Direct Costs',
+            materials: loadStoredMaterials(),
+            crewLeaders: loadStoredCrews(),
+            bundleSpecs: loadStoredBundleSpecs(),
+            pitchRates: loadStoredPitchRates()
+        };
+
+        let costChartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('quote-date').value = today;
+
+            lucide.createIcons();
+
+            syncBundleTabUI();
+            syncPitchTabUI();
+            renderMaterialDropdown();
+            renderMasterTable();
+            renderCrewTable();
+            renderCrewLeaderMultiSelect();
+            initChart();
+
+            setJobMode('insurance');
+            checkURLParamsForSharedQuote();
+        });
+
+        function switchTab(tabId) {
+            ['calculator', 'mastersheet', 'crews'].forEach(id => {
+                const tabEl = document.getElementById(`tab-${id}`);
+                const btn = document.getElementById(`tab-${id}-btn`);
+                if (tabEl) tabEl.classList.add('hidden');
+                if (btn) {
+                    btn.classList.remove('bg-sky-600', 'text-white');
+                    btn.classList.add('text-slate-300');
+                }
+            });
+
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            const activeBtn = document.getElementById(`tab-${tabId}-btn`);
+            if (activeTab) activeTab.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.classList.add('bg-sky-600', 'text-white');
+                activeBtn.classList.remove('text-slate-300');
+            }
+
+            if (tabId === 'calculator' && costChartInstance) {
+                setTimeout(() => costChartInstance.resize(), 100);
+            }
+        }
+
+        function setJobMode(mode) {
+            state.jobMode = mode;
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+
+            const retailBtn = document.getElementById('mode-retail');
+            const insuranceBtn = document.getElementById('mode-insurance');
+            const targetMarginInput = document.getElementById('cost-target-margin');
+            const sellingPriceInput = document.getElementById('input-selling-price');
+
+            if (mode === 'retail') {
+                retailBtn.className = "px-4 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-sky-700 transition";
+                insuranceBtn.className = "px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition";
+                targetMarginInput.value = "30.00";
+                sellingPriceInput.value = "425.00";
+            } else {
+                insuranceBtn.className = "px-4 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-emerald-700 transition";
+                retailBtn.className = "px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition";
+                targetMarginInput.value = "35.00";
+                sellingPriceInput.value = "450.00";
+            }
+            calculateEstimate();
+        }
+
+        function renameOtherDirectLabel() {
+            const current = state.otherDirectLabel;
+            const newLabel = prompt("Enter custom label for Other Direct Costs field:", current);
+            if (newLabel !== null && newLabel.trim() !== "") {
+                state.otherDirectLabel = newLabel.trim();
+                updateOtherDirectLabelsDisplay();
+                calculateEstimate();
+            }
+        }
+
+        function updateOtherDirectLabelsDisplay() {
+            const lbl = state.otherDirectLabel || "Other Direct Costs";
+            document.getElementById('label-other-direct').innerHTML = `${lbl} ($) <i data-lucide="edit-2" class="w-3 h-3 text-slate-400"></i>`;
+            document.getElementById('display-label-other-direct').innerText = `${lbl}:`;
+            document.getElementById('display-label-other-direct-summary').innerText = `${lbl}:`;
+            document.getElementById('print-table-other-label').innerText = lbl;
+            lucide.createIcons();
+        }
+
+        function applyScenarioPrice(price) {
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+            document.getElementById('input-selling-price').value = price.toFixed(2);
+            calculateEstimate();
+            showToast(`Applied $${price.toFixed(2)} / SQ to Selling Price!`);
+        }
+
+        function toggleContractLock(checked) {
+            state.isOverrideLocked = checked;
+            if (checked) {
+                evaluateOverrideMath();
+            } else {
+                calculateEstimate();
+            }
+        }
+
+        function onOverridePriceBlur(el) {
+            if (!el) return;
+            evaluateMathExpressionInEl(el);
+            state.isOverrideLocked = true;
+            document.getElementById('chk-lock-contract').checked = true;
+            evaluateOverrideMath();
+        }
+
+        function onSellingPriceInputBlur(el) {
+            evaluateMathExpressionInEl(el);
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+            calculateEstimate();
+        }
+
+        function onSellingPriceOutputBlur(el) {
+            evaluateMathExpressionInEl(el);
+            let val = parseCleanFloat(el.value);
+            document.getElementById('input-selling-price').value = val.toFixed(2);
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+            calculateEstimate();
+        }
+
+        function evaluateMathExpressionInEl(el) {
+            if (!el || !el.value) return;
+            let val = el.value.trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
+            try {
+                if (/^[0-9.+\-*/\s()]+$/.test(val)) {
+                    let result = Function('"use strict"; return (' + val + ')')();
+                    if (!isNaN(result) && isFinite(result)) {
+                        el.value = parseFloat(result).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function evaluateOverrideMath() {
+            const overrideInput = document.getElementById('override-contract-price');
+            let targetContract = parseCleanFloat(overrideInput.value);
+
+            const mainSqs = parseCleanFloat(document.getElementById('input-sqs').value);
+            const ridgeLF = parseCleanFloat(document.getElementById('input-ridge').value);
+            const starterLF = parseCleanFloat(document.getElementById('input-starter').value);
+            const wastePct = parseCleanFloat(document.getElementById('input-waste').value) / 100;
+            const extraSqs = parseCleanFloat(document.getElementById('input-extra-sqs').value);
+            const extraRoofType = document.getElementById('select-extra-roof-type').value;
+
+            const b = state.bundleSpecs;
+            const rawWasteSqs = mainSqs * wastePct;
+            const rawStarterSqs = starterLF / b.starterEquiv;
+            const rawRidgeSqs = ridgeLF / b.ridgeEquiv;
+
+            const wasteSqs = roundUpRoofSquares(rawWasteSqs);
+            const starterSqs = roundUpRoofSquares(rawStarterSqs);
+            const ridgeSqs = roundUpRoofSquares(rawRidgeSqs);
+
+            let calculatedTotalSqs = mainSqs + wasteSqs + starterSqs + ridgeSqs;
+            if (extraRoofType === 'shingles') {
+                calculatedTotalSqs += extraSqs;
+            }
+
+            if (calculatedTotalSqs > 0 && targetContract > 0) {
+                const newSellingPricePerSq = targetContract / calculatedTotalSqs;
+                document.getElementById('input-selling-price').value = newSellingPricePerSq.toFixed(2);
+            }
+            
+            overrideInput.value = targetContract.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            calculateEstimate();
+        }
+
+        function syncPitchTabUI() {
+            const p = state.pitchRates;
+            document.getElementById('pitch-rate-0-2').value = p.pitch_0_2.toFixed(2);
+            document.getElementById('pitch-rate-3-6').value = p.pitch_3_6.toFixed(2);
+            document.getElementById('pitch-rate-7-9').value = p.pitch_7_9.toFixed(2);
+            document.getElementById('pitch-rate-10-12').value = p.pitch_10_12.toFixed(2);
+            document.getElementById('pitch-rate-13-plus').value = p.pitch_13_plus.toFixed(2);
+        }
+
+        function savePitchRates() {
+            state.pitchRates = {
+                pitch_0_2: parseCleanFloat(document.getElementById('pitch-rate-0-2').value),
+                pitch_3_6: parseCleanFloat(document.getElementById('pitch-rate-3-6').value),
+                pitch_7_9: parseCleanFloat(document.getElementById('pitch-rate-7-9').value),
+                pitch_10_12: parseCleanFloat(document.getElementById('pitch-rate-10-12').value),
+                pitch_13_plus: parseCleanFloat(document.getElementById('pitch-rate-13-plus').value)
+            };
+            try {
+                localStorage.setItem('360_roofing_pitch_rates', JSON.stringify(state.pitchRates));
+            } catch (e) {}
+            calculateEstimate();
+            showToast('Pitch Extra Charge Rates Saved!');
+        }
+
+        function renderMaterialDropdown() {
+            const select = document.getElementById('select-material');
+            const extraSelect = document.getElementById('select-extra-roof-type');
+            
+            const currentVal = select.value;
+            const currentExtraVal = extraSelect ? extraSelect.value : '';
+
+            select.innerHTML = '';
+            if (extraSelect) extraSelect.innerHTML = '';
+
+            state.materials.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.innerText = m.name;
+                select.appendChild(opt);
+
+                if (extraSelect) {
+                    const extraOpt = document.createElement('option');
+                    extraOpt.value = m.id;
+                    extraOpt.innerText = m.name;
+                    extraSelect.appendChild(extraOpt);
+                }
+            });
+
+            if (currentVal && state.materials.some(m => m.id === currentVal)) {
+                select.value = currentVal;
+            } else if (state.materials.length > 0) {
+                select.value = state.materials[0].id;
+            }
+
+            if (extraSelect) {
+                if (currentExtraVal && state.materials.some(m => m.id === currentExtraVal)) {
+                    extraSelect.value = currentExtraVal;
+                } else if (state.materials.length > 0) {
+                    extraSelect.value = state.materials[0].id;
+                }
+            }
+        }
+
+        function onMaterialChange() {
+            const matKey = document.getElementById('select-material').value;
+            const matObj = state.materials.find(m => m.id === matKey);
+            if (matObj) {
+                document.getElementById('cost-base-material').value = matObj.cost.toFixed(2);
+            }
+            calculateEstimate();
+        }
+
+        function syncBundleTabUI() {
+            const b = state.bundleSpecs;
+            document.getElementById('tab-bundle-starter-coverage').value = b.starterCoverage.toFixed(2);
+            document.getElementById('tab-bundle-starter-equiv').value = b.starterEquiv.toFixed(2);
+            document.getElementById('tab-bundle-ridge-coverage').value = b.ridgeCoverage.toFixed(2);
+            document.getElementById('tab-bundle-ridge-equiv').value = b.ridgeEquiv.toFixed(2);
+        }
+
+        function saveBundleSettings() {
+            state.bundleSpecs = {
+                starterCoverage: parseCleanFloat(document.getElementById('tab-bundle-starter-coverage').value) || 120.00,
+                starterEquiv: parseCleanFloat(document.getElementById('tab-bundle-starter-equiv').value) || 225.00,
+                ridgeCoverage: parseCleanFloat(document.getElementById('tab-bundle-ridge-coverage').value) || 24.00,
+                ridgeEquiv: parseCleanFloat(document.getElementById('tab-bundle-ridge-equiv').value) || 72.00
+            };
+            try {
+                localStorage.setItem('360_roofing_bundle_specs', JSON.stringify(state.bundleSpecs));
+            } catch (e) {}
+            calculateEstimate();
+            showToast('Bundle Coverage Specs Saved!');
+        }
+
+        function triggerPrintQuote() {
+            switchTab('calculator');
+            
+            const printElement = document.getElementById('print-proposal-document');
+            if (!printElement) return;
+
+            const docContent = printElement.innerHTML;
+            const printWindow = window.open('', '_blank');
+
+            if (printWindow) {
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>360 Roofing Proposal - Print View</title>
+                        <script src="https://cdn.tailwindcss.com"><\/script>
+                        <style>
+                            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+                            body { font-family: 'Inter', sans-serif; background: white; color: black; padding: 24px; }
+                            .hidden { display: none !important; }
+                        </style>
+                    </head>
+                    <body onload="setTimeout(() => { window.print(); }, 250)">
+                        <div class="max-w-4xl mx-auto space-y-6">
+                            ${docContent}
+                        </div>
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            } else {
+                window.print();
+            }
+        }
+
+        function utoa(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function atou(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
+
+        function shareCalculationLink() {
+            const dataObj = getSnapshotData();
+            const jsonStr = JSON.stringify(dataObj);
+            const compressed = utoa(jsonStr);
+            const shareUrl = window.location.origin + window.location.pathname + '?quote=' + encodeURIComponent(compressed);
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showToast('Shareable calculation link copied to clipboard!');
+                }).catch(() => {
+                    copyViaTextarea(shareUrl);
+                });
+            } else {
+                copyViaTextarea(shareUrl);
+            }
+        }
+
+        function checkURLParamsForSharedQuote() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const quoteData = urlParams.get('quote') || urlParams.get('quoteData');
+            if (quoteData) {
+                try {
+                    let decodedJson = "";
+                    if (urlParams.get('quote')) {
+                        decodedJson = atou(decodeURIComponent(quoteData));
+                    } else {
+                        decodedJson = decodeURIComponent(quoteData);
+                    }
+                    const parsedData = JSON.parse(decodedJson);
+                    loadSnapshotData(parsedData);
+                    showToast('Loaded shared quote parameters!');
+                } catch (e) {
+                    console.error("Failed to parse shared quote parameters", e);
+                }
+            }
+        }
+
+        function getSnapshotData() {
+            return {
+                jobMode: state.jobMode,
+                otherDirectLabel: state.otherDirectLabel,
+                clientName: document.getElementById('client-name').value,
+                quoteDate: document.getElementById('quote-date').value,
+                brand: document.getElementById('select-brand').value,
+                material: document.getElementById('select-material').value,
+                pitchKey: document.getElementById('select-roof-pitch').value,
+                pitchSqs: document.getElementById('input-pitch-sqs').value,
+                sqs: document.getElementById('input-sqs').value,
+                ridge: document.getElementById('input-ridge').value,
+                starter: document.getElementById('input-starter').value,
+                waste: document.getElementById('input-waste').value,
+                sellingPrice: document.getElementById('input-selling-price').value,
+                commissionRate: document.getElementById('input-commission-rate').value,
+                extraSqs: document.getElementById('input-extra-sqs').value,
+                extraRoofType: document.getElementById('select-extra-roof-type').value,
+                extraRoofCost: document.getElementById('input-extra-roof-cost').value,
+                otherDirect: document.getElementById('input-other-direct').value,
+                notes: document.getElementById('input-notes').value,
+                crewCalcMode: document.getElementById('select-crew-calc-mode').value,
+                baseMaterialCost: document.getElementById('cost-base-material').value,
+                miscMaterialCost: document.getElementById('cost-misc-material').value,
+                starterCostBundle: document.getElementById('starter-cost-bundle').value,
+                ridgeCostBundle: document.getElementById('ridge-cost-bundle').value,
+                targetMargin: document.getElementById('cost-target-margin').value,
+                bundleSpecs: JSON.parse(JSON.stringify(state.bundleSpecs)),
+                pitchRates: JSON.parse(JSON.stringify(state.pitchRates)),
+                crewLeaders: JSON.parse(JSON.stringify(state.crewLeaders))
+            };
+        }
+
+        function loadSnapshotData(d) {
+            state.jobMode = d.jobMode || 'insurance';
+            state.otherDirectLabel = d.otherDirectLabel || 'Other Direct Costs';
+            updateOtherDirectLabelsDisplay();
+
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+            document.getElementById('client-name').value = d.clientName || '';
+            document.getElementById('quote-date').value = d.quoteDate || new Date().toISOString().split('T')[0];
+            document.getElementById('select-brand').value = d.brand || 'IKO Cambridge';
+            document.getElementById('select-material').value = d.material || 'shingles';
+            document.getElementById('select-roof-pitch').value = d.pitchKey || 'pitch_3_6';
+            if (d.pitchSqs) {
+                document.getElementById('input-pitch-sqs').value = d.pitchSqs;
+            }
+            document.getElementById('input-sqs').value = d.sqs || '0.00';
+            document.getElementById('input-ridge').value = d.ridge || '0.00';
+            document.getElementById('input-starter').value = d.starter || '0.00';
+            document.getElementById('input-waste').value = d.waste || '10.00';
+            document.getElementById('input-selling-price').value = d.sellingPrice || '450.00';
+            document.getElementById('input-commission-rate').value = d.commissionRate || '15.00';
+            document.getElementById('input-extra-sqs').value = d.extraSqs || '0.00';
+            
+            if (d.extraRoofType) {
+                document.getElementById('select-extra-roof-type').value = d.extraRoofType;
+            }
+            if (d.extraRoofCost) {
+                document.getElementById('input-extra-roof-cost').value = d.extraRoofCost;
+            }
+
+            document.getElementById('input-other-direct').value = d.otherDirect || '0.00';
+            document.getElementById('input-notes').value = d.notes || '';
+            document.getElementById('select-crew-calc-mode').value = d.crewCalcMode || 'average';
+
+            document.getElementById('cost-base-material').value = d.baseMaterialCost || '92.00';
+            document.getElementById('cost-misc-material').value = d.miscMaterialCost || '20.00';
+            document.getElementById('starter-cost-bundle').value = d.starterCostBundle || '50.00';
+            document.getElementById('ridge-cost-bundle').value = d.ridgeCostBundle || '65.00';
+            document.getElementById('cost-target-margin').value = d.targetMargin || '35.00';
+
+            if (d.bundleSpecs) {
+                state.bundleSpecs = JSON.parse(JSON.stringify(d.bundleSpecs));
+                syncBundleTabUI();
+            }
+
+            if (d.pitchRates) {
+                state.pitchRates = JSON.parse(JSON.stringify(d.pitchRates));
+                syncPitchTabUI();
+            }
+
+            if (d.crewLeaders) {
+                state.crewLeaders = JSON.parse(JSON.stringify(d.crewLeaders));
+                renderCrewTable();
+                renderCrewLeaderMultiSelect();
+            }
+
+            setJobMode(state.jobMode);
+            calculateEstimate();
+        }
+
+        function saveCurrentCalculation() {
+            const history = loadStoredHistory();
+            const clientName = document.getElementById('client-name').value || "Unnamed Job";
+            const quoteDate = document.getElementById('quote-date').value;
+            const contractPrice = document.getElementById('override-contract-price').value;
+            const totalSqs = document.getElementById('out-total-sqs').innerText;
+            const matSelect = document.getElementById('select-material');
+            const materialText = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '';
+
+            const snapshot = {
+                id: 'calc_' + Date.now(),
+                timestamp: new Date().toLocaleString(),
+                clientName: clientName,
+                quoteDate: quoteDate,
+                contractPrice: '$' + contractPrice,
+                totalSqs: totalSqs,
+                materialText: materialText,
+                data: getSnapshotData()
+            };
+
+            history.unshift(snapshot);
+            try {
+                localStorage.setItem('360_roofing_history', JSON.stringify(history));
+                showToast(`Saved snapshot for "${clientName}"!`);
+            } catch (e) {
+                showToast("Failed to save snapshot.");
+            }
+        }
+
+        function newCalculation() {
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+            document.getElementById('client-name').value = "New Client Job";
+            document.getElementById('input-sqs').value = "0.00";
+            document.getElementById('input-ridge').value = "0.00";
+            document.getElementById('input-starter').value = "0.00";
+            document.getElementById('select-roof-pitch').value = "pitch_3_6";
+            document.getElementById('input-pitch-sqs').value = "0.00";
+            document.getElementById('input-waste').value = "10.00";
+            document.getElementById('input-extra-sqs').value = "0.00";
+            document.getElementById('input-extra-roof-cost').value = "0.00";
+            document.getElementById('input-other-direct').value = "0.00";
+            document.getElementById('input-notes').value = "";
+            
+            state.otherDirectLabel = "Other Direct Costs";
+            updateOtherDirectLabelsDisplay();
+
+            setJobMode('insurance');
+            calculateEstimate();
+            showToast("Cleared for a new job calculation!");
+        }
+
+        function openHistoryModal() {
+            renderHistoryList();
+            document.getElementById('history-modal').classList.remove('hidden');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('history-list-container');
+            const history = loadStoredHistory();
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <i data-lucide="folder-open" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+                        <p class="text-xs">No saved calculations found.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = '';
+            history.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 rounded-2xl p-4 transition flex flex-wrap items-center justify-between gap-3";
+                card.innerHTML = `
+                    <div class="space-y-1 min-w-[200px]">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-sm text-slate-900">${item.clientName}</span>
+                            <span class="text-[10px] uppercase font-extrabold bg-slate-200 text-slate-700 px-2 py-0.5 rounded">${item.data.jobMode}</span>
+                        </div>
+                        <p class="text-xs text-slate-500">${item.materialText} • ${item.totalSqs} SQs • Saved: ${item.timestamp}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="font-black text-lg text-sky-900">${item.contractPrice}</span>
+                        <button onclick="loadHistoryItem(${index})" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl transition flex items-center space-x-1">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>Load</span>
+                        </button>
+                        <button onclick="deleteHistoryItem(${index})" class="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg transition" title="Delete">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function loadHistoryItem(index) {
+            const history = loadStoredHistory();
+            const item = history[index];
+            if (!item) return;
+
+            loadSnapshotData(item.data);
+            closeHistoryModal();
+            showToast(`Loaded calculation for "${item.clientName}"!`);
+        }
+
+        function deleteHistoryItem(index) {
+            const history = loadStoredHistory();
+            history.splice(index, 1);
+            localStorage.setItem('360_roofing_history', JSON.stringify(history));
+            renderHistoryList();
+            showToast("Calculation snapshot removed.");
+        }
+
+        function clearAllHistory() {
+            if (confirm("Are you sure you want to clear all saved calculation history?")) {
+                localStorage.removeItem('360_roofing_history');
+                renderHistoryList();
+                showToast("History cleared.");
+            }
+        }
+
+        // --- MATERIALS SHEET RENDER & CRUD ---
+        function renderMasterTable() {
+            const tbody = document.getElementById('master-material-table-body');
+            tbody.innerHTML = '';
+
+            state.materials.forEach((mat, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-800">
+                        <input type="text" value="${mat.name}" onchange="updateMaterialName(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-full max-w-[150px] font-bold">
+                    </td>
+                    <td class="p-3 text-slate-600">
+                        <input type="text" value="${mat.brand || ''}" onchange="updateMaterialBrand(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-full max-w-[140px]">
+                    </td>
+                    <td class="p-3 text-slate-600">
+                        <input type="text" value="${mat.supplier}" onchange="updateMaterialSupplier(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-full max-w-[140px]">
+                    </td>
+                    <td class="p-3 text-slate-500 font-mono text-xs">
+                        <input type="text" value="${mat.unit}" onchange="updateMaterialUnit(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-16 text-center">
+                    </td>
+                    <td class="p-3 font-bold text-slate-800">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-slate-400">$</span>
+                            <input type="text" value="${mat.cost.toFixed(2)}" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" onchange="updateMaterialCost(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-24 text-right font-bold">
+                        </div>
+                    </td>
+                    <td class="p-3 text-slate-500 text-xs">
+                        <input type="date" value="${mat.updated}" onchange="updateMaterialDate(${index}, this.value)" class="border rounded px-2 py-1 text-xs">
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="removeMaterialRow(${index})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-2.5 py-1 rounded border border-rose-200 transition">Remove</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateMaterialName(index, val) {
+            state.materials[index].name = val;
+            renderMaterialDropdown();
+        }
+        function updateMaterialBrand(index, val) { state.materials[index].brand = val; }
+        function updateMaterialCost(index, val) { 
+            state.materials[index].cost = parseCleanFloat(val); 
+            onMaterialChange();
+        }
+        function updateMaterialSupplier(index, val) { state.materials[index].supplier = val; }
+        function updateMaterialUnit(index, val) { state.materials[index].unit = val; }
+        function updateMaterialDate(index, val) { state.materials[index].updated = val; }
+
+        function addMaterialRow() {
+            const newId = 'mat_' + Date.now();
+            const today = new Date().toISOString().split('T')[0];
+            state.materials.push({
+                id: newId,
+                name: 'New Roof Material',
+                brand: 'Generic',
+                supplier: 'Direct Supplier',
+                unit: 'SQ',
+                cost: 100.00,
+                updated: today
+            });
+            renderMaterialDropdown();
+            renderMasterTable();
+            showToast('New material option added to sheet!');
+        }
+
+        function removeMaterialRow(index) {
+            if (state.materials.length <= 1) {
+                showToast('At least one roof material required!');
+                return;
+            }
+            state.materials.splice(index, 1);
+            renderMaterialDropdown();
+            renderMasterTable();
+            calculateEstimate();
+            showToast('Material option removed.');
+        }
+
+        function saveMasterMaterials() {
+            try {
+                localStorage.setItem('360_roofing_materials', JSON.stringify(state.materials));
+            } catch (e) {}
+            renderMaterialDropdown();
+            onMaterialChange();
+            showToast('Materials Price Sheet Saved!');
+        }
+
+        function renderCrewTable() {
+            const tbody = document.getElementById('crew-rate-table-body');
+            tbody.innerHTML = '';
+
+            state.crewLeaders.forEach((leader, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-800">
+                        <input type="text" value="${leader.name}" onchange="updateCrewLeaderName(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-full max-w-[180px]">
+                    </td>
+                    <td class="p-3 text-slate-600 text-xs">
+                        <input type="text" value="${leader.specialty}" onchange="updateCrewLeaderSpecialty(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-full max-w-[200px]">
+                    </td>
+                    <td class="p-3">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-slate-400">$</span>
+                            <input type="text" value="${leader.rate.toFixed(2)}" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" onchange="updateCrewLeaderRate(${index}, this.value)" class="border rounded px-2 py-1 text-xs w-24 text-right font-bold">
+                        </div>
+                    </td>
+                    <td class="p-3 text-right">
+                        <div class="flex items-center justify-end space-x-1">
+                            <button onclick="moveCrewLeader(${index}, -1)" ${index === 0 ? 'disabled' : ''} class="px-2 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded text-xs font-bold text-slate-700 transition" title="Move Up">↑</button>
+                            <button onclick="moveCrewLeader(${index}, 1)" ${index === state.crewLeaders.length - 1 ? 'disabled' : ''} class="px-2 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 rounded text-xs font-bold text-slate-700 transition" title="Move Down">↓</button>
+                            <button onclick="removeCrewLeader(${index})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium px-2.5 py-1 rounded border border-rose-200 ml-1 transition">Remove</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function moveCrewLeader(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= state.crewLeaders.length) return;
+
+            const temp = state.crewLeaders[index];
+            state.crewLeaders[index] = state.crewLeaders[newIndex];
+            state.crewLeaders[newIndex] = temp;
+
+            renderCrewTable();
+            renderCrewLeaderMultiSelect();
+            calculateEstimate();
+        }
+
+        function renderCrewLeaderMultiSelect() {
+            const container = document.getElementById('crew-leader-multiselect-container');
+            container.innerHTML = '';
+
+            state.crewLeaders.forEach((leader, index) => {
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border flex items-center justify-between transition cursor-pointer ${
+                    leader.selected ? 'bg-sky-50/80 border-sky-400 ring-1 ring-sky-300' : 'bg-slate-50/50 border-slate-200 hover:border-slate-300'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <input type="checkbox" id="crew_chk_${leader.id}" ${leader.selected ? 'checked' : ''} onchange="toggleCrewLeaderSelection(${index}, this.checked)" class="w-4 h-4 text-sky-600 rounded focus:ring-sky-500 border-slate-300 cursor-pointer">
+                        <div>
+                            <label for="crew_chk_${leader.id}" class="font-bold text-xs text-slate-800 cursor-pointer block">${leader.name || 'Unnamed Crew'}</label>
+                            <span class="text-[10px] text-slate-500 block">${leader.specialty || 'General'}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <span class="text-slate-400 text-xs font-bold">$</span>
+                        <input type="text" value="${leader.rate.toFixed(2)}" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" onchange="updateCrewLeaderRate(${index}, this.value)" class="w-16 border rounded px-1.5 py-0.5 text-xs text-right font-bold bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleCrewLeaderSelection(index, isChecked) {
+            state.crewLeaders[index].selected = isChecked;
+            calculateEstimate();
+        }
+
+        function updateCrewLeaderRate(index, val) {
+            state.crewLeaders[index].rate = parseCleanFloat(val);
+            renderCrewTable();
+            renderCrewLeaderMultiSelect();
+            calculateEstimate();
+        }
+
+        function updateCrewLeaderName(index, val) {
+            state.crewLeaders[index].name = val;
+            renderCrewLeaderMultiSelect();
+        }
+
+        function updateCrewLeaderSpecialty(index, val) {
+            state.crewLeaders[index].specialty = val;
+            renderCrewLeaderMultiSelect();
+        }
+
+        function addCrewLeader() {
+            const newId = 'leader_' + (state.crewLeaders.length + 1);
+            state.crewLeaders.push({
+                id: newId,
+                name: 'New Crew Lead',
+                specialty: 'General Roofing',
+                rate: 85.00,
+                selected: false
+            });
+            renderCrewTable();
+            renderCrewLeaderMultiSelect();
+            showToast('New crew leader added!');
+        }
+
+        function removeCrewLeader(index) {
+            if (state.crewLeaders.length <= 1) {
+                showToast('At least one crew leader required!');
+                return;
+            }
+            state.crewLeaders.splice(index, 1);
+            renderCrewTable();
+            renderCrewLeaderMultiSelect();
+            calculateEstimate();
+            showToast('Crew leader removed.');
+        }
+
+        function saveCrewLeaders() {
+            try {
+                localStorage.setItem('360_roofing_crews', JSON.stringify(state.crewLeaders));
+            } catch (e) {}
+            showToast('Crew Leaders & Rates Saved!');
+        }
+
+        function resetCalculator() {
+            state.materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+            state.crewLeaders = JSON.parse(JSON.stringify(DEFAULT_CREWS));
+            state.bundleSpecs = JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
+            state.pitchRates = JSON.parse(JSON.stringify(DEFAULT_PITCH_RATES));
+
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+
+            document.getElementById('client-name').value = "Smith Residence - Full Replacement";
+            document.getElementById('input-sqs').value = "20.00";
+            document.getElementById('input-ridge').value = "180.00";
+            document.getElementById('input-starter').value = "250.00";
+            document.getElementById('select-roof-pitch').value = "pitch_3_6";
+            document.getElementById('input-pitch-sqs').value = "0.00";
+            document.getElementById('input-waste').value = "10.00";
+            document.getElementById('input-commission-rate').value = "15.00";
+            document.getElementById('input-extra-sqs').value = "0.00";
+            document.getElementById('input-extra-roof-cost').value = "0.00";
+            document.getElementById('input-other-direct').value = "0.00";
+            document.getElementById('input-notes').value = "Standard replacement";
+            document.getElementById('select-brand').value = "IKO Cambridge";
+            document.getElementById('select-crew-calc-mode').value = "average";
+
+            state.otherDirectLabel = "Other Direct Costs";
+            updateOtherDirectLabelsDisplay();
+
+            syncBundleTabUI();
+            syncPitchTabUI();
+            setJobMode('insurance');
+            renderMaterialDropdown();
+            renderMasterTable();
+            renderCrewTable();
+            renderCrewLeaderMultiSelect();
+            onMaterialChange();
+
+            showToast('Job & databases reset to Insurance Claim default presets!');
+        }
+
+        function roundUpRoofSquares(value) {
+            if (!value || isNaN(value) || value <= 0) return 0;
+            return Math.ceil(value * 3) / 3;
+        }
+
+        // --- MAIN CALCULATION ENGINE ---
+        function calculateEstimate() {
+            const mainSqs = parseCleanFloat(document.getElementById('input-sqs').value);
+            const ridgeLF = parseCleanFloat(document.getElementById('input-ridge').value);
+            const starterLF = parseCleanFloat(document.getElementById('input-starter').value);
+            const pitchKey = document.getElementById('select-roof-pitch').value;
+            const inputPitchSqs = parseCleanFloat(document.getElementById('input-pitch-sqs').value);
+            const wastePct = parseCleanFloat(document.getElementById('input-waste').value) / 100;
+            const sellingPricePerSq = parseCleanFloat(document.getElementById('input-selling-price').value);
+            const commissionRate = parseCleanFloat(document.getElementById('input-commission-rate').value) / 100;
+            
+            const extraSqs = parseCleanFloat(document.getElementById('input-extra-sqs').value);
+            const extraRoofType = document.getElementById('select-extra-roof-type').value;
+            const extraRoofCostInput = parseCleanFloat(document.getElementById('input-extra-roof-cost').value);
+
+            const otherDirectCosts = parseCleanFloat(document.getElementById('input-other-direct').value);
+
+            // Toggle Steep Pitch SQs cell visibility
+            const containerPitchSqs = document.getElementById('container-pitch-sqs');
+            const isSteepPitch = (pitchKey === 'pitch_7_9' || pitchKey === 'pitch_10_12' || pitchKey === 'pitch_13_plus');
+            if (isSteepPitch) {
+                containerPitchSqs.classList.remove('hidden');
+            } else {
+                containerPitchSqs.classList.add('hidden');
+            }
+
+            // Toggle Additional Roof Cost Input Box (Shows immediately when non-shingle selected)
+            const containerExtraCost = document.getElementById('container-extra-roof-cost');
+            const isShinglesExtra = (extraRoofType === 'shingles');
+            
+            if (!isShinglesExtra) {
+                containerExtraCost.classList.remove('hidden');
+            } else {
+                containerExtraCost.classList.add('hidden');
+            }
+
+            // Direct Costs & Assumptions
+            const baseMatPerSq = parseCleanFloat(document.getElementById('cost-base-material').value);
+            const miscMatPerSq = parseCleanFloat(document.getElementById('cost-misc-material').value);
+            const starterCostBundle = parseCleanFloat(document.getElementById('starter-cost-bundle').value);
+            const ridgeCostBundle = parseCleanFloat(document.getElementById('ridge-cost-bundle').value);
+            const targetMargin = (parseCleanFloat(document.getElementById('cost-target-margin').value) || 35.0) / 100;
+
+            // Coverage Rules & Conversions
+            const b = state.bundleSpecs;
+            const starterCoverageLF = b.starterCoverage;
+            const starterLFPerSq = b.starterEquiv;
+            const ridgeCoverageLF = b.ridgeCoverage;
+            const ridgeLFPerSq = b.ridgeEquiv;
+
+            // Crew Labor Rate Computation
+            const crewCalcMode = document.getElementById('select-crew-calc-mode').value;
+            const selectedLeaders = state.crewLeaders.filter(l => l.selected);
+            let effectiveCrewRatePerSq = 0;
+
+            if (selectedLeaders.length > 0) {
+                const totalLeaderRateSum = selectedLeaders.reduce((sum, l) => sum + l.rate, 0);
+                if (crewCalcMode === 'cumulative') {
+                    effectiveCrewRatePerSq = totalLeaderRateSum;
+                } else {
+                    effectiveCrewRatePerSq = totalLeaderRateSum / selectedLeaders.length;
+                }
+            }
+
+            const modeLabel = crewCalcMode === 'cumulative' ? 'Combined' : 'Avg';
+            document.getElementById('calc-effective-crew-rate').innerText = `$${effectiveCrewRatePerSq.toFixed(2)} / SQ (${selectedLeaders.length} Selected - ${modeLabel})`;
+
+            // Component Squares
+            const rawWasteSqs = mainSqs * wastePct;
+            const rawStarterSqs = starterLF / starterLFPerSq;
+            const rawRidgeSqs = ridgeLF / ridgeLFPerSq;
+
+            const wasteSqs = roundUpRoofSquares(rawWasteSqs);
+            const starterSqs = roundUpRoofSquares(rawStarterSqs);
+            const ridgeSqs = roundUpRoofSquares(rawRidgeSqs);
+
+            let calculatedTotalSqs = mainSqs + wasteSqs + starterSqs + ridgeSqs;
+            if (isShinglesExtra) {
+                calculatedTotalSqs += extraSqs;
+            }
+
+            const totalSqs = parseFloat(calculatedTotalSqs.toFixed(2));
+
+            // Bundle Cost Totals & Count Formatting
+            const starterBundles = Math.ceil(starterLF / starterCoverageLF);
+            const starterBundleCostTotal = starterBundles * starterCostBundle;
+
+            const ridgeBundles = Math.ceil(ridgeLF / ridgeCoverageLF);
+            const ridgeBundleCostTotal = ridgeBundles * ridgeCostBundle;
+
+            // PITCH SURCHARGE COMPUTATION
+            const pitchRatePerSq = state.pitchRates[pitchKey] || 0;
+            const applicablePitchSqs = (isSteepPitch && inputPitchSqs > 0) ? inputPitchSqs : totalSqs;
+            const pitchSurchargeCostTotal = applicablePitchSqs * pitchRatePerSq;
+
+            const pitchSelectEl = document.getElementById('select-roof-pitch');
+            const pitchTextLabel = pitchSelectEl.options[pitchSelectEl.selectedIndex].text;
+
+            // Helper for singular vs plural bundle labels
+            const starterText = starterBundles === 1 ? '1 bundle' : `${starterBundles} bundles`;
+            const ridgeText = ridgeBundles === 1 ? '1 bundle' : `${ridgeBundles} bundles`;
+
+            document.getElementById('label-starter-bundles').innerText = `Starter Bundles Cost (${starterText}):`;
+            document.getElementById('label-ridge-bundles').innerText = `Hip & Ridge Bundles Cost (${ridgeText}):`;
+
+            // Non-Shingle Additional Roof Cost Calculation
+            let extraRoofMaterialCostTotal = 0;
+            const extraRoofObj = state.materials.find(m => m.id === extraRoofType);
+            const extraRoofTypeName = extraRoofObj ? extraRoofObj.name : 'Add\'l Roof';
+
+            if (!isShinglesExtra) {
+                if (extraRoofCostInput > 0) {
+                    extraRoofMaterialCostTotal = extraRoofCostInput;
+                } else if (extraRoofObj && extraSqs > 0) {
+                    extraRoofMaterialCostTotal = extraSqs * extraRoofObj.cost;
+                }
+            }
+
+            // 1. Job Materials Total
+            const baseMatTotal = totalSqs * baseMatPerSq;
+            const miscMatTotal = totalSqs * miscMatPerSq;
+            const totalJobMaterialsCost = baseMatTotal + miscMatTotal + starterBundleCostTotal + ridgeBundleCostTotal + pitchSurchargeCostTotal + extraRoofMaterialCostTotal;
+
+            // 2. Crew Labor Total
+            const crewLaborTotal = totalSqs * effectiveCrewRatePerSq;
+
+            // 3. Sub Total Before Commission
+            const subtotalBeforeCommission = totalJobMaterialsCost + crewLaborTotal + otherDirectCosts;
+
+            // 4. Contract Price Calculation
+            let contractPrice = totalSqs * sellingPricePerSq;
+            if (state.isOverrideLocked) {
+                const overrideVal = parseCleanFloat(document.getElementById('override-contract-price').value);
+                if (overrideVal > 0) {
+                    contractPrice = overrideVal;
+                }
+            } else {
+                document.getElementById('override-contract-price').value = contractPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            // 5. Commission Amount
+            const commissionAmount = contractPrice * commissionRate;
+
+            // 6. Total Job Cost
+            const totalJobCost = subtotalBeforeCommission + commissionAmount;
+
+            // 7. Gross Profit & Margin
+            const profitAmount = contractPrice - totalJobCost;
+            const grossMarginPct = contractPrice > 0 ? (profitAmount / contractPrice) * 100 : 0;
+
+            // Target Formulas
+            const costPerTotalSq = totalSqs > 0 ? (totalJobCost / totalSqs) : 0;
+            const breakevenPricePerSq = (1 - commissionRate) > 0 ? (subtotalBeforeCommission / (1 - commissionRate)) / totalSqs : 0;
+            
+            const targetPricePerSq = (1 - targetMargin - commissionRate) > 0 
+                ? (subtotalBeforeCommission / (1 - targetMargin - commissionRate)) / totalSqs 
+                : 0;
+            const targetContractPrice = totalSqs * targetPricePerSq;
+
+            const fmt = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            // UI Cards Update
+            document.getElementById('out-main-sqs').innerText = mainSqs.toFixed(2);
+            document.getElementById('out-waste-sqs').innerText = wasteSqs.toFixed(2);
+            document.getElementById('out-starter-sqs').innerText = starterSqs.toFixed(2);
+            document.getElementById('out-ridge-sqs').innerText = ridgeSqs.toFixed(2);
+
+            // Conditional Row for Additional Roofs in Measurement Outputs (Only if SQs > 0)
+            const rowOutExtraSqs = document.getElementById('row-out-extra-sqs');
+            if (extraSqs > 0) {
+                rowOutExtraSqs.classList.remove('hidden');
+                document.getElementById('label-out-extra-sqs').innerText = `Additional Roofs SQs (${extraRoofTypeName}):`;
+                document.getElementById('out-extra-sqs').innerText = extraSqs.toFixed(2);
+            } else {
+                rowOutExtraSqs.classList.add('hidden');
+            }
+
+            document.getElementById('out-total-sqs').innerText = totalSqs.toFixed(2);
+
+            // Cost Breakdown Card UI Updates
+            document.getElementById('out-labor-total').innerText = fmt(crewLaborTotal);
+            document.getElementById('out-base-mat-total').innerText = fmt(baseMatTotal);
+            document.getElementById('out-misc-mat-total').innerText = fmt(miscMatTotal);
+            document.getElementById('out-starter-bundle-cost').innerText = fmt(starterBundleCostTotal);
+            document.getElementById('out-ridge-bundle-cost').innerText = fmt(ridgeBundleCostTotal);
+
+            // Show/Hide Add'l Roof Cost Line in Breakdown
+            const rowExtraCostCard = document.getElementById('row-extra-roof-cost-card');
+            if (!isShinglesExtra && extraRoofMaterialCostTotal > 0) {
+                rowExtraCostCard.classList.remove('hidden');
+                document.getElementById('label-extra-roof-cost-card').innerText = `Add'l Roofs Cost (${extraRoofTypeName}):`;
+                document.getElementById('out-extra-roof-cost').innerText = fmt(extraRoofMaterialCostTotal);
+            } else {
+                rowExtraCostCard.classList.add('hidden');
+            }
+
+            // Show/Hide Pitch Surcharge Sub-line
+            const cardPitchRow = document.getElementById('row-pitch-surcharge-card');
+            if (pitchSurchargeCostTotal > 0) {
+                cardPitchRow.classList.remove('hidden');
+                document.getElementById('label-pitch-surcharge').innerText = `Pitch Charge (${pitchTextLabel.split(' ')[0]} @ $${pitchRatePerSq}/SQ on ${applicablePitchSqs.toFixed(2)} SQs):`;
+                document.getElementById('out-pitch-surcharge-cost').innerText = fmt(pitchSurchargeCostTotal);
+            } else {
+                cardPitchRow.classList.add('hidden');
+            }
+
+            document.getElementById('out-total-mat-costs').innerText = fmt(totalJobMaterialsCost);
+            document.getElementById('out-card-commission-total').innerText = fmt(commissionAmount);
+            document.getElementById('out-overall-job-total').innerText = fmt(totalJobCost);
+
+            const cardOtherRow = document.getElementById('row-other-direct-card');
+            if (otherDirectCosts > 0) {
+                cardOtherRow.classList.remove('hidden');
+                document.getElementById('out-other-direct-total').innerText = fmt(otherDirectCosts);
+            } else {
+                cardOtherRow.classList.add('hidden');
+            }
+
+            document.getElementById('header-total-price').innerText = fmt(contractPrice);
+            
+            // Sync Interactive Selling Price Field
+            if (document.activeElement !== document.getElementById('out-interactive-selling-price')) {
+                document.getElementById('out-interactive-selling-price').value = sellingPricePerSq.toFixed(2);
+            }
+
+            document.getElementById('out-job-materials-total').innerText = fmt(totalJobMaterialsCost);
+            document.getElementById('out-crew-total-display').innerText = fmt(crewLaborTotal);
+
+            const otherRow = document.getElementById('row-other-direct-display');
+            if (otherDirectCosts > 0) {
+                otherRow.classList.remove('hidden');
+                document.getElementById('out-other-direct-display').innerText = fmt(otherDirectCosts);
+            } else {
+                otherRow.classList.add('hidden');
+            }
+
+            document.getElementById('out-subtotal-before-comm').innerText = fmt(subtotalBeforeCommission);
+            document.getElementById('out-commission-amount').innerText = fmt(commissionAmount);
+            document.getElementById('out-total-job-cost').innerText = fmt(totalJobCost);
+            
+            // Format Profit & Margin outputs
+            const profitEl = document.getElementById('out-profit-amount');
+            const marginEl = document.getElementById('out-gross-margin');
+            const profitBox = document.getElementById('profit-container-box');
+
+            profitEl.innerText = fmt(profitAmount);
+            marginEl.innerText = grossMarginPct.toFixed(2) + '%';
+
+            // Targets & Variances
+            document.getElementById('out-cost-per-total-sq').innerText = fmt(costPerTotalSq);
+            document.getElementById('out-breakeven-price').innerText = fmt(breakevenPricePerSq);
+            document.getElementById('out-target-price-per-sq').innerText = fmt(targetPricePerSq);
+            document.getElementById('out-target-contract-price').innerText = fmt(targetContractPrice);
+            document.getElementById('actual-price-sq-num').innerText = sellingPricePerSq.toFixed(2);
+
+            const diffPriceSq = sellingPricePerSq - targetPricePerSq;
+            const diffPriceSqEl = document.getElementById('diff-price-per-sq');
+            if (diffPriceSq >= 0) {
+                diffPriceSqEl.innerText = `+${fmt(diffPriceSq)} / SQ (Above Target)`;
+                diffPriceSqEl.className = 'font-extrabold text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+            } else {
+                diffPriceSqEl.innerText = `${fmt(diffPriceSq)} / SQ (Below Target)`;
+                diffPriceSqEl.className = 'font-extrabold text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30';
+            }
+
+            const diffContract = contractPrice - targetContractPrice;
+            const diffContractEl = document.getElementById('diff-contract-price');
+            if (diffContract >= 0) {
+                diffContractEl.innerText = `+${fmt(diffContract)} (Above Target)`;
+                diffContractEl.className = 'font-extrabold text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+            } else {
+                diffContractEl.innerText = `${fmt(diffContract)} (Below Target)`;
+                diffContractEl.className = 'font-extrabold text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30';
+            }
+
+            // Margin Health Highlighting
+            const statusBadge = document.getElementById('out-margin-status');
+            profitEl.classList.remove('text-emerald-300', 'text-emerald-400', 'text-amber-400', 'text-rose-400');
+            marginEl.classList.remove('text-emerald-300', 'text-emerald-400', 'text-amber-400', 'text-rose-400');
+            profitBox.className = "p-2 rounded-xl transition-all duration-300 space-y-1 mt-1";
+
+            if (grossMarginPct >= 37.0) {
+                statusBadge.innerText = 'EXCELLENT';
+                statusBadge.className = 'text-[10px] font-black uppercase bg-emerald-500/25 text-emerald-300 px-3 py-1 rounded-full border border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.35)]';
+                profitEl.classList.add('text-emerald-300');
+                marginEl.classList.add('text-emerald-300');
+                profitBox.classList.add('bg-emerald-950/40', 'border', 'border-emerald-500/40');
+            } else if (grossMarginPct >= 32.0) {
+                statusBadge.innerText = 'GOOD';
+                statusBadge.className = 'text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-400/30';
+                profitEl.classList.add('text-emerald-400');
+                marginEl.classList.add('text-emerald-400');
+            } else if (grossMarginPct >= 27.1) {
+                statusBadge.innerText = 'FAIR';
+                statusBadge.className = 'text-[10px] font-extrabold uppercase bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full border border-amber-400/30';
+                profitEl.classList.add('text-amber-400');
+                marginEl.classList.add('text-amber-400');
+            } else {
+                statusBadge.innerText = 'LOW MARGIN';
+                statusBadge.className = 'text-[10px] font-extrabold uppercase bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded-full border border-rose-400/30';
+                profitEl.classList.add('text-rose-400');
+                marginEl.classList.add('text-rose-400');
+            }
+
+            renderScenarioTable(totalSqs, subtotalBeforeCommission, sellingPricePerSq, commissionRate);
+            updateChart(totalJobMaterialsCost, crewLaborTotal, commissionAmount, profitAmount);
+
+            // Sync Print Proposal Sheet Elements
+            const clientVal = document.getElementById('client-name').value;
+            const quoteDateVal = document.getElementById('quote-date').value;
+            const matSelect = document.getElementById('select-material');
+            const matText = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '-';
+            const brandVal = document.getElementById('select-brand').value;
+
+            document.getElementById('print-client-name').innerText = clientVal;
+            document.getElementById('print-sheet-client').innerText = `Client: ${clientVal}`;
+            document.getElementById('print-sheet-date').innerText = `Date: ${quoteDateVal}`;
+            document.getElementById('print-sheet-mode').innerText = `Mode: ${state.jobMode.toUpperCase()}`;
+            document.getElementById('print-sheet-mat').innerText = matText;
+            document.getElementById('print-sheet-brand').innerText = brandVal;
+            document.getElementById('print-sheet-sqs').innerText = `${totalSqs.toFixed(2)} SQs`;
+
+            document.getElementById('print-table-mat-spec').innerText = `${matText} (${brandVal})`;
+            document.getElementById('print-table-mat-qty').innerText = `${totalSqs.toFixed(2)} SQs`;
+            document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal + miscMatTotal);
+
+            document.getElementById('print-table-starter-qty').innerText = `${starterText} (${starterLF} LF)`;
+            document.getElementById('print-table-starter-cost').innerText = fmt(starterBundleCostTotal);
+
+            document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${ridgeLF} LF)`;
+            document.getElementById('print-table-ridge-cost').innerText = fmt(ridgeBundleCostTotal);
+
+            // Print Row for Additional Non-Shingle Roof
+            const printExtraRoofRow = document.getElementById('print-row-extra-roof');
+            if (!isShinglesExtra && extraRoofMaterialCostTotal > 0) {
+                printExtraRoofRow.classList.remove('hidden');
+                document.getElementById('print-table-extra-roof-title').innerText = `Additional Roof (${extraRoofTypeName})`;
+                document.getElementById('print-table-extra-roof-spec').innerText = `${extraRoofTypeName} Option`;
+                document.getElementById('print-table-extra-roof-qty').innerText = `${extraSqs > 0 ? extraSqs.toFixed(2) + ' SQs' : 'Direct Expense'}`;
+                document.getElementById('print-table-extra-roof-cost').innerText = fmt(extraRoofMaterialCostTotal);
+            } else {
+                printExtraRoofRow.classList.add('hidden');
+            }
+
+            const printPitchRow = document.getElementById('print-row-pitch-surcharge');
+            if (pitchSurchargeCostTotal > 0) {
+                printPitchRow.classList.remove('hidden');
+                document.getElementById('print-table-pitch-desc').innerText = `${pitchTextLabel} Charge`;
+                document.getElementById('print-table-pitch-qty').innerText = `@ $${pitchRatePerSq.toFixed(2)} / SQ (${applicablePitchSqs.toFixed(2)} SQs)`;
+                document.getElementById('print-table-pitch-cost').innerText = fmt(pitchSurchargeCostTotal);
+            } else {
+                printPitchRow.classList.add('hidden');
+            }
+
+            document.getElementById('print-table-crews').innerText = selectedLeaders.map(l => l.name).join(', ') || 'Standard Subcontractor';
+            document.getElementById('print-table-crew-rate').innerText = `@ ${fmt(effectiveCrewRatePerSq)} / SQ`;
+            document.getElementById('print-table-labor-subtotal').innerText = fmt(crewLaborTotal);
+
+            document.getElementById('print-table-other-cost').innerText = fmt(otherDirectCosts);
+            document.getElementById('print-table-contract-total').innerText = fmt(contractPrice);
+        }
+
+        // --- SCENARIOS TABLE ---
+        function renderScenarioTable(totalSqs, directCost, currentPricePerSq, commissionRate) {
+            const tbody = document.getElementById('scenario-table-body');
+            tbody.innerHTML = '';
+            const fmt = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const standardTiers = [375.00, 400.00, 425.00, 450.00, 475.00, 500.00];
+            const uniquePrices = Array.from(new Set([...standardTiers, currentPricePerSq]));
+
+            const scenarioItems = uniquePrices.map(price => ({
+                price: price,
+                isCurrent: Math.abs(price - currentPricePerSq) < 0.001
+            }));
+
+            scenarioItems.sort((a, b) => a.price - b.price);
+
+            scenarioItems.forEach(item => {
+                let pricePerSq = item.price;
+                let contractTotal = pricePerSq * totalSqs;
+                let comm = contractTotal * commissionRate;
+                let totalJobCost = directCost + comm;
+                let profit = contractTotal - totalJobCost;
+                let marginPct = contractTotal > 0 ? (profit / contractTotal) * 100 : 0;
+
+                const tr = document.createElement('tr');
+                const isCurrent = item.isCurrent;
+
+                if (isCurrent) {
+                    tr.className = "bg-sky-50/90 border-y border-sky-300 text-sky-950 font-extrabold cursor-pointer hover:bg-sky-100 transition";
+                } else {
+                    tr.className = "hover:bg-slate-100 cursor-pointer transition text-slate-800";
+                }
+
+                tr.onclick = function() { applyScenarioPrice(pricePerSq); };
+
+                let scenarioMarginClass = "text-rose-500 font-bold";
+                if (marginPct >= 37.0) {
+                    scenarioMarginClass = "text-emerald-400 font-black";
+                } else if (marginPct >= 32.0) {
+                    scenarioMarginClass = "text-emerald-500 font-extrabold";
+                } else if (marginPct >= 27.1) {
+                    scenarioMarginClass = "text-amber-500 font-bold";
+                }
+
+                tr.innerHTML = `
+                    <td class="py-3">
+                        <div class="flex items-center gap-2">
+                            <span>${fmt(pricePerSq)}</span>
+                            ${isCurrent ? '<span class="text-[9px] bg-sky-500 text-white font-extrabold px-1.5 py-0.5 rounded uppercase shadow-sm">Current</span>' : ''}
+                        </div>
+                    </td>
+                    <td class="py-3">${fmt(contractTotal)}</td>
+                    <td class="py-3 text-slate-600 font-normal">${fmt(totalJobCost)}</td>
+                    <td class="py-3 text-slate-600 font-normal">${fmt(comm)}</td>
+                    <td class="py-3">${fmt(profit)}</td>
+                    <td class="py-3 text-right ${scenarioMarginClass}">
+                        ${marginPct.toFixed(2)}%
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            costChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Job Materials', 'Crew Labor', 'Commission', 'Gross Profit'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#0284c7', '#64748b', '#f59e0b', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11, family: 'Inter' },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        const dataset = data.datasets[0];
+                                        const total = dataset.data.reduce((acc, curr) => acc + curr, 0);
+                                        return data.labels.map((label, i) => {
+                                            const value = dataset.data[i] || 0;
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return {
+                                                text: `${label}: $${value.toLocaleString()} (${percentage}%)`,
+                                                fillStyle: dataset.backgroundColor[i],
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: $${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function updateChart(mat, labor, comm, profit) {
+            if (!costChartInstance) return;
+            costChartInstance.data.datasets[0].data = [
+                Math.round(mat),
+                Math.round(labor),
+                Math.round(comm),
+                Math.round(profit)
+            ];
+            costChartInstance.update();
+        }
+
+        // Spreadsheet-Friendly Text Summary Generation with Emojis
+        function copyQuoteSummary() {
+            const client = document.getElementById('client-name').value || 'Unnamed Client';
+            const date = document.getElementById('quote-date').value || new Date().toISOString().split('T')[0];
+            const matSelect = document.getElementById('select-material');
+            const mat = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : 'Standard Roof';
+            const brand = document.getElementById('select-brand').value;
+            const pitchSelect = document.getElementById('select-roof-pitch');
+            const pitchText = pitchSelect.options[pitchSelect.selectedIndex].text;
+            const sqs = document.getElementById('out-total-sqs').innerText;
+            const priceSq = document.getElementById('input-selling-price').value;
+            const total = '$' + document.getElementById('override-contract-price').value;
+            const cost = document.getElementById('out-total-job-cost').innerText;
+            const profit = document.getElementById('out-profit-amount').innerText;
+            const margin = document.getElementById('out-gross-margin').innerText;
+            const status = document.getElementById('out-margin-status').innerText;
+            const selectedLeaders = state.crewLeaders.filter(l => l.selected).map(l => l.name).join(', ') || 'Standard Crew';
+
+            const summaryText = 
+`🏠 360 ROOFING PROJECT ESTIMATE
+👤 CLIENT: ${client}
+📅 DATE: ${date}
+⚙️ MODE: ${state.jobMode.toUpperCase()}
+----------------------------------------
+📦 SPECIFICATIONS
+- Material: ${mat} (${brand})
+- Roof Pitch: ${pitchText}
+- Total Work Squares: ${sqs} SQs
+- Final Selling Price / SQ: $${parseFloat(priceSq).toFixed(2)}
+- Assigned Crew Leaders: ${selectedLeaders}
+----------------------------------------
+💰 FINANCIAL SUMMARY
+- Contract Total: ${total}
+- Total Job Cost: ${cost}
+- Gross Profit: ${profit} (${margin})
+- Margin Health: ${status}`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(summaryText).then(() => {
+                    showToast("Summary copied to clipboard!");
+                }).catch(() => {
+                    copyViaTextarea(summaryText);
+                });
+            } else {
+                copyViaTextarea(summaryText);
+            }
+        }
+
+        function copyViaTextarea(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showToast("Summary copied to clipboard!");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
