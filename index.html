@@ -6,6 +6,7 @@
     <title>360 Roofing Price Calculator</title>
 <link rel="icon" type="image/png" href="./Logo-Vertical-Color.png?v=4">
 <link rel="apple-touch-icon" href="./Logo-Vertical-Color.png?v=4">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -2602,6 +2603,47 @@
                 toast.classList.add('opacity-0', 'pointer-events-none');
             }, 3000);
         }
+        // --- Supabase Cloud Sync ---
+const SUPABASE_URL = "https://vraarxgciqaybkbjzwii.supabase.co";
+const SUPABASE_KEY = "sb_publishable_sP5Uzrl2cRF06qIUVqXbSA_-Id9Rv9d";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Save current quote to Supabase
+async function saveQuoteToCloud(customerName, createdByName = "Team Member") {
+  const quoteData = {
+    customer_name: customerName || "Unnamed Estimate",
+    created_by: createdByName,
+    roof_sqft: parseFloat(document.getElementById("roofSqft")?.value || 0),
+    pitch: document.getElementById("roofPitch")?.value || "Standard",
+    waste_pct: parseFloat(document.getElementById("wastePct")?.value || 10),
+    total_price: parseFloat(document.getElementById("totalPrice")?.innerText?.replace(/[^0-9.]/g, "") || 0),
+    quote_data: {
+      timestamp: new Date().toISOString()
+    }
+  };
+
+  const { data, error } = await supabaseClient.from("quotes").insert([quoteData]);
+  if (error) {
+    console.error("Save error:", error);
+    alert("Could not save quote. Check console.");
+  } else {
+    alert("Quote saved to cloud successfully!");
+  }
+}
+
+// Fetch all saved quotes
+async function loadSavedQuotes() {
+  const { data, error } = await supabaseClient
+    .from("quotes")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Load error:", error);
+    return [];
+  }
+  return data;
+}
     </script>
 </body>
 </html>
