@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>360 Roofing Price Calculator</title>
-<link rel="icon" type="image/png" href="./Logo-Vertical-Color.png?v=4">
-<link rel="apple-touch-icon" href="./Logo-Vertical-Color.png?v=4">
+    <link rel="icon" type="image/png" href="./Logo-Vertical-Color.png?v=4">
+    <link rel="apple-touch-icon" href="./Logo-Vertical-Color.png?v=4">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -88,11 +88,11 @@
                     <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
                     <span>New</span>
                 </button>
-                <button onclick="saveCurrentCalculation()" class="px-2.5 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Save current job to History">
-                    <i data-lucide="save" class="w-3.5 h-3.5"></i>
-                    <span>Save</span>
+                <button onclick="saveCurrentCalculation()" class="px-2.5 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Save current job to Supabase Cloud">
+                    <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
+                    <span>Save to Cloud</span>
                 </button>
-                <button onclick="openHistoryModal()" class="px-2.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="View saved calculation history">
+                <button onclick="openHistoryModal()" class="px-2.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="View cloud saved calculation history">
                     <i data-lucide="history" class="w-3.5 h-3.5"></i>
                     <span>History</span>
                 </button>
@@ -949,8 +949,8 @@
         <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-3">
                 <div class="flex items-center space-x-2">
-                    <i data-lucide="history" class="w-5 h-5 text-indigo-600"></i>
-                    <h3 class="font-bold text-lg text-slate-900">Saved Calculation History</h3>
+                    <i data-lucide="cloud" class="w-5 h-5 text-sky-600"></i>
+                    <h3 class="font-bold text-lg text-slate-900">Supabase Cloud History</h3>
                 </div>
                 <button onclick="closeHistoryModal()" class="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -959,10 +959,7 @@
 
             <div id="history-list-container" class="overflow-y-auto flex-grow space-y-3 pr-1"></div>
 
-            <div class="border-t pt-3 flex justify-between items-center">
-                <button onclick="clearAllHistory()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold px-2 py-1 rounded hover:bg-rose-50 transition">
-                    Clear All History
-                </button>
+            <div class="border-t pt-3 flex justify-end items-center">
                 <button onclick="closeHistoryModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
                     Close
                 </button>
@@ -1190,15 +1187,6 @@
                 return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_PITCH_RATES));
             } catch (e) {
                 return JSON.parse(JSON.stringify(DEFAULT_PITCH_RATES));
-            }
-        }
-
-        function loadStoredHistory() {
-            try {
-                const stored = localStorage.getItem('360_roofing_history');
-                return stored ? JSON.parse(stored) : [];
-            } catch (e) {
-                return [];
             }
         }
 
@@ -1654,33 +1642,11 @@
             calculateEstimate();
         }
 
-        function saveCurrentCalculation() {
-            const history = loadStoredHistory();
+        // --- CLOUD SYNC & SAVE ENGINE ---
+        async function saveCurrentCalculation() {
             const clientName = document.getElementById('client-name').value || "Unnamed Job";
-            const quoteDate = document.getElementById('quote-date').value;
-            const contractPrice = document.getElementById('override-contract-price').value;
-            const totalSqs = document.getElementById('out-total-sqs').innerText;
-            const matSelect = document.getElementById('select-material');
-            const materialText = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '';
-
-            const snapshot = {
-                id: 'calc_' + Date.now(),
-                timestamp: new Date().toLocaleString(),
-                clientName: clientName,
-                quoteDate: quoteDate,
-                contractPrice: '$' + contractPrice,
-                totalSqs: totalSqs,
-                materialText: materialText,
-                data: getSnapshotData()
-            };
-
-            history.unshift(snapshot);
-            try {
-                localStorage.setItem('360_roofing_history', JSON.stringify(history));
-                showToast(`Saved snapshot for "${clientName}"!`);
-            } catch (e) {
-                showToast("Failed to save snapshot.");
-            }
+            showToast("Saving quote to Supabase cloud...");
+            await saveQuoteToCloud(clientName);
         }
 
         function newCalculation() {
@@ -1706,24 +1672,34 @@
             showToast("Cleared for a new job calculation!");
         }
 
-        function openHistoryModal() {
-            renderHistoryList();
+        async function openHistoryModal() {
             document.getElementById('history-modal').classList.remove('hidden');
+            await renderHistoryList();
         }
 
         function closeHistoryModal() {
             document.getElementById('history-modal').classList.add('hidden');
         }
 
-        function renderHistoryList() {
-            const container = document.getElementById('history-list-container');
-            const history = loadStoredHistory();
+        let cloudHistoryCache = [];
 
-            if (history.length === 0) {
+        async function renderHistoryList() {
+            const container = document.getElementById('history-list-container');
+            container.innerHTML = `
+                <div class="text-center py-10 text-slate-400">
+                    <i data-lucide="loader" class="w-8 h-8 mx-auto mb-2 animate-spin text-sky-500"></i>
+                    <p class="text-xs">Fetching quotes from cloud...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            cloudHistoryCache = await loadSavedQuotes();
+
+            if (!cloudHistoryCache || cloudHistoryCache.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-10 text-slate-400">
                         <i data-lucide="folder-open" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
-                        <p class="text-xs">No saved calculations found.</p>
+                        <p class="text-xs">No cloud saved quotes found.</p>
                     </div>
                 `;
                 lucide.createIcons();
@@ -1731,25 +1707,25 @@
             }
 
             container.innerHTML = '';
-            history.forEach((item, index) => {
+            cloudHistoryCache.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = "bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 rounded-2xl p-4 transition flex flex-wrap items-center justify-between gap-3";
+                const createdDate = new Date(item.created_at).toLocaleDateString();
+                const contractTotal = item.total_price ? '$' + Number(item.total_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00';
+                
                 card.innerHTML = `
                     <div class="space-y-1 min-w-[200px]">
                         <div class="flex items-center space-x-2">
-                            <span class="font-bold text-sm text-slate-900">${item.clientName}</span>
-                            <span class="text-[10px] uppercase font-extrabold bg-slate-200 text-slate-700 px-2 py-0.5 rounded">${item.data.jobMode}</span>
+                            <span class="font-bold text-sm text-slate-900">${item.customer_name || 'Unnamed Client'}</span>
+                            <span class="text-[10px] uppercase font-extrabold bg-sky-100 text-sky-800 px-2 py-0.5 rounded">${item.pitch || 'Pitch 3/12-6/12'}</span>
                         </div>
-                        <p class="text-xs text-slate-500">${item.materialText} • ${item.totalSqs} SQs • Saved: ${item.timestamp}</p>
+                        <p class="text-xs text-slate-500">${item.roof_sqft || 0} SQs • Waste: ${item.waste_pct || 10}% • Date: ${createdDate}</p>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <span class="font-black text-lg text-sky-900">${item.contractPrice}</span>
+                        <span class="font-black text-lg text-sky-900">${contractTotal}</span>
                         <button onclick="loadHistoryItem(${index})" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl transition flex items-center space-x-1">
                             <i data-lucide="download" class="w-3.5 h-3.5"></i>
                             <span>Load</span>
-                        </button>
-                        <button onclick="deleteHistoryItem(${index})" class="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg transition" title="Delete">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
                 `;
@@ -1759,29 +1735,15 @@
         }
 
         function loadHistoryItem(index) {
-            const history = loadStoredHistory();
-            const item = history[index];
-            if (!item) return;
-
-            loadSnapshotData(item.data);
-            closeHistoryModal();
-            showToast(`Loaded calculation for "${item.clientName}"!`);
-        }
-
-        function deleteHistoryItem(index) {
-            const history = loadStoredHistory();
-            history.splice(index, 1);
-            localStorage.setItem('360_roofing_history', JSON.stringify(history));
-            renderHistoryList();
-            showToast("Calculation snapshot removed.");
-        }
-
-        function clearAllHistory() {
-            if (confirm("Are you sure you want to clear all saved calculation history?")) {
-                localStorage.removeItem('360_roofing_history');
-                renderHistoryList();
-                showToast("History cleared.");
+            const item = cloudHistoryCache[index];
+            if (!item || !item.quote_data) {
+                showToast("Could not load quote snapshot data.");
+                return;
             }
+
+            loadSnapshotData(item.quote_data);
+            closeHistoryModal();
+            showToast(`Loaded calculation for "${item.customer_name}"!`);
         }
 
         // --- MATERIALS SHEET RENDER & CRUD ---
@@ -2070,7 +2032,7 @@
                 containerPitchSqs.classList.add('hidden');
             }
 
-            // Toggle Additional Roof Cost Input Box (Shows immediately when non-shingle selected)
+            // Toggle Additional Roof Cost Input Box
             const containerExtraCost = document.getElementById('container-extra-roof-cost');
             const isShinglesExtra = (extraRoofType === 'shingles');
             
@@ -2142,7 +2104,6 @@
             const pitchSelectEl = document.getElementById('select-roof-pitch');
             const pitchTextLabel = pitchSelectEl.options[pitchSelectEl.selectedIndex].text;
 
-            // Helper for singular vs plural bundle labels
             const starterText = starterBundles === 1 ? '1 bundle' : `${starterBundles} bundles`;
             const ridgeText = ridgeBundles === 1 ? '1 bundle' : `${ridgeBundles} bundles`;
 
@@ -2211,7 +2172,6 @@
             document.getElementById('out-starter-sqs').innerText = starterSqs.toFixed(2);
             document.getElementById('out-ridge-sqs').innerText = ridgeSqs.toFixed(2);
 
-            // Conditional Row for Additional Roofs in Measurement Outputs (Only if SQs > 0)
             const rowOutExtraSqs = document.getElementById('row-out-extra-sqs');
             if (extraSqs > 0) {
                 rowOutExtraSqs.classList.remove('hidden');
@@ -2230,7 +2190,6 @@
             document.getElementById('out-starter-bundle-cost').innerText = fmt(starterBundleCostTotal);
             document.getElementById('out-ridge-bundle-cost').innerText = fmt(ridgeBundleCostTotal);
 
-            // Show/Hide Add'l Roof Cost Line in Breakdown
             const rowExtraCostCard = document.getElementById('row-extra-roof-cost-card');
             if (!isShinglesExtra && extraRoofMaterialCostTotal > 0) {
                 rowExtraCostCard.classList.remove('hidden');
@@ -2240,7 +2199,6 @@
                 rowExtraCostCard.classList.add('hidden');
             }
 
-            // Show/Hide Pitch Surcharge Sub-line
             const cardPitchRow = document.getElementById('row-pitch-surcharge-card');
             if (pitchSurchargeCostTotal > 0) {
                 cardPitchRow.classList.remove('hidden');
@@ -2264,7 +2222,6 @@
 
             document.getElementById('header-total-price').innerText = fmt(contractPrice);
             
-            // Sync Interactive Selling Price Field
             if (document.activeElement !== document.getElementById('out-interactive-selling-price')) {
                 document.getElementById('out-interactive-selling-price').value = sellingPricePerSq.toFixed(2);
             }
@@ -2358,7 +2315,6 @@
             const matText = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '-';
             const brandVal = document.getElementById('select-brand').value;
 
-            document.getElementById('print-client-name').innerText = clientVal;
             document.getElementById('print-sheet-client').innerText = `Client: ${clientVal}`;
             document.getElementById('print-sheet-date').innerText = `Date: ${quoteDateVal}`;
             document.getElementById('print-sheet-mode').innerText = `Mode: ${state.jobMode.toUpperCase()}`;
@@ -2376,7 +2332,6 @@
             document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${ridgeLF} LF)`;
             document.getElementById('print-table-ridge-cost').innerText = fmt(ridgeBundleCostTotal);
 
-            // Print Row for Additional Non-Shingle Roof
             const printExtraRoofRow = document.getElementById('print-row-extra-roof');
             if (!isShinglesExtra && extraRoofMaterialCostTotal > 0) {
                 printExtraRoofRow.classList.remove('hidden');
@@ -2537,7 +2492,6 @@
             costChartInstance.update();
         }
 
-        // Spreadsheet-Friendly Text Summary Generation with Emojis
         function copyQuoteSummary() {
             const client = document.getElementById('client-name').value || 'Unnamed Client';
             const date = document.getElementById('quote-date').value || new Date().toISOString().split('T')[0];
@@ -2603,47 +2557,50 @@
                 toast.classList.add('opacity-0', 'pointer-events-none');
             }, 3000);
         }
-        // --- Supabase Cloud Sync ---
-const SUPABASE_URL = "https://vraarxgciqaybkbjzwii.supabase.co";
-const SUPABASE_KEY = "sb_publishable_sP5Uzrl2cRF06qIUVqXbSA_-Id9Rv9d";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Save current quote to Supabase
-async function saveQuoteToCloud(customerName, createdByName = "Team Member") {
-  const quoteData = {
-    customer_name: customerName || "Unnamed Estimate",
-    created_by: createdByName,
-    roof_sqft: parseFloat(document.getElementById("roofSqft")?.value || 0),
-    pitch: document.getElementById("roofPitch")?.value || "Standard",
-    waste_pct: parseFloat(document.getElementById("wastePct")?.value || 10),
-    total_price: parseFloat(document.getElementById("totalPrice")?.innerText?.replace(/[^0-9.]/g, "") || 0),
-    quote_data: {
-      timestamp: new Date().toISOString()
-    }
-  };
+        // --- Supabase Cloud Client & Operations ---
+        const SUPABASE_URL = "https://vraarxgciqaybkbjzwii.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_sP5Uzrl2cRF06qIUVqXbSA_-Id9Rv9d";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const { data, error } = await supabaseClient.from("quotes").insert([quoteData]);
-  if (error) {
-    console.error("Save error:", error);
-    alert("Could not save quote. Check console.");
-  } else {
-    alert("Quote saved to cloud successfully!");
-  }
-}
+        // Saves current quote to Supabase with full snapshot data
+        async function saveQuoteToCloud(customerName, createdByName = "Team Member") {
+            const pitchSelect = document.getElementById('select-roof-pitch');
+            const pitchText = pitchSelect ? pitchSelect.options[pitchSelect.selectedIndex].text : "Standard";
+            const contractVal = parseCleanFloat(document.getElementById('override-contract-price')?.value || 0);
 
-// Fetch all saved quotes
-async function loadSavedQuotes() {
-  const { data, error } = await supabaseClient
-    .from("quotes")
-    .select("*")
-    .order("created_at", { ascending: false });
+            const quoteData = {
+                customer_name: customerName || "Unnamed Estimate",
+                created_by: createdByName,
+                roof_sqft: parseCleanFloat(document.getElementById("out-total-sqs")?.innerText || document.getElementById("input-sqs")?.value || 0),
+                pitch: pitchText,
+                waste_pct: parseCleanFloat(document.getElementById("input-waste")?.value || 10),
+                total_price: contractVal,
+                quote_data: getSnapshotData()
+            };
 
-  if (error) {
-    console.error("Load error:", error);
-    return [];
-  }
-  return data;
-}
+            const { data, error } = await supabaseClient.from("quotes").insert([quoteData]);
+            if (error) {
+                console.error("Save error:", error);
+                showToast("Could not save to Supabase cloud. Check console.");
+            } else {
+                showToast("Quote synced to Supabase cloud successfully!");
+            }
+        }
+
+        // Fetches all saved quotes from Supabase
+        async function loadSavedQuotes() {
+            const { data, error } = await supabaseClient
+                .from("quotes")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            if (error) {
+                console.error("Load error:", error);
+                return [];
+            }
+            return data;
+        }
     </script>
 </body>
 </html>
