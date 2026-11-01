@@ -98,7 +98,7 @@
                     <i data-lucide="history" class="w-3.5 h-3.5"></i>
                     <span>History</span>
                 </button>
-                <button onclick="resetCalculator()" class="px-2.5 py-1.5 text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Reset job inputs to defaults (keeps customer details & cloud settings)">
+                <button onclick="resetCalculator()" class="px-2.5 py-1.5 text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Reset job inputs to defaults">
                     <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                     <span>Reset</span>
                 </button>
@@ -185,9 +185,15 @@
                         <div class="flex items-center justify-between border-b pb-3">
                             <h2 class="font-semibold text-emerald-900 flex items-center gap-2">
                                 <i data-lucide="ruler" class="w-5 h-5 text-emerald-600"></i>
-                                2. Job Inputs (Measurements & Pricing)
+                                2. Job Inputs (Main Roof Measurements & Pricing)
                             </h2>
-                            <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">Job Measurements</span>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="addAdditionalRoof()" class="px-2.5 py-1 text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white rounded-lg flex items-center gap-1 transition shadow-sm" title="Add up to 5 additional roofs (2A to 2E)">
+                                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                    <span>+ Add'l Roof</span>
+                                </button>
+                                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">Main Roof</span>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -204,6 +210,12 @@
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Starter)</label>
                                 <input type="text" id="input-starter" value="250.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            </div>
+
+                            <!-- NEW VALLEY LF INPUT -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Valley LF</label>
+                                <input type="text" id="input-valley" value="0.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
                             </div>
 
                             <!-- ROOF PITCH SELECTOR -->
@@ -248,27 +260,6 @@
                                 </div>
                             </div>
 
-                            <!-- ADDITIONAL ROOFS INPUTS -->
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Additional Roofs (SQs)</label>
-                                <input type="text" id="input-extra-sqs" value="0.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Additional Roof Type</label>
-                                <select id="select-extra-roof-type" onchange="calculateEstimate()" class="w-full border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-semibold focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                                </select>
-                            </div>
-
-                            <!-- DYNAMIC ADDITIONAL ROOFS COST CELL -->
-                            <div id="container-extra-roof-cost" class="hidden">
-                                <label class="block text-xs font-medium text-amber-800 mb-1">Add'l Roofs Cost ($)</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
-                                    <input type="text" id="input-extra-roof-cost" value="0.00" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                                </div>
-                            </div>
-
                             <!-- RENAMABLE DIRECT COSTS FIELD -->
                             <div>
                                 <div class="flex items-center justify-between mb-1">
@@ -289,6 +280,9 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- CONTAINER FOR DYNAMIC ADDITIONAL ROOFS (2A, 2B, 2C, 2D, 2E) -->
+                    <div id="additional-roofs-container" class="space-y-4"></div>
 
                     <!-- CARD 3: MATERIAL & PRODUCTION ASSUMPTIONS -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-200 space-y-4">
@@ -319,6 +313,12 @@
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Cost / Bundle ($)</label>
                                 <input type="text" id="ridge-cost-bundle" value="65.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                            </div>
+
+                            <!-- NEW VALLEY BUNDLE COST -->
+                            <div>
+                                <label class="block font-medium text-slate-600 mb-1">Valley Cost / Bundle or Roll ($)</label>
+                                <input type="text" id="valley-cost-bundle" value="55.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <div>
@@ -407,7 +407,7 @@
                             
                             <!-- Dynamic Additional Roofs SQs line -->
                             <div id="row-out-extra-sqs" class="flex justify-between text-slate-600 hidden">
-                                <span id="label-out-extra-sqs">Additional Roofs SQs:</span>
+                                <span id="label-out-extra-sqs">Additional Roofs Total SQs:</span>
                                 <span class="font-bold text-slate-900" id="out-extra-sqs">0.00</span>
                             </div>
 
@@ -445,17 +445,21 @@
                                         <span class="font-medium text-slate-800" id="out-misc-mat-total">$0.00</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span id="label-starter-bundles">Starter Bundles Cost:</span>
+                                        <span id="label-starter-bundles">Starter Bundles Cost (0 bundles):</span>
                                         <span class="font-medium text-slate-800" id="out-starter-bundle-cost">$0.00</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span id="label-ridge-bundles">Hip & Ridge Bundles Cost:</span>
+                                        <span id="label-ridge-bundles">Hip & Ridge Bundles Cost (0 bundles):</span>
                                         <span class="font-medium text-slate-800" id="out-ridge-bundle-cost">$0.00</span>
+                                    </div>
+                                    <div class="flex justify-between" id="row-valley-bundles">
+                                        <span id="label-valley-bundles">Valley Bundles Cost (0 bundles):</span>
+                                        <span class="font-medium text-slate-800" id="out-valley-bundle-cost">$0.00</span>
                                     </div>
 
                                     <!-- DYNAMIC NON-SHINGLE ADD'L ROOF COST LINE ITEM -->
                                     <div id="row-extra-roof-cost-card" class="flex justify-between text-slate-700 font-medium hidden">
-                                        <span id="label-extra-roof-cost-card">Add'l Roofs Cost:</span>
+                                        <span id="label-extra-roof-cost-card">Add'l Roofs Materials Total:</span>
                                         <span class="font-bold text-slate-900" id="out-extra-roof-cost">$0.00</span>
                                     </div>
 
@@ -674,7 +678,7 @@
                             <th class="py-2 px-3 text-right">Cost Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 text-slate-800">
+                    <tbody class="divide-y divide-slate-200 text-slate-800" id="print-line-items-body">
                         <tr>
                             <td class="py-2 px-3 font-semibold">Base & Misc Roofing Material</td>
                             <td class="py-2 px-3" id="print-table-mat-spec">Main Roof Material</td>
@@ -693,11 +697,11 @@
                             <td class="py-2 px-3 text-right" id="print-table-ridge-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-ridge-cost">-</td>
                         </tr>
-                        <tr id="print-row-extra-roof" class="hidden">
-                            <td class="py-2 px-3 font-semibold" id="print-table-extra-roof-title">Additional Roof Material</td>
-                            <td class="py-2 px-3" id="print-table-extra-roof-spec">Add'l Roof Option</td>
-                            <td class="py-2 px-3 text-right" id="print-table-extra-roof-qty">-</td>
-                            <td class="py-2 px-3 text-right font-semibold" id="print-table-extra-roof-cost">-</td>
+                        <tr id="print-row-valley">
+                            <td class="py-2 px-3 font-semibold">Valley Linings & Shingles</td>
+                            <td class="py-2 px-3">Valley Bundles / Rolls</td>
+                            <td class="py-2 px-3 text-right" id="print-table-valley-qty">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-valley-cost">-</td>
                         </tr>
                         <tr id="print-row-pitch-surcharge" class="hidden">
                             <td class="py-2 px-3 font-semibold">Roof Pitch Surcharge</td>
@@ -705,6 +709,8 @@
                             <td class="py-2 px-3 text-right" id="print-table-pitch-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-pitch-cost">-</td>
                         </tr>
+                        <!-- DYNAMIC ROWS FOR ADD'L ROOFS IN PRINT -->
+                        <tbody id="print-additional-roofs-tbody" class="divide-y divide-slate-200"></tbody>
                         <tr>
                             <td class="py-2 px-3 font-semibold">Labor & Crew Allocation</td>
                             <td class="py-2 px-3" id="print-table-crews">Assigned Crew Leads</td>
@@ -790,7 +796,7 @@
                                 <i data-lucide="sliders" class="w-4 h-4 text-amber-600"></i>
                                 Bundle Logic & Coverage Specifications
                             </h3>
-                            <p class="text-xs text-slate-500">Configure coverage per bundle and LF conversions for Starter and Hip & Ridge caps.</p>
+                            <p class="text-xs text-slate-500">Configure coverage per bundle and LF conversions for Starter, Hip & Ridge caps, and Valleys.</p>
                         </div>
                         <button onclick="saveBundleSettings()" class="px-3.5 py-1.5 text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition shadow">
                             <i data-lucide="save" class="w-3.5 h-3.5"></i>
@@ -798,14 +804,14 @@
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Starter Specs Box -->
                         <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
                             <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
                                 <i data-lucide="box" class="w-3.5 h-3.5 text-amber-600"></i>
                                 Starter Shingles Coverage
                             </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="space-y-3 text-xs">
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Starter Coverage / Bundle LF</label>
                                     <input type="text" id="tab-bundle-starter-coverage" value="120.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
@@ -823,7 +829,7 @@
                                 <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-600"></i>
                                 Hip & Ridge Caps Coverage
                             </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="space-y-3 text-xs">
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Coverage / Bundle LF</label>
                                     <input type="text" id="tab-bundle-ridge-coverage" value="24.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
@@ -832,6 +838,21 @@
                                     <label class="block font-medium text-slate-600 mb-1">Hip & Ridge LF / SQ Equivalent</label>
                                     <input type="text" id="tab-bundle-ridge-equiv" value="72.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- NEW VALLEY SPECS BOX -->
+                        <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
+                            <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="git-commit" class="w-3.5 h-3.5 text-amber-600"></i>
+                                Valley Coverage Specs
+                            </h4>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <label class="block font-medium text-slate-600 mb-1">Valley Coverage / Bundle (LF)</label>
+                                    <input type="text" id="tab-bundle-valley-coverage" value="50.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                </div>
+                                <p class="text-[11px] text-amber-700 italic">Default standard: 50 LF = 1 Bundle / Roll of valley lining.</p>
                             </div>
                         </div>
                     </div>
@@ -998,7 +1019,7 @@
             return isNaN(result) ? 0 : result;
         }
 
-        // SAFE MATH PARSER (Replaces dangerous Function/eval calls)
+        // SAFE MATH PARSER
         function safeComputeMath(expr) {
             if (!expr) return 0;
             const sanitized = expr.replace(/[^0-9.+\-*/()]/g, '');
@@ -1178,6 +1199,7 @@
 
         const DEFAULT_MATERIALS = [
             { id: 'shingles', name: 'Shingles', brand: 'IKO Cambridge', supplier: 'ABC Supply Co.', unit: 'SQ', cost: 92.00, updated: '2026-10-01' },
+            { id: 'mod_bit', name: 'Modified Bitumen', brand: 'CertainTeed', supplier: 'Beacon Building', unit: 'SQ', cost: 135.00, updated: '2026-10-01' },
             { id: 'TPO', name: 'TPO', brand: 'CertainTeed', supplier: 'Beacon Building', unit: 'SQ', cost: 165.00, updated: '2026-09-20' },
             { id: 'flat_roof', name: 'Flat Roof', brand: 'CertainTeed', supplier: 'ABC Supply Co.', unit: 'SQ', cost: 140.00, updated: '2026-10-10' },
             { id: 'metal_roof', name: 'Metal Roof', brand: 'Generic Metal', supplier: 'Metal Direct', unit: 'SQ', cost: 210.00, updated: '2026-08-15' },
@@ -1195,7 +1217,8 @@
             starterCoverage: 120.00,
             starterEquiv: 225.00,
             ridgeCoverage: 24.00,
-            ridgeEquiv: 72.00
+            ridgeEquiv: 72.00,
+            valleyCoverage: 50.00
         };
 
         const DEFAULT_PITCH_RATES = {
@@ -1227,7 +1250,9 @@
         function loadStoredBundleSpecs() {
             try {
                 const stored = localStorage.getItem('360_roofing_bundle_specs');
-                return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
+                const parsed = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
+                if (!parsed.valleyCoverage) parsed.valleyCoverage = 50.00;
+                return parsed;
             } catch (e) {
                 return JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
             }
@@ -1249,7 +1274,8 @@
             materials: loadStoredMaterials(),
             crewLeaders: loadStoredCrews(),
             bundleSpecs: loadStoredBundleSpecs(),
-            pitchRates: loadStoredPitchRates()
+            pitchRates: loadStoredPitchRates(),
+            additionalRoofs: [] // holds items like { id, label: '2A', type: 'shingles', sqs, ridge, starter, valley, pitch, waste, cost, dripEdgeLF }
         };
 
         let costChartInstance = null;
@@ -1273,6 +1299,185 @@
 
             await syncGlobalSettingsFromCloud();
         });
+
+        // --- DYNAMIC ADDITIONAL ROOFS (2A, 2B, 2C, 2D, 2E) ---
+        const ROOF_LETTERS = ['2A', '2B', '2C', '2D', '2E'];
+
+        function addAdditionalRoof() {
+            if (state.additionalRoofs.length >= 5) {
+                showToast("Maximum of 5 additional roofs allowed (2A to 2E).");
+                return;
+            }
+
+            const nextLetter = ROOF_LETTERS[state.additionalRoofs.length];
+            const newRoof = {
+                id: 'roof_' + Date.now(),
+                label: nextLetter,
+                type: 'shingles',
+                sqs: '0.00',
+                ridge: '0.00',
+                starter: '0.00',
+                valley: '0.00',
+                pitchKey: 'pitch_3_6',
+                pitchSqs: '0.00',
+                waste: '10.00',
+                directCost: '0.00',
+                dripEdgeLF: '0.00'
+            };
+
+            state.additionalRoofs.push(newRoof);
+            renderAdditionalRoofsUI();
+            calculateEstimate();
+            showToast(`Added Roof Section ${nextLetter}`);
+        }
+
+        function removeAdditionalRoof(id) {
+            state.additionalRoofs = state.additionalRoofs.filter(r => r.id !== id);
+            // Re-label properly 2A, 2B, 2C...
+            state.additionalRoofs.forEach((r, idx) => {
+                r.label = ROOF_LETTERS[idx];
+            });
+            renderAdditionalRoofsUI();
+            calculateEstimate();
+            showToast("Additional roof removed.");
+        }
+
+        function renderAdditionalRoofsUI() {
+            const container = document.getElementById('additional-roofs-container');
+            container.innerHTML = '';
+
+            state.additionalRoofs.forEach((roof, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl p-5 shadow-sm border border-sky-200 space-y-4";
+                card.id = `card_${roof.id}`;
+
+                let optionsHTML = '';
+                state.materials.forEach(m => {
+                    optionsHTML += `<option value="${m.id}" ${roof.type === m.id ? 'selected' : ''}>${m.name}</option>`;
+                });
+
+                const isShingle = (roof.type === 'shingles');
+                const isModBit = (roof.type === 'mod_bit' || roof.type.includes('modified') || roof.type.includes('bitumen'));
+                const isOtherNonShingle = !isShingle && !isModBit;
+
+                let dynamicFieldsHTML = '';
+
+                if (isShingle) {
+                    dynamicFieldsHTML = `
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Roof Squares</label>
+                                <input type="text" value="${roof.sqs}" onchange="updateRoofProp('${roof.id}', 'sqs', this.value)" onwheel="handleWheelScroll(event, this, 1)" onblur="evaluateMathExpression(this)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Hip & Ridge LF</label>
+                                <input type="text" value="${roof.ridge}" onchange="updateRoofProp('${roof.id}', 'ridge', this.value)" onwheel="handleWheelScroll(event, this, 5)" onblur="evaluateMathExpression(this)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Starter)</label>
+                                <input type="text" value="${roof.starter}" onchange="updateRoofProp('${roof.id}', 'starter', this.value)" onwheel="handleWheelScroll(event, this, 5)" onblur="evaluateMathExpression(this)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Valley LF</label>
+                                <input type="text" value="${roof.valley}" onchange="updateRoofProp('${roof.id}', 'valley', this.value)" onwheel="handleWheelScroll(event, this, 5)" onblur="evaluateMathExpression(this)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Roof Pitch</label>
+                                <select onchange="updateRoofProp('${roof.id}', 'pitchKey', this.value); calculateEstimate();" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-2 py-2 text-xs font-bold text-slate-900 focus:outline-none">
+                                    <option value="pitch_0_2" ${roof.pitchKey === 'pitch_0_2' ? 'selected' : ''}>0/12 - 2/12</option>
+                                    <option value="pitch_3_6" ${roof.pitchKey === 'pitch_3_6' ? 'selected' : ''}>3/12 - 6/12</option>
+                                    <option value="pitch_7_9" ${roof.pitchKey === 'pitch_7_9' ? 'selected' : ''}>7/12 - 9/12</option>
+                                    <option value="pitch_10_12" ${roof.pitchKey === 'pitch_10_12' ? 'selected' : ''}>10/12 - 12/12</option>
+                                    <option value="pitch_13_plus" ${roof.pitchKey === 'pitch_13_plus' ? 'selected' : ''}>13/12+</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Waste %</label>
+                                <div class="relative">
+                                    <input type="text" value="${roof.waste}" onchange="updateRoofProp('${roof.id}', 'waste', this.value)" onwheel="handleWheelScroll(event, this, 1)" onblur="evaluateMathExpression(this)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl pl-3 pr-7 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                    <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (isModBit) {
+                    dynamicFieldsHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Mod. Bitumen Roof Squares</label>
+                                <input type="text" value="${roof.sqs}" onchange="updateRoofProp('${roof.id}', 'sqs', this.value)" onwheel="handleWheelScroll(event, this, 1)" onblur="evaluateMathExpression(this)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none" placeholder="0.00 SQs">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Drip Edge)</label>
+                                <input type="text" value="${roof.dripEdgeLF || '0.00'}" onchange="updateRoofProp('${roof.id}', 'dripEdgeLF', this.value)" onwheel="handleWheelScroll(event, this, 5)" onblur="evaluateMathExpression(this)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none" placeholder="0.00 LF">
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // TPO, Metal, or generic direct cost
+                    const matObj = state.materials.find(m => m.id === roof.type);
+                    const matName = matObj ? matObj.name : 'Material';
+                    dynamicFieldsHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-medium text-amber-800 mb-1">${matName} Materials Direct Cost ($)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
+                                    <input type="text" value="${roof.directCost}" onchange="updateRoofProp('${roof.id}', 'directCost', this.value)" onwheel="handleWheelScroll(event, this, 25)" onblur="evaluateMathExpression(this)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Estimated Roof Squares (Optional)</label>
+                                <input type="text" value="${roof.sqs}" onchange="updateRoofProp('${roof.id}', 'sqs', this.value)" onwheel="handleWheelScroll(event, this, 1)" onblur="evaluateMathExpression(this)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none" placeholder="0.00 SQs">
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-sky-600 text-white font-black text-xs px-2.5 py-1 rounded-lg tracking-wider">${roof.label}</span>
+                            <h3 class="font-bold text-slate-800 text-sm">Additional Roof Section (${roof.label})</h3>
+                        </div>
+                        <button type="button" onclick="removeAdditionalRoof('${roof.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-bold flex items-center gap-1 transition">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>Remove</span>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Add'l Roof Type</label>
+                        <select onchange="updateRoofType('${roof.id}', this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            ${optionsHTML}
+                        </select>
+                    </div>
+
+                    ${dynamicFieldsHTML}
+                `;
+
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function updateRoofType(id, newType) {
+            const roof = state.additionalRoofs.find(r => r.id === id);
+            if (roof) {
+                roof.type = newType;
+                renderAdditionalRoofsUI();
+                calculateEstimate();
+            }
+        }
+
+        function updateRoofProp(id, prop, val) {
+            const roof = state.additionalRoofs.find(r => r.id === id);
+            if (roof) {
+                roof[prop] = val;
+                calculateEstimate();
+            }
+        }
 
         async function syncGlobalSettingsFromCloud() {
             try {
@@ -1436,22 +1641,30 @@
             const ridgeLF = parseCleanFloat(document.getElementById('input-ridge').value);
             const starterLF = parseCleanFloat(document.getElementById('input-starter').value);
             const wastePct = parseCleanFloat(document.getElementById('input-waste').value) / 100;
-            const extraSqs = parseCleanFloat(document.getElementById('input-extra-sqs').value);
-            const extraRoofType = document.getElementById('select-extra-roof-type').value;
 
             const b = state.bundleSpecs;
             const rawWasteSqs = mainSqs * wastePct;
             const rawStarterSqs = starterLF / b.starterEquiv;
             const rawRidgeSqs = ridgeLF / b.ridgeEquiv;
 
-            const wasteSqs = roundUpRoofSquares(rawWasteSqs);
-            const starterSqs = roundUpRoofSquares(rawStarterSqs);
-            const ridgeSqs = roundUpRoofSquares(rawRidgeSqs);
+            let calculatedTotalSqs = mainSqs + roundUpRoofSquares(rawWasteSqs) + roundUpRoofSquares(rawStarterSqs) + roundUpRoofSquares(rawRidgeSqs);
 
-            let calculatedTotalSqs = mainSqs + wasteSqs + starterSqs + ridgeSqs;
-            if (extraRoofType === 'shingles') {
-                calculatedTotalSqs += extraSqs;
-            }
+            // Add Squares from Additional Roofs
+            state.additionalRoofs.forEach(r => {
+                const isShingle = (r.type === 'shingles');
+                const isModBit = (r.type === 'mod_bit' || r.type.includes('modified') || r.type.includes('bitumen'));
+                const rSqs = parseCleanFloat(r.sqs);
+                if (isShingle) {
+                    const rWaste = rSqs * (parseCleanFloat(r.waste) / 100);
+                    const rStarter = parseCleanFloat(r.starter) / b.starterEquiv;
+                    const rRidge = parseCleanFloat(r.ridge) / b.ridgeEquiv;
+                    calculatedTotalSqs += rSqs + roundUpRoofSquares(rWaste) + roundUpRoofSquares(rStarter) + roundUpRoofSquares(rRidge);
+                } else if (isModBit) {
+                    calculatedTotalSqs += rSqs;
+                } else if (rSqs > 0) {
+                    calculatedTotalSqs += rSqs;
+                }
+            });
 
             if (calculatedTotalSqs > 0 && targetContract > 0) {
                 const newSellingPricePerSq = targetContract / calculatedTotalSqs;
@@ -1489,40 +1702,20 @@
 
         function renderMaterialDropdown() {
             const select = document.getElementById('select-material');
-            const extraSelect = document.getElementById('select-extra-roof-type');
-            
             const currentVal = select.value;
-            const currentExtraVal = extraSelect ? extraSelect.value : '';
-
             select.innerHTML = '';
-            if (extraSelect) extraSelect.innerHTML = '';
 
             state.materials.forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m.id;
                 opt.innerText = m.name;
                 select.appendChild(opt);
-
-                if (extraSelect) {
-                    const extraOpt = document.createElement('option');
-                    extraOpt.value = m.id;
-                    extraOpt.innerText = m.name;
-                    extraSelect.appendChild(extraOpt);
-                }
             });
 
             if (currentVal && state.materials.some(m => m.id === currentVal)) {
                 select.value = currentVal;
             } else if (state.materials.length > 0) {
                 select.value = state.materials[0].id;
-            }
-
-            if (extraSelect) {
-                if (currentExtraVal && state.materials.some(m => m.id === currentExtraVal)) {
-                    extraSelect.value = currentExtraVal;
-                } else if (state.materials.length > 0) {
-                    extraSelect.value = state.materials[0].id;
-                }
             }
         }
 
@@ -1541,6 +1734,7 @@
             document.getElementById('tab-bundle-starter-equiv').value = b.starterEquiv.toFixed(2);
             document.getElementById('tab-bundle-ridge-coverage').value = b.ridgeCoverage.toFixed(2);
             document.getElementById('tab-bundle-ridge-equiv').value = b.ridgeEquiv.toFixed(2);
+            document.getElementById('tab-bundle-valley-coverage').value = (b.valleyCoverage || 50.00).toFixed(2);
         }
 
         async function saveBundleSettings() {
@@ -1548,7 +1742,8 @@
                 starterCoverage: parseCleanFloat(document.getElementById('tab-bundle-starter-coverage').value) || 120.00,
                 starterEquiv: parseCleanFloat(document.getElementById('tab-bundle-starter-equiv').value) || 225.00,
                 ridgeCoverage: parseCleanFloat(document.getElementById('tab-bundle-ridge-coverage').value) || 24.00,
-                ridgeEquiv: parseCleanFloat(document.getElementById('tab-bundle-ridge-equiv').value) || 72.00
+                ridgeEquiv: parseCleanFloat(document.getElementById('tab-bundle-ridge-equiv').value) || 72.00,
+                valleyCoverage: parseCleanFloat(document.getElementById('tab-bundle-valley-coverage').value) || 50.00
             };
             try {
                 localStorage.setItem('360_roofing_bundle_specs', JSON.stringify(state.bundleSpecs));
@@ -1670,12 +1865,11 @@
                 sqs: document.getElementById('input-sqs').value,
                 ridge: document.getElementById('input-ridge').value,
                 starter: document.getElementById('input-starter').value,
+                valley: document.getElementById('input-valley').value,
                 waste: document.getElementById('input-waste').value,
                 sellingPrice: document.getElementById('input-selling-price').value,
                 commissionRate: document.getElementById('input-commission-rate').value,
-                extraSqs: document.getElementById('input-extra-sqs').value,
-                extraRoofType: document.getElementById('select-extra-roof-type').value,
-                extraRoofCost: document.getElementById('input-extra-roof-cost').value,
+                additionalRoofs: JSON.parse(JSON.stringify(state.additionalRoofs)),
                 otherDirect: document.getElementById('input-other-direct').value,
                 notes: document.getElementById('input-notes').value,
                 crewCalcMode: document.getElementById('select-crew-calc-mode').value,
@@ -1683,6 +1877,7 @@
                 miscMaterialCost: document.getElementById('cost-misc-material').value,
                 starterCostBundle: document.getElementById('starter-cost-bundle').value,
                 ridgeCostBundle: document.getElementById('ridge-cost-bundle').value,
+                valleyCostBundle: document.getElementById('valley-cost-bundle').value,
                 targetMargin: document.getElementById('cost-target-margin').value,
                 bundleSpecs: JSON.parse(JSON.stringify(state.bundleSpecs)),
                 pitchRates: JSON.parse(JSON.stringify(state.pitchRates)),
@@ -1708,17 +1903,13 @@
             document.getElementById('input-sqs').value = d.sqs || '0.00';
             document.getElementById('input-ridge').value = d.ridge || '0.00';
             document.getElementById('input-starter').value = d.starter || '0.00';
+            document.getElementById('input-valley').value = d.valley || '0.00';
             document.getElementById('input-waste').value = d.waste || '10.00';
             document.getElementById('input-selling-price').value = d.sellingPrice || '450.00';
             document.getElementById('input-commission-rate').value = d.commissionRate || '15.00';
-            document.getElementById('input-extra-sqs').value = d.extraSqs || '0.00';
-            
-            if (d.extraRoofType) {
-                document.getElementById('select-extra-roof-type').value = d.extraRoofType;
-            }
-            if (d.extraRoofCost) {
-                document.getElementById('input-extra-roof-cost').value = d.extraRoofCost;
-            }
+
+            state.additionalRoofs = d.additionalRoofs ? JSON.parse(JSON.stringify(d.additionalRoofs)) : [];
+            renderAdditionalRoofsUI();
 
             document.getElementById('input-other-direct').value = d.otherDirect || '0.00';
             document.getElementById('input-notes').value = d.notes || '';
@@ -1728,6 +1919,7 @@
             document.getElementById('cost-misc-material').value = d.miscMaterialCost || '20.00';
             document.getElementById('starter-cost-bundle').value = d.starterCostBundle || '50.00';
             document.getElementById('ridge-cost-bundle').value = d.ridgeCostBundle || '65.00';
+            document.getElementById('valley-cost-bundle').value = d.valleyCostBundle || '55.00';
             document.getElementById('cost-target-margin').value = d.targetMargin || '35.00';
 
             if (d.bundleSpecs) {
@@ -1766,12 +1958,15 @@
             document.getElementById('input-sqs').value = "20.00";
             document.getElementById('input-ridge').value = "180.00";
             document.getElementById('input-starter').value = "250.00";
+            document.getElementById('input-valley').value = "0.00";
             document.getElementById('select-roof-pitch').value = "pitch_3_6";
             document.getElementById('input-pitch-sqs').value = "0.00";
             document.getElementById('input-waste').value = "10.00";
             document.getElementById('input-commission-rate').value = "15.00";
-            document.getElementById('input-extra-sqs').value = "0.00";
-            document.getElementById('input-extra-roof-cost').value = "0.00";
+
+            state.additionalRoofs = [];
+            renderAdditionalRoofsUI();
+
             document.getElementById('input-other-direct').value = "0.00";
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
@@ -1779,6 +1974,7 @@
             document.getElementById('cost-misc-material').value = "20.00";
             document.getElementById('starter-cost-bundle').value = "50.00";
             document.getElementById('ridge-cost-bundle').value = "65.00";
+            document.getElementById('valley-cost-bundle').value = "55.00";
             document.getElementById('cost-target-margin').value = "35.00";
 
             state.otherDirectLabel = "Other Direct Costs";
@@ -1807,12 +2003,15 @@
             document.getElementById('input-sqs').value = "20.00";
             document.getElementById('input-ridge').value = "180.00";
             document.getElementById('input-starter').value = "250.00";
+            document.getElementById('input-valley').value = "0.00";
             document.getElementById('select-roof-pitch').value = "pitch_3_6";
             document.getElementById('input-pitch-sqs').value = "0.00";
             document.getElementById('input-waste').value = "10.00";
             document.getElementById('input-commission-rate').value = "15.00";
-            document.getElementById('input-extra-sqs').value = "0.00";
-            document.getElementById('input-extra-roof-cost').value = "0.00";
+
+            state.additionalRoofs = [];
+            renderAdditionalRoofsUI();
+
             document.getElementById('input-other-direct').value = "0.00";
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
@@ -1820,6 +2019,7 @@
             document.getElementById('cost-misc-material').value = "20.00";
             document.getElementById('starter-cost-bundle').value = "50.00";
             document.getElementById('ridge-cost-bundle').value = "65.00";
+            document.getElementById('valley-cost-bundle').value = "55.00";
             document.getElementById('cost-target-margin').value = "35.00";
 
             state.otherDirectLabel = "Other Direct Costs";
@@ -1977,6 +2177,7 @@
         function updateMaterialName(index, val) {
             state.materials[index].name = val;
             renderMaterialDropdown();
+            renderAdditionalRoofsUI();
         }
         function updateMaterialBrand(index, val) { state.materials[index].brand = val; }
         function updateMaterialCost(index, val) { 
@@ -2001,6 +2202,7 @@
             });
             renderMaterialDropdown();
             renderMasterTable();
+            renderAdditionalRoofsUI();
             showToast('New material option added to sheet!');
         }
 
@@ -2012,6 +2214,7 @@
             state.materials.splice(index, 1);
             renderMaterialDropdown();
             renderMasterTable();
+            renderAdditionalRoofsUI();
             calculateEstimate();
             showToast('Material option removed.');
         }
@@ -2022,6 +2225,7 @@
             } catch (e) {}
             await pushGlobalSettingsToCloud();
             renderMaterialDropdown();
+            renderAdditionalRoofsUI();
             onMaterialChange();
             showToast('Materials Price Sheet Saved to Cloud!');
         }
@@ -2164,15 +2368,12 @@
             const mainSqs = parseCleanFloat(document.getElementById('input-sqs').value);
             const ridgeLF = parseCleanFloat(document.getElementById('input-ridge').value);
             const starterLF = parseCleanFloat(document.getElementById('input-starter').value);
+            const valleyLF = parseCleanFloat(document.getElementById('input-valley').value);
             const pitchKey = document.getElementById('select-roof-pitch').value;
             const inputPitchSqs = parseCleanFloat(document.getElementById('input-pitch-sqs').value);
             const wastePct = parseCleanFloat(document.getElementById('input-waste').value) / 100;
             const sellingPricePerSq = parseCleanFloat(document.getElementById('input-selling-price').value);
             const commissionRate = parseCleanFloat(document.getElementById('input-commission-rate').value) / 100;
-            
-            const extraSqs = parseCleanFloat(document.getElementById('input-extra-sqs').value);
-            const extraRoofType = document.getElementById('select-extra-roof-type').value;
-            const extraRoofCostInput = parseCleanFloat(document.getElementById('input-extra-roof-cost').value);
             const otherDirectCosts = parseCleanFloat(document.getElementById('input-other-direct').value);
 
             // Toggle Steep Pitch SQs cell visibility
@@ -2184,21 +2385,12 @@
                 containerPitchSqs.classList.add('hidden');
             }
 
-            // Toggle Additional Roof Cost Input Box
-            const containerExtraCost = document.getElementById('container-extra-roof-cost');
-            const isShinglesExtra = (extraRoofType === 'shingles');
-            
-            if (!isShinglesExtra) {
-                containerExtraCost.classList.remove('hidden');
-            } else {
-                containerExtraCost.classList.add('hidden');
-            }
-
             // Direct Costs & Assumptions
             const baseMatPerSq = parseCleanFloat(document.getElementById('cost-base-material').value);
             const miscMatPerSq = parseCleanFloat(document.getElementById('cost-misc-material').value);
             const starterCostBundle = parseCleanFloat(document.getElementById('starter-cost-bundle').value);
             const ridgeCostBundle = parseCleanFloat(document.getElementById('ridge-cost-bundle').value);
+            const valleyCostBundle = parseCleanFloat(document.getElementById('valley-cost-bundle').value);
             const targetMargin = (parseCleanFloat(document.getElementById('cost-target-margin').value) || 35.0) / 100;
 
             // Coverage Rules & Conversions
@@ -2207,6 +2399,7 @@
             const starterLFPerSq = b.starterEquiv;
             const ridgeCoverageLF = b.ridgeCoverage;
             const ridgeLFPerSq = b.ridgeEquiv;
+            const valleyCoverageLF = b.valleyCoverage || 50.00;
 
             // Crew Labor Rate Computation
             const crewCalcMode = document.getElementById('select-crew-calc-mode').value;
@@ -2225,7 +2418,7 @@
             const modeLabel = crewCalcMode === 'cumulative' ? 'Combined' : 'Avg';
             document.getElementById('calc-effective-crew-rate').innerText = `$${effectiveCrewRatePerSq.toFixed(2)} / SQ (${selectedLeaders.length} Selected - ${modeLabel})`;
 
-            // Component Squares
+            // Main Component Squares
             const rawWasteSqs = mainSqs * wastePct;
             const rawStarterSqs = starterLF / starterLFPerSq;
             const rawRidgeSqs = ridgeLF / ridgeLFPerSq;
@@ -2234,51 +2427,138 @@
             const starterSqs = roundUpRoofSquares(rawStarterSqs);
             const ridgeSqs = roundUpRoofSquares(rawRidgeSqs);
 
-            let calculatedTotalSqs = mainSqs + wasteSqs + starterSqs + ridgeSqs;
-            if (isShinglesExtra) {
-                calculatedTotalSqs += extraSqs;
-            }
+            let mainTotalSqs = mainSqs + wasteSqs + starterSqs + ridgeSqs;
+            let totalSqs = mainTotalSqs;
 
-            const totalSqs = parseFloat(calculatedTotalSqs.toFixed(2));
+            // Accumulators for Bundles & Material Costs
+            let totalStarterLF = starterLF;
+            let totalRidgeLF = ridgeLF;
+            let totalValleyLF = valleyLF;
+            let extraRoofsMaterialCost = 0;
+            let extraRoofsTotalSqs = 0;
+            let extraPitchSurcharge = 0;
+
+            // Iterate over Dynamic Additional Roofs (2A to 2E)
+            const printAddlTbody = document.getElementById('print-additional-roofs-tbody');
+            if (printAddlTbody) printAddlTbody.innerHTML = '';
+
+            state.additionalRoofs.forEach(r => {
+                const isShingle = (r.type === 'shingles');
+                const isModBit = (r.type === 'mod_bit' || r.type.includes('modified') || r.type.includes('bitumen'));
+                const matObj = state.materials.find(m => m.id === r.type);
+                const matCostPerSq = matObj ? matObj.cost : 100.00;
+                const rSqs = parseCleanFloat(r.sqs);
+
+                if (isShingle) {
+                    const rRidge = parseCleanFloat(r.ridge);
+                    const rStarter = parseCleanFloat(r.starter);
+                    const rValley = parseCleanFloat(r.valley);
+                    const rWastePct = parseCleanFloat(r.waste) / 100;
+                    
+                    const rWasteSqs = roundUpRoofSquares(rSqs * rWastePct);
+                    const rStarterSqs = roundUpRoofSquares(rStarter / starterLFPerSq);
+                    const rRidgeSqs = roundUpRoofSquares(rRidge / ridgeLFPerSq);
+                    const rSectionTotalSqs = rSqs + rWasteSqs + rStarterSqs + rRidgeSqs;
+
+                    totalSqs += rSectionTotalSqs;
+                    extraRoofsTotalSqs += rSectionTotalSqs;
+
+                    totalStarterLF += rStarter;
+                    totalRidgeLF += rRidge;
+                    totalValleyLF += rValley;
+
+                    // Pitch surcharge for additional shingle roof
+                    const rPitchRate = state.pitchRates[r.pitchKey] || 0;
+                    if (rPitchRate > 0) {
+                        extraPitchSurcharge += (rSectionTotalSqs * rPitchRate);
+                    }
+
+                    if (printAddlTbody) {
+                        printAddlTbody.innerHTML += `
+                            <tr>
+                                <td class="py-2 px-3 font-semibold">Additional Roof (${r.label} - Shingles)</td>
+                                <td class="py-2 px-3">Shingle Roof Component</td>
+                                <td class="py-2 px-3 text-right">${rSectionTotalSqs.toFixed(2)} SQs</td>
+                                <td class="py-2 px-3 text-right font-semibold">$${(rSectionTotalSqs * (baseMatPerSq + miscMatPerSq)).toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+                } else if (isModBit) {
+                    totalSqs += rSqs;
+                    extraRoofsTotalSqs += rSqs;
+                    const dripEdgeCost = parseCleanFloat(r.dripEdgeLF) * 1.50; // standard drip edge material approx
+                    const modBitMaterialCost = (rSqs * matCostPerSq) + dripEdgeCost;
+                    extraRoofsMaterialCost += modBitMaterialCost;
+
+                    if (printAddlTbody) {
+                        printAddlTbody.innerHTML += `
+                            <tr>
+                                <td class="py-2 px-3 font-semibold">Additional Roof (${r.label} - Mod. Bitumen)</td>
+                                <td class="py-2 px-3">${r.dripEdgeLF ? parseCleanFloat(r.dripEdgeLF).toFixed(2) + ' LF Drip Edge' : 'Mod. Bitumen Membrane'}</td>
+                                <td class="py-2 px-3 text-right">${rSqs.toFixed(2)} SQs</td>
+                                <td class="py-2 px-3 text-right font-semibold">$${modBitMaterialCost.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+                } else {
+                    // TPO, Metal, or direct cost
+                    const directCost = parseCleanFloat(r.directCost);
+                    if (directCost > 0) {
+                        extraRoofsMaterialCost += directCost;
+                    } else if (rSqs > 0) {
+                        extraRoofsMaterialCost += (rSqs * matCostPerSq);
+                    }
+                    if (rSqs > 0) {
+                        totalSqs += rSqs;
+                        extraRoofsTotalSqs += rSqs;
+                    }
+
+                    if (printAddlTbody) {
+                        printAddlTbody.innerHTML += `
+                            <tr>
+                                <td class="py-2 px-3 font-semibold">Additional Roof (${r.label} - ${matObj ? matObj.name : 'Flat/Metal'})</td>
+                                <td class="py-2 px-3">Direct Package Expense</td>
+                                <td class="py-2 px-3 text-right">${rSqs > 0 ? rSqs.toFixed(2) + ' SQs' : '-'}</td>
+                                <td class="py-2 px-3 text-right font-semibold">$${(directCost > 0 ? directCost : rSqs * matCostPerSq).toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+                }
+            });
+
+            totalSqs = parseFloat(totalSqs.toFixed(2));
 
             // Bundle Cost Totals & Count Formatting
-            const starterBundles = Math.ceil(starterLF / starterCoverageLF);
+            const starterBundles = Math.ceil(totalStarterLF / starterCoverageLF);
             const starterBundleCostTotal = starterBundles * starterCostBundle;
 
-            const ridgeBundles = Math.ceil(ridgeLF / ridgeCoverageLF);
+            const ridgeBundles = Math.ceil(totalRidgeLF / ridgeCoverageLF);
             const ridgeBundleCostTotal = ridgeBundles * ridgeCostBundle;
 
-            // PITCH SURCHARGE COMPUTATION
+            const valleyBundles = Math.ceil(totalValleyLF / valleyCoverageLF);
+            const valleyBundleCostTotal = valleyBundles * valleyCostBundle;
+
+            // Pitch Surcharge
             const pitchRatePerSq = state.pitchRates[pitchKey] || 0;
-            const applicablePitchSqs = (isSteepPitch && inputPitchSqs > 0) ? inputPitchSqs : totalSqs;
-            const pitchSurchargeCostTotal = applicablePitchSqs * pitchRatePerSq;
+            const applicablePitchSqs = (isSteepPitch && inputPitchSqs > 0) ? inputPitchSqs : mainTotalSqs;
+            const mainPitchSurcharge = applicablePitchSqs * pitchRatePerSq;
+            const pitchSurchargeCostTotal = mainPitchSurcharge + extraPitchSurcharge;
 
             const pitchSelectEl = document.getElementById('select-roof-pitch');
             const pitchTextLabel = pitchSelectEl.options[pitchSelectEl.selectedIndex].text;
 
             const starterText = starterBundles === 1 ? '1 bundle' : `${starterBundles} bundles`;
             const ridgeText = ridgeBundles === 1 ? '1 bundle' : `${ridgeBundles} bundles`;
+            const valleyText = valleyBundles === 1 ? '1 bundle' : `${valleyBundles} bundles`;
 
             document.getElementById('label-starter-bundles').innerText = `Starter Bundles Cost (${starterText}):`;
             document.getElementById('label-ridge-bundles').innerText = `Hip & Ridge Bundles Cost (${ridgeText}):`;
-
-            // Non-Shingle Additional Roof Cost Calculation
-            let extraRoofMaterialCostTotal = 0;
-            const extraRoofObj = state.materials.find(m => m.id === extraRoofType);
-            const extraRoofTypeName = extraRoofObj ? extraRoofObj.name : 'Add\'l Roof';
-
-            if (!isShinglesExtra) {
-                if (extraRoofCostInput > 0) {
-                    extraRoofMaterialCostTotal = extraRoofCostInput;
-                } else if (extraRoofObj && extraSqs > 0) {
-                    extraRoofMaterialCostTotal = extraSqs * extraRoofObj.cost;
-                }
-            }
+            document.getElementById('label-valley-bundles').innerText = `Valley Bundles Cost (${valleyText}):`;
 
             // 1. Job Materials Total
             const baseMatTotal = totalSqs * baseMatPerSq;
             const miscMatTotal = totalSqs * miscMatPerSq;
-            const totalJobMaterialsCost = baseMatTotal + miscMatTotal + starterBundleCostTotal + ridgeBundleCostTotal + pitchSurchargeCostTotal + extraRoofMaterialCostTotal;
+            const totalJobMaterialsCost = baseMatTotal + miscMatTotal + starterBundleCostTotal + ridgeBundleCostTotal + valleyBundleCostTotal + pitchSurchargeCostTotal + extraRoofsMaterialCost;
 
             // 2. Crew Labor Total
             const crewLaborTotal = totalSqs * effectiveCrewRatePerSq;
@@ -2307,7 +2587,7 @@
             const profitAmount = contractPrice - totalJobCost;
             const grossMarginPct = contractPrice > 0 ? (profitAmount / contractPrice) * 100 : 0;
 
-            // TARGET FORMULAS (PROTECTED AGAINST DIVISION BY ZERO)
+            // TARGET FORMULAS
             const costPerTotalSq = totalSqs > 0 ? (totalJobCost / totalSqs) : 0;
             
             const breakevenPricePerSq = (totalSqs > 0 && (1 - commissionRate) > 0) 
@@ -2330,10 +2610,9 @@
             document.getElementById('out-ridge-sqs').innerText = ridgeSqs.toFixed(2);
 
             const rowOutExtraSqs = document.getElementById('row-out-extra-sqs');
-            if (extraSqs > 0) {
+            if (extraRoofsTotalSqs > 0) {
                 rowOutExtraSqs.classList.remove('hidden');
-                document.getElementById('label-out-extra-sqs').innerText = `Additional Roofs SQs (${extraRoofTypeName}):`;
-                document.getElementById('out-extra-sqs').innerText = extraSqs.toFixed(2);
+                document.getElementById('out-extra-sqs').innerText = extraRoofsTotalSqs.toFixed(2);
             } else {
                 rowOutExtraSqs.classList.add('hidden');
             }
@@ -2346,12 +2625,12 @@
             document.getElementById('out-misc-mat-total').innerText = fmt(miscMatTotal);
             document.getElementById('out-starter-bundle-cost').innerText = fmt(starterBundleCostTotal);
             document.getElementById('out-ridge-bundle-cost').innerText = fmt(ridgeBundleCostTotal);
+            document.getElementById('out-valley-bundle-cost').innerText = fmt(valleyBundleCostTotal);
 
             const rowExtraCostCard = document.getElementById('row-extra-roof-cost-card');
-            if (!isShinglesExtra && extraRoofMaterialCostTotal > 0) {
+            if (extraRoofsMaterialCost > 0) {
                 rowExtraCostCard.classList.remove('hidden');
-                document.getElementById('label-extra-roof-cost-card').innerText = `Add'l Roofs Cost (${extraRoofTypeName}):`;
-                document.getElementById('out-extra-roof-cost').innerText = fmt(extraRoofMaterialCostTotal);
+                document.getElementById('out-extra-roof-cost').innerText = fmt(extraRoofsMaterialCost);
             } else {
                 rowExtraCostCard.classList.add('hidden');
             }
@@ -2359,7 +2638,7 @@
             const cardPitchRow = document.getElementById('row-pitch-surcharge-card');
             if (pitchSurchargeCostTotal > 0) {
                 cardPitchRow.classList.remove('hidden');
-                document.getElementById('label-pitch-surcharge').innerText = `Pitch Charge (${pitchTextLabel.split(' ')[0]} @ $${pitchRatePerSq}/SQ on ${applicablePitchSqs.toFixed(2)} SQs):`;
+                document.getElementById('label-pitch-surcharge').innerText = `Pitch Surcharge Cost:`;
                 document.getElementById('out-pitch-surcharge-cost').innerText = fmt(pitchSurchargeCostTotal);
             } else {
                 cardPitchRow.classList.add('hidden');
@@ -2483,28 +2762,20 @@
             document.getElementById('print-table-mat-qty').innerText = `${totalSqs.toFixed(2)} SQs`;
             document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal + miscMatTotal);
 
-            document.getElementById('print-table-starter-qty').innerText = `${starterText} (${starterLF} LF)`;
+            document.getElementById('print-table-starter-qty').innerText = `${starterText} (${totalStarterLF} LF)`;
             document.getElementById('print-table-starter-cost').innerText = fmt(starterBundleCostTotal);
 
-            document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${ridgeLF} LF)`;
+            document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${totalRidgeLF} LF)`;
             document.getElementById('print-table-ridge-cost').innerText = fmt(ridgeBundleCostTotal);
 
-            const printExtraRoofRow = document.getElementById('print-row-extra-roof');
-            if (!isShinglesExtra && extraRoofMaterialCostTotal > 0) {
-                printExtraRoofRow.classList.remove('hidden');
-                document.getElementById('print-table-extra-roof-title').innerText = `Additional Roof (${extraRoofTypeName})`;
-                document.getElementById('print-table-extra-roof-spec').innerText = `${extraRoofTypeName} Option`;
-                document.getElementById('print-table-extra-roof-qty').innerText = `${extraSqs > 0 ? extraSqs.toFixed(2) + ' SQs' : 'Direct Expense'}`;
-                document.getElementById('print-table-extra-roof-cost').innerText = fmt(extraRoofMaterialCostTotal);
-            } else {
-                printExtraRoofRow.classList.add('hidden');
-            }
+            document.getElementById('print-table-valley-qty').innerText = `${valleyText} (${totalValleyLF} LF)`;
+            document.getElementById('print-table-valley-cost').innerText = fmt(valleyBundleCostTotal);
 
             const printPitchRow = document.getElementById('print-row-pitch-surcharge');
             if (pitchSurchargeCostTotal > 0) {
                 printPitchRow.classList.remove('hidden');
-                document.getElementById('print-table-pitch-desc').innerText = `${pitchTextLabel} Charge`;
-                document.getElementById('print-table-pitch-qty').innerText = `@ $${pitchRatePerSq.toFixed(2)} / SQ (${applicablePitchSqs.toFixed(2)} SQs)`;
+                document.getElementById('print-table-pitch-desc').innerText = `Pitch Surcharge`;
+                document.getElementById('print-table-pitch-qty').innerText = `Multi-Slope / Steep`;
                 document.getElementById('print-table-pitch-cost').innerText = fmt(pitchSurchargeCostTotal);
             } else {
                 printPitchRow.classList.add('hidden');
@@ -2675,6 +2946,7 @@
 📦 SPECIFICATIONS
 - Material: ${mat} (${brand})
 - Roof Pitch: ${pitchText}
+- Additional Roofs Included: ${state.additionalRoofs.length > 0 ? state.additionalRoofs.map(r => r.label).join(', ') : 'None'}
 - Total Work Squares: ${sqs} SQs
 - Final Selling Price / SQ: $${parseFloat(priceSq).toFixed(2)}
 - Assigned Crew Leaders: ${selectedLeaders}
