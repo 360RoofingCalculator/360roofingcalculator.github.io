@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>360 Roofing Price Calculator</title>
-    <link rel="icon" type="image/png" href="./Icon-Color.png?v=5">
-    <link rel="apple-touch-icon" href="./Icon-Color.png?v=5">
+    <link rel="icon" type="image/png" href="./Logo-Vertical-Color.png?v=4">
+    <link rel="apple-touch-icon" href="./Logo-Vertical-Color.png?v=4">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -96,7 +96,7 @@
                     <i data-lucide="history" class="w-3.5 h-3.5"></i>
                     <span>History</span>
                 </button>
-                <button onclick="resetCalculator()" class="px-2.5 py-1.5 text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Reset to default inputs">
+                <button onclick="resetCalculator()" class="px-2.5 py-1.5 text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Reset job inputs to defaults (keeps customer details & cloud settings)">
                     <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                     <span>Reset</span>
                 </button>
@@ -126,9 +126,9 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3 text-xs flex-1 max-w-2xl">
-                    <div class="flex-1 min-w-[150px]">
-                        <label class="block text-slate-500 font-medium mb-0.5">Customer / Job Name</label>
-                        <input type="text" id="client-name" value="Smith Residence - Full Replacement" oninput="calculateEstimate()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    <div class="flex-1 min-w-[180px]">
+                        <label class="block text-slate-500 font-medium mb-0.5">Customer - Address</label>
+                        <input type="text" id="client-name" value="(Type Customer's Name & Address)" placeholder="(Type Customer's Name & Address)" oninput="calculateEstimate()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
                     </div>
                     <div class="w-36">
                         <label class="block text-slate-500 font-medium mb-0.5">Quote Date</label>
@@ -983,7 +983,7 @@
         function handleInputFocus(el) {
             if (!el) return;
             const val = el.value ? el.value.trim() : "";
-            if (parseFloat(val) === 0 || val === "0" || val === "0.00" || val === "0.0") {
+            if (parseFloat(val) === 0 || val === "0" || val === "0.00" || val === "0.0" || val === "(Type Customer's Name & Address)") {
                 el.select();
             }
         }
@@ -1647,7 +1647,7 @@
 
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
-            document.getElementById('client-name').value = d.clientName || '';
+            document.getElementById('client-name').value = d.clientName || "(Type Customer's Name & Address)";
             document.getElementById('quote-date').value = d.quoteDate || new Date().toISOString().split('T')[0];
             document.getElementById('select-brand').value = d.brand || 'IKO Cambridge';
             document.getElementById('select-material').value = d.material || 'shingles';
@@ -1707,27 +1707,98 @@
             await saveQuoteToCloud(clientName);
         }
 
+        // "NEW" BUTTON: Clears job inputs, keeps cloud settings, and resets Customer Name back to default placeholder
         function newCalculation() {
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
-            document.getElementById('client-name').value = "New Client Job";
-            document.getElementById('input-sqs').value = "0.00";
-            document.getElementById('input-ridge').value = "0.00";
-            document.getElementById('input-starter').value = "0.00";
+
+            // Reset client details specifically
+            document.getElementById('client-name').value = "(Type Customer's Name & Address)";
+            document.getElementById('quote-date').value = new Date().toISOString().split('T')[0];
+
+            // Reset measurements & inputs
+            document.getElementById('input-sqs').value = "20.00";
+            document.getElementById('input-ridge').value = "180.00";
+            document.getElementById('input-starter').value = "250.00";
             document.getElementById('select-roof-pitch').value = "pitch_3_6";
             document.getElementById('input-pitch-sqs').value = "0.00";
             document.getElementById('input-waste').value = "10.00";
+            document.getElementById('input-commission-rate').value = "15.00";
             document.getElementById('input-extra-sqs').value = "0.00";
             document.getElementById('input-extra-roof-cost').value = "0.00";
             document.getElementById('input-other-direct').value = "0.00";
-            document.getElementById('input-notes').value = "";
-            
+            document.getElementById('input-notes').value = "Standard replacement";
+            document.getElementById('select-crew-calc-mode').value = "average";
+
+            // Reset production assumptions
+            document.getElementById('cost-misc-material').value = "20.00";
+            document.getElementById('starter-cost-bundle').value = "50.00";
+            document.getElementById('ridge-cost-bundle').value = "65.00";
+            document.getElementById('cost-target-margin').value = "35.00";
+
             state.otherDirectLabel = "Other Direct Costs";
             updateOtherDirectLabelsDisplay();
 
             setJobMode('insurance');
+
+            if (state.materials && state.materials.length > 0) {
+                document.getElementById('select-material').value = state.materials[0].id;
+                document.getElementById('cost-base-material').value = state.materials[0].cost.toFixed(2);
+            }
+
+            state.crewLeaders.forEach((leader, idx) => {
+                leader.selected = (idx === 0);
+            });
+            renderCrewLeaderMultiSelect();
+
             calculateEstimate();
-            showToast("Cleared for a new job calculation!");
+            showToast("Started a fresh job calculation!");
+        }
+
+        // "RESET" BUTTON: Resets measurements & assumptions, but KEEPS current Customer - Address & Quote Date
+        function resetCalculator() {
+            state.isOverrideLocked = false;
+            document.getElementById('chk-lock-contract').checked = false;
+
+            // Notice: client-name and quote-date are intentionally preserved!
+
+            // Reset measurements & inputs
+            document.getElementById('input-sqs').value = "20.00";
+            document.getElementById('input-ridge').value = "180.00";
+            document.getElementById('input-starter').value = "250.00";
+            document.getElementById('select-roof-pitch').value = "pitch_3_6";
+            document.getElementById('input-pitch-sqs').value = "0.00";
+            document.getElementById('input-waste').value = "10.00";
+            document.getElementById('input-commission-rate').value = "15.00";
+            document.getElementById('input-extra-sqs').value = "0.00";
+            document.getElementById('input-extra-roof-cost').value = "0.00";
+            document.getElementById('input-other-direct').value = "0.00";
+            document.getElementById('input-notes').value = "Standard replacement";
+            document.getElementById('select-crew-calc-mode').value = "average";
+
+            // Reset production assumptions
+            document.getElementById('cost-misc-material').value = "20.00";
+            document.getElementById('starter-cost-bundle').value = "50.00";
+            document.getElementById('ridge-cost-bundle').value = "65.00";
+            document.getElementById('cost-target-margin').value = "35.00";
+
+            state.otherDirectLabel = "Other Direct Costs";
+            updateOtherDirectLabelsDisplay();
+
+            setJobMode('insurance');
+
+            if (state.materials && state.materials.length > 0) {
+                document.getElementById('select-material').value = state.materials[0].id;
+                document.getElementById('cost-base-material').value = state.materials[0].cost.toFixed(2);
+            }
+
+            state.crewLeaders.forEach((leader, idx) => {
+                leader.selected = (idx === 0);
+            });
+            renderCrewLeaderMultiSelect();
+
+            calculateEstimate();
+            showToast("Job inputs & assumptions reset (Client details & Cloud pricing intact)!");
         }
 
         async function openHistoryModal() {
@@ -2041,45 +2112,6 @@
             } catch (e) {}
             await pushGlobalSettingsToCloud();
             showToast('Crew Leaders & Rates Saved to Cloud!');
-        }
-
-        function resetCalculator() {
-            state.materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
-            state.crewLeaders = JSON.parse(JSON.stringify(DEFAULT_CREWS));
-            state.bundleSpecs = JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
-            state.pitchRates = JSON.parse(JSON.stringify(DEFAULT_PITCH_RATES));
-
-            state.isOverrideLocked = false;
-            document.getElementById('chk-lock-contract').checked = false;
-
-            document.getElementById('client-name').value = "Smith Residence - Full Replacement";
-            document.getElementById('input-sqs').value = "20.00";
-            document.getElementById('input-ridge').value = "180.00";
-            document.getElementById('input-starter').value = "250.00";
-            document.getElementById('select-roof-pitch').value = "pitch_3_6";
-            document.getElementById('input-pitch-sqs').value = "0.00";
-            document.getElementById('input-waste').value = "10.00";
-            document.getElementById('input-commission-rate').value = "15.00";
-            document.getElementById('input-extra-sqs').value = "0.00";
-            document.getElementById('input-extra-roof-cost').value = "0.00";
-            document.getElementById('input-other-direct').value = "0.00";
-            document.getElementById('input-notes').value = "Standard replacement";
-            document.getElementById('select-brand').value = "IKO Cambridge";
-            document.getElementById('select-crew-calc-mode').value = "average";
-
-            state.otherDirectLabel = "Other Direct Costs";
-            updateOtherDirectLabelsDisplay();
-
-            syncBundleTabUI();
-            syncPitchTabUI();
-            setJobMode('insurance');
-            renderMaterialDropdown();
-            renderMasterTable();
-            renderCrewTable();
-            renderCrewLeaderMultiSelect();
-            onMaterialChange();
-
-            showToast('Job & databases reset to Insurance Claim default presets!');
         }
 
         function roundUpRoofSquares(value) {
@@ -2574,7 +2606,7 @@
         }
 
         function copyQuoteSummary() {
-            const client = document.getElementById('client-name').value || 'Unnamed Client';
+            const client = document.getElementById('client-name').value || "(Type Customer's Name & Address)";
             const date = document.getElementById('quote-date').value || new Date().toISOString().split('T')[0];
             const matSelect = document.getElementById('select-material');
             const mat = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : 'Standard Roof';
@@ -2646,7 +2678,7 @@
             const contractVal = parseCleanFloat(document.getElementById('override-contract-price')?.value || 0);
 
             const quoteData = {
-                customer_name: customerName || "Unnamed Estimate",
+                customer_name: customerName || "(Type Customer's Name & Address)",
                 created_by: createdByName,
                 roof_sqft: parseCleanFloat(document.getElementById("out-total-sqs")?.innerText || document.getElementById("input-sqs")?.value || 0),
                 pitch: pitchText,
