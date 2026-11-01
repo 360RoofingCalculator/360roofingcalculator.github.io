@@ -199,22 +199,22 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Main Roof Squares</label>
-                                <input type="text" id="input-sqs" value="20.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <input type="text" id="input-sqs" value="20.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Hip & Ridge LF</label>
-                                <input type="text" id="input-ridge" value="180.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <input type="text" id="input-ridge" value="180.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Starter)</label>
-                                <input type="text" id="input-starter" value="250.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <input type="text" id="input-starter" value="250.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Valley LF</label>
-                                <input type="text" id="input-valley" value="0.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
+                                <input type="text" id="input-valley" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
                             </div>
 
                             <div>
@@ -230,13 +230,13 @@
 
                             <div id="container-pitch-sqs" class="hidden">
                                 <label class="block text-xs font-medium text-amber-700 mb-1">Affected Pitch SQs</label>
-                                <input type="text" id="input-pitch-sqs" value="0.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/50 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Leave blank or 0 to apply pitch charge to total roof squares">
+                                <input type="text" id="input-pitch-sqs" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/50 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Leave blank or 0 to apply pitch charge to total roof squares">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Waste %</label>
                                 <div class="relative">
-                                    <input type="text" id="input-waste" value="10.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <input type="text" id="input-waste" value="10.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                     <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
                                 </div>
                             </div>
@@ -252,7 +252,7 @@
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Sales Commission %</label>
                                 <div class="relative">
-                                    <input type="text" id="input-commission-rate" value="15.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <input type="text" id="input-commission-rate" value="15.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                     <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
                                 </div>
                             </div>
@@ -266,7 +266,7 @@
                                 </div>
                                 <div class="relative">
                                     <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
-                                    <input type="text" id="input-other-direct" value="0.00" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <input type="text" id="input-other-direct" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                 </div>
                             </div>
 
@@ -293,33 +293,33 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Base Material / SQ ($)</label>
-                                <input type="text" id="cost-base-material" value="92.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="cost-base-material" value="92.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Misc Material / SQ ($)</label>
-                                <input type="text" id="cost-misc-material" value="20.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="cost-misc-material" value="20.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Starter Cost / Bundle ($)</label>
-                                <input type="text" id="starter-cost-bundle" value="50.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="starter-cost-bundle" value="50.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Cost / Bundle ($)</label>
-                                <input type="text" id="ridge-cost-bundle" value="65.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="ridge-cost-bundle" value="65.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Valley Cost / Bundle or Roll ($)</label>
-                                <input type="text" id="valley-cost-bundle" value="55.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="valley-cost-bundle" value="55.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Target Margin %</label>
                                 <div class="relative">
-                                    <input type="text" id="cost-target-margin" value="35.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-800">
+                                    <input type="text" id="cost-target-margin" value="35.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-800">
                                     <span class="absolute right-3 top-2 text-xs text-slate-400">%</span>
                                 </div>
                             </div>
@@ -822,11 +822,11 @@
                             <div class="space-y-3 text-xs">
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Starter Coverage / Bundle LF</label>
-                                    <input type="text" id="tab-bundle-starter-coverage" value="120.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                    <input type="text" id="tab-bundle-starter-coverage" value="120.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Starter LF / SQ Equivalent</label>
-                                    <input type="text" id="tab-bundle-starter-equiv" value="225.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                    <input type="text" id="tab-bundle-starter-equiv" value="225.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
                             </div>
                         </div>
@@ -839,11 +839,11 @@
                             <div class="space-y-3 text-xs">
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Coverage / Bundle LF</label>
-                                    <input type="text" id="tab-bundle-ridge-coverage" value="24.00" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                    <input type="text" id="tab-bundle-ridge-coverage" value="24.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Hip & Ridge LF / SQ Equivalent</label>
-                                    <input type="text" id="tab-bundle-ridge-equiv" value="72.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                    <input type="text" id="tab-bundle-ridge-equiv" value="72.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
                             </div>
                         </div>
@@ -856,7 +856,7 @@
                             <div class="space-y-3 text-xs">
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Valley Coverage / Bundle (LF)</label>
-                                    <input type="text" id="tab-bundle-valley-coverage" value="50.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                    <input type="text" id="tab-bundle-valley-coverage" value="50.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
                                 <p class="text-[11px] text-amber-700 italic">Default standard: 50 LF = 1 Bundle / Roll of valley lining.</p>
                             </div>
@@ -885,7 +885,7 @@
                             <label class="block font-bold text-slate-700">0/12 - 2/12 (Flat / Low Slope)</label>
                             <div class="flex items-center space-x-1">
                                 <span class="text-slate-400 font-bold">$</span>
-                                <input type="text" id="pitch-rate-0-2" value="0.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <input type="text" id="pitch-rate-0-2" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
                                 <span class="text-slate-400 font-medium">/ SQ</span>
                             </div>
                         </div>
@@ -894,7 +894,7 @@
                             <label class="block font-bold text-slate-700">3/12 - 6/12 (Walkable / Standard)</label>
                             <div class="flex items-center space-x-1">
                                 <span class="text-slate-400 font-bold">$</span>
-                                <input type="text" id="pitch-rate-3-6" value="0.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <input type="text" id="pitch-rate-3-6" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
                                 <span class="text-slate-400 font-medium">/ SQ</span>
                             </div>
                         </div>
@@ -903,7 +903,7 @@
                             <label class="block font-bold text-slate-700">7/12 - 9/12 (Steep Slope)</label>
                             <div class="flex items-center space-x-1">
                                 <span class="text-slate-400 font-bold">$</span>
-                                <input type="text" id="pitch-rate-7-9" value="15.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <input type="text" id="pitch-rate-7-9" value="15.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
                                 <span class="text-slate-400 font-medium">/ SQ</span>
                             </div>
                         </div>
@@ -912,7 +912,7 @@
                             <label class="block font-bold text-slate-700">10/12 - 12/12 (Very Steep / Walk-Off)</label>
                             <div class="flex items-center space-x-1">
                                 <span class="text-slate-400 font-bold">$</span>
-                                <input type="text" id="pitch-rate-10-12" value="30.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <input type="text" id="pitch-rate-10-12" value="30.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
                                 <span class="text-slate-400 font-medium">/ SQ</span>
                             </div>
                         </div>
@@ -921,7 +921,7 @@
                             <label class="block font-bold text-slate-700">13/12+ (Mansard / Extreme Pitch)</label>
                             <div class="flex items-center space-x-1">
                                 <span class="text-slate-400 font-bold">$</span>
-                                <input type="text" id="pitch-rate-13-plus" value="45.00" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
+                                <input type="text" id="pitch-rate-13-plus" value="45.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border rounded px-2.5 py-1.5 text-xs font-bold bg-white">
                                 <span class="text-slate-400 font-medium">/ SQ</span>
                             </div>
                         </div>
@@ -1026,7 +1026,7 @@
 
         function safeComputeMath(expr) {
             if (!expr) return 0;
-            const sanitized = expr.replace(/[^0-9.+\-*/()]/g, '');
+            const sanitized = String(expr).replace(/[^0-9.+\-*/()]/g, '');
             if (!sanitized) return 0;
 
             try {
@@ -1199,6 +1199,67 @@
             }
         }
 
+        // --- ADDITIONAL ROOFS INTERACTIVE EVENT HANDLERS ---
+        function updateRoofProp(id, prop, val) {
+            const roof = state.additionalRoofs.find(r => r.id === id);
+            if (roof) {
+                roof[prop] = val;
+                calculateEstimate();
+            }
+        }
+
+        function evaluateRoofMath(el, id, prop) {
+            if (!el) return;
+            let val = (el.value || '').trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
+            const result = safeComputeMath(val);
+            el.value = result.toFixed(2);
+            updateRoofProp(id, prop, el.value);
+        }
+
+        function handleWheelScrollRoof(event, el, id, prop, step) {
+            if (document.activeElement !== el) return;
+            event.preventDefault();
+            let currentVal = parseCleanFloat(el.value);
+            if (event.deltaY < 0) {
+                currentVal += step;
+            } else if (event.deltaY > 0) {
+                currentVal = Math.max(0, currentVal - step);
+            }
+            el.value = currentVal.toFixed(2);
+            updateRoofProp(id, prop, el.value);
+        }
+
+        function handleKeydownRoof(event, el, id, prop, step) {
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                let currentVal = parseCleanFloat(el.value) + step;
+                el.value = currentVal.toFixed(2);
+                updateRoofProp(id, prop, el.value);
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                let currentVal = Math.max(0, parseCleanFloat(el.value) - step);
+                el.value = currentVal.toFixed(2);
+                updateRoofProp(id, prop, el.value);
+            } else if (event.key === 'Enter') {
+                evaluateRoofMath(el, id, prop);
+            }
+        }
+
+        function updateRoofPitch(id, pitchKey) {
+            const roof = state.additionalRoofs.find(r => r.id === id);
+            if (roof) {
+                roof.pitchKey = pitchKey;
+                renderAdditionalRoofsUI();
+                calculateEstimate();
+            }
+        }
+
+        function isShingleType(type) {
+            if (!type) return false;
+            const lower = String(type).toLowerCase();
+            return lower === 'shingles' || lower.includes('shingle');
+        }
+
         const DEFAULT_MATERIALS = [
             { id: 'shingles', name: 'Shingles', brand: 'IKO Cambridge', supplier: 'ABC Supply Co.', unit: 'SQ', cost: 92.00, updated: '2026-10-01' },
             { id: 'mod_bit', name: 'Modified Bitumen', brand: 'CertainTeed', supplier: 'Beacon Building', unit: 'SQ', cost: 135.00, updated: '2026-10-01' },
@@ -1346,7 +1407,7 @@
             const container = document.getElementById('additional-roofs-container');
             container.innerHTML = '';
 
-            state.additionalRoofs.forEach((roof, index) => {
+            state.additionalRoofs.forEach((roof) => {
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-2xl p-5 shadow-sm border border-sky-200 space-y-4";
                 card.id = `card_${roof.id}`;
@@ -1356,7 +1417,7 @@
                     optionsHTML += `<option value="${m.id}" ${roof.type === m.id ? 'selected' : ''}>${m.name}</option>`;
                 });
 
-                const isShingle = (roof.type === 'shingles');
+                const isShingle = isShingleType(roof.type);
                 const isModBit = (roof.type === 'mod_bit' || roof.type.includes('modified') || roof.type.includes('bitumen'));
                 const isSteep = (roof.pitchKey === 'pitch_7_9' || roof.pitchKey === 'pitch_10_12' || roof.pitchKey === 'pitch_13_plus');
 
@@ -1367,23 +1428,47 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Roof Squares</label>
-                                <input type="text" value="${roof.sqs}" onchange="updateRoofProp('${roof.id}', 'sqs', this.value)" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                <input type="text" value="${roof.sqs}" 
+                                    oninput="updateRoofProp('${roof.id}', 'sqs', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'sqs')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'sqs', 1)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'sqs', 1)" 
+                                    class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Hip & Ridge LF</label>
-                                <input type="text" value="${roof.ridge}" onchange="updateRoofProp('${roof.id}', 'ridge', this.value)" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                <input type="text" value="${roof.ridge}" 
+                                    oninput="updateRoofProp('${roof.id}', 'ridge', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'ridge')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'ridge', 5)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'ridge', 5)" 
+                                    class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Starter)</label>
-                                <input type="text" value="${roof.starter}" onchange="updateRoofProp('${roof.id}', 'starter', this.value)" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                <input type="text" value="${roof.starter}" 
+                                    oninput="updateRoofProp('${roof.id}', 'starter', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'starter')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'starter', 5)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'starter', 5)" 
+                                    class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Valley LF</label>
-                                <input type="text" value="${roof.valley}" onchange="updateRoofProp('${roof.id}', 'valley', this.value)" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                <input type="text" value="${roof.valley}" 
+                                    oninput="updateRoofProp('${roof.id}', 'valley', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'valley')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'valley', 5)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'valley', 5)" 
+                                    class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Roof Pitch</label>
-                                <select onchange="updateRoofProp('${roof.id}', 'pitchKey', this.value); renderAdditionalRoofsUI(); calculateEstimate();" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-2 py-2 text-xs font-bold text-slate-900 focus:outline-none">
+                                <select onchange="updateRoofPitch('${roof.id}', this.value)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-2 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                                     <option value="pitch_0_2" ${roof.pitchKey === 'pitch_0_2' ? 'selected' : ''}>0/12 - 2/12 (Flat / Low Slope)</option>
                                     <option value="pitch_3_6" ${roof.pitchKey === 'pitch_3_6' ? 'selected' : ''}>3/12 - 6/12 (Walkable / Standard)</option>
                                     <option value="pitch_7_9" ${roof.pitchKey === 'pitch_7_9' ? 'selected' : ''}>7/12 - 9/12 (Steep Slope)</option>
@@ -1393,12 +1478,24 @@
                             </div>
                             <div class="${isSteep ? '' : 'hidden'}">
                                 <label class="block text-xs font-medium text-amber-700 mb-1">Affected Pitch SQs</label>
-                                <input type="text" value="${roof.pitchSqs || '0.00'}" onchange="updateRoofProp('${roof.id}', 'pitchSqs', this.value)" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/50 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Leave blank or 0 to apply pitch charge to total roof squares">
+                                <input type="text" value="${roof.pitchSqs || '0.00'}" 
+                                    oninput="updateRoofProp('${roof.id}', 'pitchSqs', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'pitchSqs')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'pitchSqs', 1)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'pitchSqs', 1)" 
+                                    class="w-full border border-amber-300 bg-amber-50/50 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Leave blank or 0 to apply pitch charge to total roof squares">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Waste %</label>
                                 <div class="relative">
-                                    <input type="text" value="${roof.waste}" onchange="updateRoofProp('${roof.id}', 'waste', this.value)" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-sky-300 bg-sky-50/40 rounded-xl pl-3 pr-7 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                    <input type="text" value="${roof.waste}" 
+                                        oninput="updateRoofProp('${roof.id}', 'waste', this.value)" 
+                                        onfocus="handleInputFocus(this)" 
+                                        onblur="evaluateRoofMath(this, '${roof.id}', 'waste')" 
+                                        onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'waste', 1)" 
+                                        onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'waste', 1)" 
+                                        class="w-full border border-sky-300 bg-sky-50/40 rounded-xl pl-3 pr-7 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                                     <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
                                 </div>
                             </div>
@@ -1409,11 +1506,23 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Mod. Bitumen Roof Squares</label>
-                                <input type="text" value="${roof.sqs}" onchange="updateRoofProp('${roof.id}', 'sqs', this.value)" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none" placeholder="0.00 SQs">
+                                <input type="text" value="${roof.sqs}" 
+                                    oninput="updateRoofProp('${roof.id}', 'sqs', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'sqs')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'sqs', 1)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'sqs', 1)" 
+                                    class="w-full border border-amber-300 bg-amber-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none" placeholder="0.00 SQs">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Drip Edge)</label>
-                                <input type="text" value="${roof.dripEdgeLF || '0.00'}" onchange="updateRoofProp('${roof.id}', 'dripEdgeLF', this.value)" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none" placeholder="0.00 LF">
+                                <input type="text" value="${roof.dripEdgeLF || '0.00'}" 
+                                    oninput="updateRoofProp('${roof.id}', 'dripEdgeLF', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'dripEdgeLF')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'dripEdgeLF', 5)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'dripEdgeLF', 5)" 
+                                    class="w-full border border-amber-300 bg-amber-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none" placeholder="0.00 LF">
                             </div>
                         </div>
                     `;
@@ -1426,12 +1535,24 @@
                                 <label class="block text-xs font-medium text-amber-800 mb-1">${matName} Materials Direct Cost ($)</label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
-                                    <input type="text" value="${roof.directCost}" onchange="updateRoofProp('${roof.id}', 'directCost', this.value)" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-amber-300 bg-amber-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                                    <input type="text" value="${roof.directCost}" 
+                                        oninput="updateRoofProp('${roof.id}', 'directCost', this.value)" 
+                                        onfocus="handleInputFocus(this)" 
+                                        onblur="evaluateRoofMath(this, '${roof.id}', 'directCost')" 
+                                        onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'directCost', 25)" 
+                                        onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'directCost', 25)" 
+                                        class="w-full border border-amber-300 bg-amber-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:outline-none">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Estimated Roof Squares (Optional)</label>
-                                <input type="text" value="${roof.sqs}" onchange="updateRoofProp('${roof.id}', 'sqs', this.value)" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none" placeholder="0.00 SQs">
+                                <input type="text" value="${roof.sqs}" 
+                                    oninput="updateRoofProp('${roof.id}', 'sqs', this.value)" 
+                                    onfocus="handleInputFocus(this)" 
+                                    onblur="evaluateRoofMath(this, '${roof.id}', 'sqs')" 
+                                    onwheel="handleWheelScrollRoof(event, this, '${roof.id}', 'sqs', 1)" 
+                                    onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'sqs', 1)" 
+                                    class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none" placeholder="0.00 SQs">
                             </div>
                         </div>
                     `;
@@ -1470,14 +1591,6 @@
             if (roof) {
                 roof.type = newType;
                 renderAdditionalRoofsUI();
-                calculateEstimate();
-            }
-        }
-
-        function updateRoofProp(id, prop, val) {
-            const roof = state.additionalRoofs.find(r => r.id === id);
-            if (roof) {
-                roof[prop] = val;
                 calculateEstimate();
             }
         }
@@ -2353,11 +2466,11 @@
         // --- CORE REUSABLE AGGREGATION ENGINE ---
         // Seamlessly combines Main Roof and ALL Additional Roofs (2A to 2E) into common totals
         function computeTotalSquaresAndBundles() {
-            const mainBaseSqs = parseCleanFloat(document.getElementById('input-sqs').value);
-            const ridgeLF = parseCleanFloat(document.getElementById('input-ridge').value);
-            const starterLF = parseCleanFloat(document.getElementById('input-starter').value);
-            const valleyLF = parseCleanFloat(document.getElementById('input-valley').value);
-            const mainWastePct = parseCleanFloat(document.getElementById('input-waste').value) / 100;
+            const mainBaseSqs = parseCleanFloat(document.getElementById('input-sqs')?.value);
+            const ridgeLF = parseCleanFloat(document.getElementById('input-ridge')?.value);
+            const starterLF = parseCleanFloat(document.getElementById('input-starter')?.value);
+            const valleyLF = parseCleanFloat(document.getElementById('input-valley')?.value);
+            const mainWastePct = parseCleanFloat(document.getElementById('input-waste')?.value) / 100;
 
             const b = state.bundleSpecs;
             const starterLFPerSq = b.starterEquiv;
@@ -2384,7 +2497,7 @@
 
             // Iterate over all active additional roofs (2A to 2E) and add directly into line items
             state.additionalRoofs.forEach(r => {
-                const isShingle = (r.type === 'shingles');
+                const isShingle = isShingleType(r.type);
                 const isModBit = (r.type === 'mod_bit' || r.type.includes('modified') || r.type.includes('bitumen'));
                 const matObj = state.materials.find(m => m.id === r.type);
                 const matCostPerSq = matObj ? matObj.cost : 100.00;
@@ -2480,28 +2593,30 @@
 
         // --- MAIN CALCULATION ENGINE ---
         function calculateEstimate() {
-            const pitchKey = document.getElementById('select-roof-pitch').value;
-            const inputPitchSqs = parseCleanFloat(document.getElementById('input-pitch-sqs').value);
-            const sellingPricePerSq = parseCleanFloat(document.getElementById('input-selling-price').value);
-            const commissionRate = parseCleanFloat(document.getElementById('input-commission-rate').value) / 100;
-            const otherDirectCosts = parseCleanFloat(document.getElementById('input-other-direct').value);
+            const pitchKey = document.getElementById('select-roof-pitch')?.value || 'pitch_3_6';
+            const inputPitchSqs = parseCleanFloat(document.getElementById('input-pitch-sqs')?.value);
+            const sellingPricePerSq = parseCleanFloat(document.getElementById('input-selling-price')?.value);
+            const commissionRate = parseCleanFloat(document.getElementById('input-commission-rate')?.value) / 100;
+            const otherDirectCosts = parseCleanFloat(document.getElementById('input-other-direct')?.value);
 
             // Steep pitch input visibility on Main Roof
             const containerPitchSqs = document.getElementById('container-pitch-sqs');
             const isSteepPitch = (pitchKey === 'pitch_7_9' || pitchKey === 'pitch_10_12' || pitchKey === 'pitch_13_plus');
-            if (isSteepPitch) {
-                containerPitchSqs.classList.remove('hidden');
-            } else {
-                containerPitchSqs.classList.add('hidden');
+            if (containerPitchSqs) {
+                if (isSteepPitch) {
+                    containerPitchSqs.classList.remove('hidden');
+                } else {
+                    containerPitchSqs.classList.add('hidden');
+                }
             }
 
             // Material Assumptions
-            const baseMatPerSq = parseCleanFloat(document.getElementById('cost-base-material').value);
-            const miscMatPerSq = parseCleanFloat(document.getElementById('cost-misc-material').value);
-            const starterCostBundle = parseCleanFloat(document.getElementById('starter-cost-bundle').value);
-            const ridgeCostBundle = parseCleanFloat(document.getElementById('ridge-cost-bundle').value);
-            const valleyCostBundle = parseCleanFloat(document.getElementById('valley-cost-bundle').value);
-            const targetMargin = (parseCleanFloat(document.getElementById('cost-target-margin').value) || 35.0) / 100;
+            const baseMatPerSq = parseCleanFloat(document.getElementById('cost-base-material')?.value);
+            const miscMatPerSq = parseCleanFloat(document.getElementById('cost-misc-material')?.value);
+            const starterCostBundle = parseCleanFloat(document.getElementById('starter-cost-bundle')?.value);
+            const ridgeCostBundle = parseCleanFloat(document.getElementById('ridge-cost-bundle')?.value);
+            const valleyCostBundle = parseCleanFloat(document.getElementById('valley-cost-bundle')?.value);
+            const targetMargin = (parseCleanFloat(document.getElementById('cost-target-margin')?.value) || 35.0) / 100;
 
             const b = state.bundleSpecs;
             const starterCoverageLF = b.starterCoverage;
@@ -2509,7 +2624,7 @@
             const valleyCoverageLF = b.valleyCoverage || 50.00;
 
             // Crew Labor
-            const crewCalcMode = document.getElementById('select-crew-calc-mode').value;
+            const crewCalcMode = document.getElementById('select-crew-calc-mode')?.value || 'average';
             const selectedLeaders = state.crewLeaders.filter(l => l.selected);
             let effectiveCrewRatePerSq = 0;
 
@@ -2523,7 +2638,10 @@
             }
 
             const modeLabel = crewCalcMode === 'cumulative' ? 'Combined' : 'Avg';
-            document.getElementById('calc-effective-crew-rate').innerText = `$${effectiveCrewRatePerSq.toFixed(2)} / SQ (${selectedLeaders.length} Selected - ${modeLabel})`;
+            const crewRateEl = document.getElementById('calc-effective-crew-rate');
+            if (crewRateEl) {
+                crewRateEl.innerText = `$${effectiveCrewRatePerSq.toFixed(2)} / SQ (${selectedLeaders.length} Selected - ${modeLabel})`;
+            }
 
             // Get consolidated measurements & squares with 1/3 square rounding & integrated additional roofs
             const calc = computeTotalSquaresAndBundles();
@@ -2539,9 +2657,9 @@
             const valleyBundles = Math.ceil(calc.totalValleyLF / valleyCoverageLF);
             const valleyBundleCostTotal = valleyBundles * valleyCostBundle;
 
-            // Main pitch surcharge
+            // Pitch surcharge
             const pitchRatePerSq = state.pitchRates[pitchKey] || 0;
-            const mainBaseAndWaste = calc.totalBaseMainSqs * (1 + (parseCleanFloat(document.getElementById('input-waste').value) / 100));
+            const mainBaseAndWaste = calc.totalBaseMainSqs * (1 + (parseCleanFloat(document.getElementById('input-waste')?.value) / 100));
             const mainPitchEligibleSqs = (isSteepPitch && inputPitchSqs > 0) ? inputPitchSqs : mainBaseAndWaste;
             const mainPitchSurcharge = mainPitchEligibleSqs * pitchRatePerSq;
             const pitchSurchargeCostTotal = mainPitchSurcharge + calc.additionalPitchSurcharges;
@@ -2551,9 +2669,12 @@
             const ridgeText = ridgeBundles === 1 ? '1 bundle' : `${ridgeBundles} bundles`;
             const valleyText = valleyBundles === 1 ? '1 bundle' : `${valleyBundles} bundles`;
 
-            document.getElementById('label-starter-bundles').innerText = `Starter Bundles Cost (${starterText}):`;
-            document.getElementById('label-ridge-bundles').innerText = `Hip & Ridge Bundles Cost (${ridgeText}):`;
-            document.getElementById('label-valley-bundles').innerText = `Valley Bundles Cost (${valleyText}):`;
+            const lblStarter = document.getElementById('label-starter-bundles');
+            if (lblStarter) lblStarter.innerText = `Starter Bundles Cost (${starterText}):`;
+            const lblRidge = document.getElementById('label-ridge-bundles');
+            if (lblRidge) lblRidge.innerText = `Hip & Ridge Bundles Cost (${ridgeText}):`;
+            const lblValley = document.getElementById('label-valley-bundles');
+            if (lblValley) lblValley.innerText = `Valley Bundles Cost (${valleyText}):`;
 
             // Material Totals
             const baseMatTotal = totalSqs * baseMatPerSq;
@@ -2567,12 +2688,13 @@
             // Contract Price
             let contractPrice = totalSqs * sellingPricePerSq;
             if (state.isOverrideLocked) {
-                const overrideVal = parseCleanFloat(document.getElementById('override-contract-price').value);
+                const overrideVal = parseCleanFloat(document.getElementById('override-contract-price')?.value);
                 if (overrideVal > 0) {
                     contractPrice = overrideVal;
                 }
             } else {
-                document.getElementById('override-contract-price').value = contractPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const overrideEl = document.getElementById('override-contract-price');
+                if (overrideEl) overrideEl.value = contractPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
             const commissionAmount = contractPrice * commissionRate;
@@ -2594,24 +2716,33 @@
             const fmt = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             // UI Updates - Measurement Outputs (All Additional Roofs aggregated directly into lines)
-            document.getElementById('out-main-sqs').innerText = calc.mainWithWaste.toFixed(2);
-            document.getElementById('out-main-sqs-detail').innerText = `${calc.totalBaseMainSqs.toFixed(2)} base + ${calc.totalWasteMainSqs.toFixed(2)} waste`;
+            const elMainSqs = document.getElementById('out-main-sqs');
+            if (elMainSqs) elMainSqs.innerText = calc.mainWithWaste.toFixed(2);
+            const elMainDetail = document.getElementById('out-main-sqs-detail');
+            if (elMainDetail) elMainDetail.innerText = `${calc.totalBaseMainSqs.toFixed(2)} base + ${calc.totalWasteMainSqs.toFixed(2)} waste`;
 
-            document.getElementById('out-starter-sqs').innerText = calc.starterWithWaste.toFixed(2);
-            document.getElementById('out-starter-sqs-detail').innerText = `${calc.totalRawStarterSqs.toFixed(2)} base + ${calc.totalWasteStarterSqs.toFixed(2)} waste`;
+            const elStarterSqs = document.getElementById('out-starter-sqs');
+            if (elStarterSqs) elStarterSqs.innerText = calc.starterWithWaste.toFixed(2);
+            const elStarterDetail = document.getElementById('out-starter-sqs-detail');
+            if (elStarterDetail) elStarterDetail.innerText = `${calc.totalRawStarterSqs.toFixed(2)} base + ${calc.totalWasteStarterSqs.toFixed(2)} waste`;
 
-            document.getElementById('out-ridge-sqs').innerText = calc.ridgeWithWaste.toFixed(2);
-            document.getElementById('out-ridge-sqs-detail').innerText = `${calc.totalRawRidgeSqs.toFixed(2)} base + ${calc.totalWasteRidgeSqs.toFixed(2)} waste`;
+            const elRidgeSqs = document.getElementById('out-ridge-sqs');
+            if (elRidgeSqs) elRidgeSqs.innerText = calc.ridgeWithWaste.toFixed(2);
+            const elRidgeDetail = document.getElementById('out-ridge-sqs-detail');
+            if (elRidgeDetail) elRidgeDetail.innerText = `${calc.totalRawRidgeSqs.toFixed(2)} base + ${calc.totalWasteRidgeSqs.toFixed(2)} waste`;
 
             const rowOutExtraSqs = document.getElementById('row-out-extra-sqs');
-            if (calc.nonShingleExtraSqs > 0) {
-                rowOutExtraSqs.classList.remove('hidden');
-                document.getElementById('out-extra-sqs').innerText = calc.nonShingleExtraSqs.toFixed(2);
-            } else {
-                rowOutExtraSqs.classList.add('hidden');
+            if (rowOutExtraSqs) {
+                if (calc.nonShingleExtraSqs > 0) {
+                    rowOutExtraSqs.classList.remove('hidden');
+                    document.getElementById('out-extra-sqs').innerText = calc.nonShingleExtraSqs.toFixed(2);
+                } else {
+                    rowOutExtraSqs.classList.add('hidden');
+                }
             }
 
-            document.getElementById('out-total-sqs').innerText = totalSqs.toFixed(2);
+            const elTotalSqs = document.getElementById('out-total-sqs');
+            if (elTotalSqs) elTotalSqs.innerText = totalSqs.toFixed(2);
 
             // Cost Breakdown UI Updates
             document.getElementById('out-labor-total').innerText = fmt(crewLaborTotal);
@@ -2622,19 +2753,23 @@
             document.getElementById('out-valley-bundle-cost').innerText = fmt(valleyBundleCostTotal);
 
             const rowExtraCostCard = document.getElementById('row-extra-roof-cost-card');
-            if (calc.nonShingleExtraCost > 0) {
-                rowExtraCostCard.classList.remove('hidden');
-                document.getElementById('out-extra-roof-cost').innerText = fmt(calc.nonShingleExtraCost);
-            } else {
-                rowExtraCostCard.classList.add('hidden');
+            if (rowExtraCostCard) {
+                if (calc.nonShingleExtraCost > 0) {
+                    rowExtraCostCard.classList.remove('hidden');
+                    document.getElementById('out-extra-roof-cost').innerText = fmt(calc.nonShingleExtraCost);
+                } else {
+                    rowExtraCostCard.classList.add('hidden');
+                }
             }
 
             const cardPitchRow = document.getElementById('row-pitch-surcharge-card');
-            if (pitchSurchargeCostTotal > 0) {
-                cardPitchRow.classList.remove('hidden');
-                document.getElementById('out-pitch-surcharge-cost').innerText = fmt(pitchSurchargeCostTotal);
-            } else {
-                cardPitchRow.classList.add('hidden');
+            if (cardPitchRow) {
+                if (pitchSurchargeCostTotal > 0) {
+                    cardPitchRow.classList.remove('hidden');
+                    document.getElementById('out-pitch-surcharge-cost').innerText = fmt(pitchSurchargeCostTotal);
+                } else {
+                    cardPitchRow.classList.add('hidden');
+                }
             }
 
             document.getElementById('out-total-mat-costs').innerText = fmt(totalJobMaterialsCost);
@@ -2642,11 +2777,13 @@
             document.getElementById('out-overall-job-total').innerText = fmt(totalJobCost);
 
             const cardOtherRow = document.getElementById('row-other-direct-card');
-            if (otherDirectCosts > 0) {
-                cardOtherRow.classList.remove('hidden');
-                document.getElementById('out-other-direct-total').innerText = fmt(otherDirectCosts);
-            } else {
-                cardOtherRow.classList.add('hidden');
+            if (cardOtherRow) {
+                if (otherDirectCosts > 0) {
+                    cardOtherRow.classList.remove('hidden');
+                    document.getElementById('out-other-direct-total').innerText = fmt(otherDirectCosts);
+                } else {
+                    cardOtherRow.classList.add('hidden');
+                }
             }
 
             document.getElementById('header-total-price').innerText = fmt(contractPrice);
@@ -2659,11 +2796,13 @@
             document.getElementById('out-crew-total-display').innerText = fmt(crewLaborTotal);
 
             const otherRow = document.getElementById('row-other-direct-display');
-            if (otherDirectCosts > 0) {
-                otherRow.classList.remove('hidden');
-                document.getElementById('out-other-direct-display').innerText = fmt(otherDirectCosts);
-            } else {
-                otherRow.classList.add('hidden');
+            if (otherRow) {
+                if (otherDirectCosts > 0) {
+                    otherRow.classList.remove('hidden');
+                    document.getElementById('out-other-direct-display').innerText = fmt(otherDirectCosts);
+                } else {
+                    otherRow.classList.add('hidden');
+                }
             }
 
             document.getElementById('out-subtotal-before-comm').innerText = fmt(subtotalBeforeCommission);
@@ -2735,11 +2874,11 @@
             updateChart(totalJobMaterialsCost, crewLaborTotal, commissionAmount, profitAmount);
 
             // Sync Print Proposal Sheet
-            const clientVal = document.getElementById('client-name').value;
-            const quoteDateVal = document.getElementById('quote-date').value;
+            const clientVal = document.getElementById('client-name')?.value || '-';
+            const quoteDateVal = document.getElementById('quote-date')?.value || '-';
             const matSelect = document.getElementById('select-material');
-            const matText = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '-';
-            const brandVal = document.getElementById('select-brand').value;
+            const matText = matSelect && matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '-';
+            const brandVal = document.getElementById('select-brand')?.value || '-';
 
             document.getElementById('print-sheet-client').innerText = `Client: ${clientVal}`;
             document.getElementById('print-sheet-date').innerText = `Date: ${quoteDateVal}`;
@@ -2762,19 +2901,21 @@
             document.getElementById('print-table-valley-cost').innerText = fmt(valleyBundleCostTotal);
 
             const printPitchRow = document.getElementById('print-row-pitch-surcharge');
-            if (pitchSurchargeCostTotal > 0) {
-                printPitchRow.classList.remove('hidden');
-                document.getElementById('print-table-pitch-desc').innerText = `Pitch Surcharge`;
-                document.getElementById('print-table-pitch-qty').innerText = `Multi-Slope / Steep`;
-                document.getElementById('print-table-pitch-cost').innerText = fmt(pitchSurchargeCostTotal);
-            } else {
-                printPitchRow.classList.add('hidden');
+            if (printPitchRow) {
+                if (pitchSurchargeCostTotal > 0) {
+                    printPitchRow.classList.remove('hidden');
+                    document.getElementById('print-table-pitch-desc').innerText = `Pitch Surcharge`;
+                    document.getElementById('print-table-pitch-qty').innerText = `Multi-Slope / Steep`;
+                    document.getElementById('print-table-pitch-cost').innerText = fmt(pitchSurchargeCostTotal);
+                } else {
+                    printPitchRow.classList.add('hidden');
+                }
             }
 
             const printAddlTbody = document.getElementById('print-additional-roofs-tbody');
             if (printAddlTbody) {
                 printAddlTbody.innerHTML = '';
-                state.additionalRoofs.filter(r => r.type !== 'shingles').forEach(r => {
+                state.additionalRoofs.filter(r => !isShingleType(r.type)).forEach(r => {
                     const isModBit = (r.type === 'mod_bit' || r.type.includes('modified') || r.type.includes('bitumen'));
                     const matObj = state.materials.find(m => m.id === r.type);
                     const matCostPerSq = matObj ? matObj.cost : 100.00;
