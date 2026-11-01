@@ -42,10 +42,12 @@
         }
 
         @media print {
-            .no-print, header, nav, button, #toast, #history-modal { display: none !important; }
-            .print-only { display: block !important; }
+            .no-print, header, nav, button, #toast, #history-modal, #tab-mastersheet, #tab-crews { display: none !important; }
+            #tab-calculator { display: block !important; }
+            #tab-calculator > div { display: none !important; }
+            #print-proposal-document { display: block !important; margin: 0 !important; border: none !important; padding: 0 !important; }
             body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
-            main { max-width: 100% !important; padding: 0 !important; }
+            main { max-width: 100% !important; padding: 0 !important; width: 100% !important; }
             .shadow-xl, .shadow-md, .shadow-sm, .shadow-2xl { box-shadow: none !important; }
             .border { border-color: #cbd5e1 !important; }
             .page-break-avoid { page-break-inside: avoid; }
@@ -143,7 +145,7 @@
             </div>
 
             <!-- Main Grid Split -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
 
                 <!-- LEFT COLUMN -->
                 <div class="lg:col-span-7 space-y-6">
@@ -996,6 +998,73 @@
             return isNaN(result) ? 0 : result;
         }
 
+        // SAFE MATH PARSER (Replaces dangerous Function/eval calls)
+        function safeComputeMath(expr) {
+            if (!expr) return 0;
+            const sanitized = expr.replace(/[^0-9.+\-*/()]/g, '');
+            if (!sanitized) return 0;
+
+            try {
+                const tokens = sanitized.match(/(\d+(\.\d+)?|[+\-*/()])/g);
+                if (!tokens) return 0;
+
+                let pos = 0;
+                function parsePrimary() {
+                    let token = tokens[pos++];
+                    if (token === '(') {
+                        let val = parseAddSub();
+                        pos++;
+                        return val;
+                    }
+                    if (token === '-') return -parsePrimary();
+                    if (token === '+') return parsePrimary();
+                    return parseFloat(token) || 0;
+                }
+
+                function parseMulDiv() {
+                    let left = parsePrimary();
+                    while (pos < tokens.length && (tokens[pos] === '*' || tokens[pos] === '/')) {
+                        let op = tokens[pos++];
+                        let right = parsePrimary();
+                        if (op === '*') left *= right;
+                        if (op === '/') left = right === 0 ? 0 : left / right;
+                    }
+                    return left;
+                }
+
+                function parseAddSub() {
+                    let left = parseMulDiv();
+                    while (pos < tokens.length && (tokens[pos] === '+' || tokens[pos] === '-')) {
+                        let op = tokens[pos++];
+                        let right = parseMulDiv();
+                        if (op === '+') left += right;
+                        if (op === '-') left -= right;
+                    }
+                    return left;
+                }
+
+                const res = parseAddSub();
+                return isNaN(res) || !isFinite(res) ? 0 : res;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function evaluateMathExpression(el) {
+            if (!el || !el.value) return;
+            let val = el.value.trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
+            const result = safeComputeMath(val);
+            el.value = result.toFixed(2);
+            calculateEstimate();
+        }
+
+        function evaluateMathExpressionInEl(el) {
+            if (!el || !el.value) return;
+            let val = el.value.trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
+            const result = safeComputeMath(val);
+            el.value = result.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
         // SCROLL-WHEEL NUMERICAL INCREMENT LOGIC
         function handleWheelScroll(event, el, step) {
             if (document.activeElement !== el) return;
@@ -1042,14 +1111,12 @@
         function handleInputKeydown(event, el, step) {
             if (event.key === 'ArrowUp') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal += step;
+                let currentVal = parseCleanFloat(el.value) + step;
                 el.value = currentVal.toFixed(2);
                 calculateEstimate();
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal = Math.max(0, currentVal - step);
+                let currentVal = Math.max(0, parseCleanFloat(el.value) - step);
                 el.value = currentVal.toFixed(2);
                 calculateEstimate();
             } else if (event.key === 'Enter') {
@@ -1060,14 +1127,12 @@
         function handleSellingPriceKeydown(event, el, step) {
             if (event.key === 'ArrowUp') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal += step;
+                let currentVal = parseCleanFloat(el.value) + step;
                 el.value = currentVal.toFixed(2);
                 onSellingPriceInputBlur(el);
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal = Math.max(0, currentVal - step);
+                let currentVal = Math.max(0, parseCleanFloat(el.value) - step);
                 el.value = currentVal.toFixed(2);
                 onSellingPriceInputBlur(el);
             } else if (event.key === 'Enter') {
@@ -1078,14 +1143,12 @@
         function handleSellingPriceOutputKeydown(event, el, step) {
             if (event.key === 'ArrowUp') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal += step;
+                let currentVal = parseCleanFloat(el.value) + step;
                 el.value = currentVal.toFixed(2);
                 onSellingPriceOutputBlur(el);
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal = Math.max(0, currentVal - step);
+                let currentVal = Math.max(0, parseCleanFloat(el.value) - step);
                 el.value = currentVal.toFixed(2);
                 onSellingPriceOutputBlur(el);
             } else if (event.key === 'Enter') {
@@ -1096,16 +1159,14 @@
         function handleOverrideKeydown(event, el, step) {
             if (event.key === 'ArrowUp') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal += step;
+                let currentVal = parseCleanFloat(el.value) + step;
                 el.value = currentVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 state.isOverrideLocked = true;
                 document.getElementById('chk-lock-contract').checked = true;
                 evaluateOverrideMath();
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
-                let currentVal = parseCleanFloat(el.value);
-                currentVal = Math.max(0, currentVal - step);
+                let currentVal = Math.max(0, parseCleanFloat(el.value) - step);
                 el.value = currentVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 state.isOverrideLocked = true;
                 document.getElementById('chk-lock-contract').checked = true;
@@ -1113,20 +1174,6 @@
             } else if (event.key === 'Enter') {
                 onOverridePriceBlur(el);
             }
-        }
-
-        function evaluateMathExpression(el) {
-            if (!el || !el.value) return;
-            let val = el.value.trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
-            try {
-                if (/^[0-9.+\-*/\s()]+$/.test(val)) {
-                    let result = Function('"use strict"; return (' + val + ')')();
-                    if (!isNaN(result) && isFinite(result)) {
-                        el.value = parseFloat(result).toFixed(2);
-                    }
-                }
-            } catch (e) {}
-            calculateEstimate();
         }
 
         const DEFAULT_MATERIALS = [
@@ -1224,11 +1271,9 @@
             setJobMode('insurance');
             checkURLParamsForSharedQuote();
 
-            // Load shared company settings from Supabase
             await syncGlobalSettingsFromCloud();
         });
 
-        // Pull company materials, crew rates, and pitch specs from cloud
         async function syncGlobalSettingsFromCloud() {
             try {
                 const { data, error } = await supabaseClient
@@ -1257,7 +1302,6 @@
             }
         }
 
-        // Push company settings to Supabase
         async function pushGlobalSettingsToCloud() {
             try {
                 const payload = {
@@ -1382,19 +1426,6 @@
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
             calculateEstimate();
-        }
-
-        function evaluateMathExpressionInEl(el) {
-            if (!el || !el.value) return;
-            let val = el.value.trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
-            try {
-                if (/^[0-9.+\-*/\s()]+$/.test(val)) {
-                    let result = Function('"use strict"; return (' + val + ')')();
-                    if (!isNaN(result) && isFinite(result)) {
-                        el.value = parseFloat(result).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    }
-                }
-            } catch (e) {}
         }
 
         function evaluateOverrideMath() {
@@ -1527,47 +1558,66 @@
             showToast('Bundle Coverage Specs Saved to Cloud!');
         }
 
+        // PRINT FUNCTION WITH BUILT-IN FALLBACK
         function triggerPrintQuote() {
             switchTab('calculator');
-            
             const printElement = document.getElementById('print-proposal-document');
             if (!printElement) return;
 
-            const docContent = printElement.innerHTML;
-            const printWindow = window.open('', '_blank');
-
-            if (printWindow) {
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>360 Roofing Proposal - Print View</title>
-                        <script src="https://cdn.tailwindcss.com"><\/script>
-                        <style>
-                            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-                            body { font-family: 'Inter', sans-serif; background: white; color: black; padding: 24px; }
-                            .hidden { display: none !important; }
-                        </style>
-                    </head>
-                    <body onload="setTimeout(() => { window.print(); }, 250)">
-                        <div class="max-w-4xl mx-auto space-y-6">
-                            ${docContent}
-                        </div>
-                    </body>
-                    </html>
-                `);
-                printWindow.document.close();
-            } else {
+            try {
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>360 Roofing Proposal - Print View</title>
+                            <script src="https://cdn.tailwindcss.com"><\/script>
+                            <style>
+                                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+                                body { font-family: 'Inter', sans-serif; background: white; color: black; padding: 24px; }
+                                .hidden { display: none !important; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="max-w-4xl mx-auto space-y-6">
+                                ${printElement.innerHTML}
+                            </div>
+                            <script>
+                                window.onload = function() {
+                                    window.focus();
+                                    window.print();
+                                };
+                            <\/script>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                } else {
+                    window.print();
+                }
+            } catch (e) {
                 window.print();
             }
         }
 
+        // SAFE UNICODE URL SHARING
         function utoa(str) {
-            return btoa(unescape(encodeURIComponent(str)));
+            const bytes = new TextEncoder().encode(str);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
         }
 
         function atou(str) {
-            return decodeURIComponent(escape(atob(str)));
+            const binary = atob(str);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new TextDecoder().decode(bytes);
         }
 
         function shareCalculationLink() {
@@ -1700,23 +1750,19 @@
             calculateEstimate();
         }
 
-        // --- CLOUD SYNC & SAVE ENGINE ---
         async function saveCurrentCalculation() {
             const clientName = document.getElementById('client-name').value || "Unnamed Job";
             showToast("Saving quote to Supabase cloud...");
             await saveQuoteToCloud(clientName);
         }
 
-        // "NEW" BUTTON: Clears job inputs, keeps cloud settings, and resets Customer Name back to default placeholder
         function newCalculation() {
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
 
-            // Reset client details specifically
             document.getElementById('client-name').value = "(Type Customer's Name & Address)";
             document.getElementById('quote-date').value = new Date().toISOString().split('T')[0];
 
-            // Reset measurements & inputs
             document.getElementById('input-sqs').value = "20.00";
             document.getElementById('input-ridge').value = "180.00";
             document.getElementById('input-starter').value = "250.00";
@@ -1730,7 +1776,6 @@
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
 
-            // Reset production assumptions
             document.getElementById('cost-misc-material').value = "20.00";
             document.getElementById('starter-cost-bundle').value = "50.00";
             document.getElementById('ridge-cost-bundle').value = "65.00";
@@ -1755,14 +1800,10 @@
             showToast("Started a fresh job calculation!");
         }
 
-        // "RESET" BUTTON: Resets measurements & assumptions, but KEEPS current Customer - Address & Quote Date
         function resetCalculator() {
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
 
-            // Notice: client-name and quote-date are intentionally preserved!
-
-            // Reset measurements & inputs
             document.getElementById('input-sqs').value = "20.00";
             document.getElementById('input-ridge').value = "180.00";
             document.getElementById('input-starter').value = "250.00";
@@ -1776,7 +1817,6 @@
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
 
-            // Reset production assumptions
             document.getElementById('cost-misc-material').value = "20.00";
             document.getElementById('starter-cost-bundle').value = "50.00";
             document.getElementById('ridge-cost-bundle').value = "65.00";
@@ -1798,7 +1838,7 @@
             renderCrewLeaderMultiSelect();
 
             calculateEstimate();
-            showToast("Job inputs & assumptions reset (Client details & Cloud pricing intact)!");
+            showToast("Job inputs & assumptions reset!");
         }
 
         async function openHistoryModal() {
@@ -2133,7 +2173,6 @@
             const extraSqs = parseCleanFloat(document.getElementById('input-extra-sqs').value);
             const extraRoofType = document.getElementById('select-extra-roof-type').value;
             const extraRoofCostInput = parseCleanFloat(document.getElementById('input-extra-roof-cost').value);
-
             const otherDirectCosts = parseCleanFloat(document.getElementById('input-other-direct').value);
 
             // Toggle Steep Pitch SQs cell visibility
@@ -2268,13 +2307,18 @@
             const profitAmount = contractPrice - totalJobCost;
             const grossMarginPct = contractPrice > 0 ? (profitAmount / contractPrice) * 100 : 0;
 
-            // Target Formulas
+            // TARGET FORMULAS (PROTECTED AGAINST DIVISION BY ZERO)
             const costPerTotalSq = totalSqs > 0 ? (totalJobCost / totalSqs) : 0;
-            const breakevenPricePerSq = (1 - commissionRate) > 0 ? (subtotalBeforeCommission / (1 - commissionRate)) / totalSqs : 0;
             
-            const targetPricePerSq = (1 - targetMargin - commissionRate) > 0 
-                ? (subtotalBeforeCommission / (1 - targetMargin - commissionRate)) / totalSqs 
+            const breakevenPricePerSq = (totalSqs > 0 && (1 - commissionRate) > 0) 
+                ? (subtotalBeforeCommission / (1 - commissionRate)) / totalSqs 
                 : 0;
+
+            const netMarginDenominator = 1 - targetMargin - commissionRate;
+            const targetPricePerSq = (totalSqs > 0 && netMarginDenominator > 0) 
+                ? (subtotalBeforeCommission / netMarginDenominator) / totalSqs 
+                : 0;
+
             const targetContractPrice = totalSqs * targetPricePerSq;
 
             const fmt = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -2671,7 +2715,6 @@
             }, 3000);
         }
 
-        // Saves current quote to Supabase with full snapshot data
         async function saveQuoteToCloud(customerName, createdByName = "Team Member") {
             const pitchSelect = document.getElementById('select-roof-pitch');
             const pitchText = pitchSelect ? pitchSelect.options[pitchSelect.selectedIndex].text : "Standard";
@@ -2696,7 +2739,6 @@
             }
         }
 
-        // Fetches all saved quotes from Supabase
         async function loadSavedQuotes() {
             const { data, error } = await supabaseClient
                 .from("quotes")
