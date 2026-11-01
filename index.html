@@ -387,11 +387,11 @@
                 <!-- RIGHT COLUMN: OUTPUTS & CHART -->
                 <div class="lg:col-span-5 space-y-6">
 
-                    <!-- MEASUREMENT OUTPUTS CARD (UPDATED: Integrated Waste & Additional Roofs) -->
+                    <!-- MEASUREMENT OUTPUTS CARD (ROUNDED TO 0.33, 0.66, 1.00) -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
                             <span>Measurement Outputs</span>
-                            <span class="text-xs bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">Live Values</span>
+                            <span class="text-xs bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">Live Values (1/3 SQ Rounded)</span>
                         </h3>
 
                         <div class="space-y-2 text-xs">
@@ -405,14 +405,14 @@
                             <div class="flex justify-between items-center text-slate-600">
                                 <span>Starter Squares (incl. waste):</span>
                                 <div class="text-right">
-                                    <span class="font-bold text-slate-900" id="out-starter-sqs">1.46</span>
+                                    <span class="font-bold text-slate-900" id="out-starter-sqs">1.66</span>
                                     <span class="text-[10px] text-slate-400 block" id="out-starter-sqs-detail">1.33 base + 0.13 waste</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center text-slate-600">
                                 <span>Hip & Ridge Squares (incl. waste):</span>
                                 <div class="text-right">
-                                    <span class="font-bold text-slate-900" id="out-ridge-sqs">2.93</span>
+                                    <span class="font-bold text-slate-900" id="out-ridge-sqs">3.00</span>
                                     <span class="text-[10px] text-slate-400 block" id="out-ridge-sqs-detail">2.67 base + 0.27 waste</span>
                                 </div>
                             </div>
@@ -424,7 +424,7 @@
                             </div>
 
                             <div class="flex justify-between font-extrabold text-slate-900 bg-slate-100 p-2 rounded-lg text-sm mt-1">
-                                <span>TOTAL SQUARES:</span><span id="out-total-sqs">26.39</span>
+                                <span>TOTAL SQUARES:</span><span id="out-total-sqs">26.66</span>
                             </div>
                         </div>
                     </div>
@@ -698,13 +698,13 @@
                         </tr>
                         <tr>
                             <td class="py-2 px-3 font-semibold">Perimeter Starter Shingles</td>
-                            <td class="py-2 px-3">Starter Course Bundles</td>
+                            <td class="py-2 px-3">Starter Course Bundles (incl. waste)</td>
                             <td class="py-2 px-3 text-right" id="print-table-starter-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-starter-cost">-</td>
                         </tr>
                         <tr>
                             <td class="py-2 px-3 font-semibold">Hip & Ridge Cap Shingles</td>
-                            <td class="py-2 px-3">Hip & Ridge Capping Bundles</td>
+                            <td class="py-2 px-3">Hip & Ridge Capping Bundles (incl. waste)</td>
                             <td class="py-2 px-3 text-right" id="print-table-ridge-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-ridge-cost">-</td>
                         </tr>
@@ -2327,13 +2327,28 @@
             showToast('Crew Leaders & Rates Saved to Cloud!');
         }
 
-        function roundUpRoofSquares(value) {
+        // --- ROUND UP TO NEAREST THIRD (0.33, 0.66, 1.00) ---
+        function roundUpThirdSquare(value) {
             if (!value || isNaN(value) || value <= 0) return 0;
-            return Math.ceil(value * 3) / 3;
+            const floor = Math.floor(value);
+            const remainder = value - floor;
+            
+            // Tolerance threshold for rounding up
+            const EPSILON = 0.0001;
+
+            if (remainder <= EPSILON) {
+                return floor;
+            } else if (remainder <= (1 / 3) + EPSILON) {
+                return parseFloat((floor + 0.33).toFixed(2));
+            } else if (remainder <= (2 / 3) + EPSILON) {
+                return parseFloat((floor + 0.66).toFixed(2));
+            } else {
+                return floor + 1;
+            }
         }
 
         // --- CORE REUSABLE AGGREGATION ENGINE ---
-        // Applies waste rates to all square types directly and combines Additional Roofs into primary outputs
+        // Incorporates waste into Starter & Ridge bundle LF & SQs, and aggregates additional roofs
         function computeTotalSquaresAndBundles() {
             const mainBaseSqs = parseCleanFloat(document.getElementById('input-sqs').value);
             const ridgeLF = parseCleanFloat(document.getElementById('input-ridge').value);
@@ -2345,15 +2360,19 @@
             const starterLFPerSq = b.starterEquiv;
             const ridgeLFPerSq = b.ridgeEquiv;
 
-            // Main base conversion
+            // Main Base & Waste
             let baseMainSqs = mainBaseSqs;
             let wasteMainSqs = mainBaseSqs * mainWastePct;
 
+            // Starter Base & Waste
             let baseStarterLF = starterLF;
+            let starterLFWasteTotal = starterLF * (1 + mainWastePct);
             let rawStarterSqs = starterLF / starterLFPerSq;
             let wasteStarterSqs = rawStarterSqs * mainWastePct;
 
+            // Ridge Base & Waste
             let baseRidgeLF = ridgeLF;
+            let ridgeLFWasteTotal = ridgeLF * (1 + mainWastePct);
             let rawRidgeSqs = ridgeLF / ridgeLFPerSq;
             let wasteRidgeSqs = rawRidgeSqs * mainWastePct;
 
@@ -2380,21 +2399,23 @@
                     wasteMainSqs += (rSqs * rWastePct);
 
                     baseStarterLF += rStarter;
+                    starterLFWasteTotal += rStarter * (1 + rWastePct);
                     const rStarterSqs = rStarter / starterLFPerSq;
                     rawStarterSqs += rStarterSqs;
                     wasteStarterSqs += (rStarterSqs * rWastePct);
 
                     baseRidgeLF += rRidge;
+                    ridgeLFWasteTotal += rRidge * (1 + rWastePct);
                     const rRidgeSqs = rRidge / ridgeLFPerSq;
                     rawRidgeSqs += rRidgeSqs;
                     wasteRidgeSqs += (rRidgeSqs * rWastePct);
 
                     totalValleyLF += rValley;
 
-                    const rTotalSectionSqs = (rSqs * (1 + rWastePct)) + (rStarterSqs * (1 + rWastePct)) + (rRidgeSqs * (1 + rWastePct));
+                    const rSectionSqs = (rSqs * (1 + rWastePct)) + (rStarterSqs * (1 + rWastePct)) + (rRidgeSqs * (1 + rWastePct));
                     const rPitchRate = state.pitchRates[r.pitchKey] || 0;
                     if (rPitchRate > 0) {
-                        extraPitchSurcharge += (rTotalSectionSqs * rPitchRate);
+                        extraPitchSurcharge += (rSectionSqs * rPitchRate);
                     }
                 } else if (isModBit) {
                     nonShingleExtraSqs += rSqs;
@@ -2413,9 +2434,15 @@
                 }
             });
 
-            const mainWithWaste = baseMainSqs + wasteMainSqs;
-            const starterWithWaste = rawStarterSqs + wasteStarterSqs;
-            const ridgeWithWaste = rawRidgeSqs + wasteRidgeSqs;
+            // Raw totals with waste
+            const rawMainWithWaste = baseMainSqs + wasteMainSqs;
+            const rawStarterWithWaste = rawStarterSqs + wasteStarterSqs;
+            const rawRidgeWithWaste = rawRidgeSqs + wasteRidgeSqs;
+
+            // Rounded up to 0.33, 0.66, 1.00 (3 bundles/SQ logic)
+            const mainWithWaste = roundUpThirdSquare(rawMainWithWaste);
+            const starterWithWaste = roundUpThirdSquare(rawStarterWithWaste);
+            const ridgeWithWaste = roundUpThirdSquare(rawRidgeWithWaste);
 
             const totalSqs = parseFloat((mainWithWaste + starterWithWaste + ridgeWithWaste + nonShingleExtraSqs).toFixed(2));
 
@@ -2424,10 +2451,12 @@
                 wasteMainSqs,
                 mainWithWaste,
                 baseStarterLF,
+                starterLFWasteTotal,
                 rawStarterSqs,
                 wasteStarterSqs,
                 starterWithWaste,
                 baseRidgeLF,
+                ridgeLFWasteTotal,
                 rawRidgeSqs,
                 wasteRidgeSqs,
                 ridgeWithWaste,
@@ -2486,15 +2515,15 @@
             const modeLabel = crewCalcMode === 'cumulative' ? 'Combined' : 'Avg';
             document.getElementById('calc-effective-crew-rate').innerText = `$${effectiveCrewRatePerSq.toFixed(2)} / SQ (${selectedLeaders.length} Selected - ${modeLabel})`;
 
-            // Get consolidated measurements & squares with per-category waste applied
+            // Get consolidated measurements & squares with 1/3 square rounding & waste inclusion
             const calc = computeTotalSquaresAndBundles();
             const totalSqs = calc.totalSqs;
 
-            // Bundle counts based on total accumulated LF
-            const starterBundles = Math.ceil(calc.baseStarterLF / starterCoverageLF);
+            // Bundle counts now derived from waste-inclusive total LF
+            const starterBundles = Math.ceil(calc.starterLFWasteTotal / starterCoverageLF);
             const starterBundleCostTotal = starterBundles * starterCostBundle;
 
-            const ridgeBundles = Math.ceil(calc.baseRidgeLF / ridgeCoverageLF);
+            const ridgeBundles = Math.ceil(calc.ridgeLFWasteTotal / ridgeCoverageLF);
             const ridgeBundleCostTotal = ridgeBundles * ridgeCostBundle;
 
             const valleyBundles = Math.ceil(calc.totalValleyLF / valleyCoverageLF);
@@ -2506,7 +2535,7 @@
             const mainPitchSurcharge = mainPitchEligibleSqs * pitchRatePerSq;
             const pitchSurchargeCostTotal = mainPitchSurcharge + calc.extraPitchSurcharge;
 
-            // Bundle labels
+            // Bundle labels reflecting waste-inclusive QTY
             const starterText = starterBundles === 1 ? '1 bundle' : `${starterBundles} bundles`;
             const ridgeText = ridgeBundles === 1 ? '1 bundle' : `${ridgeBundles} bundles`;
             const valleyText = valleyBundles === 1 ? '1 bundle' : `${valleyBundles} bundles`;
@@ -2553,7 +2582,7 @@
             const targetContractPrice = totalSqs * targetPricePerSq;
             const fmt = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            // UI Updates - Measurement Outputs
+            // UI Updates - Measurement Outputs (Rounded to .33, .66, or whole number)
             document.getElementById('out-main-sqs').innerText = calc.mainWithWaste.toFixed(2);
             document.getElementById('out-main-sqs-detail').innerText = `${calc.baseMainSqs.toFixed(2)} base + ${calc.wasteMainSqs.toFixed(2)} waste`;
 
@@ -2712,10 +2741,10 @@
             document.getElementById('print-table-mat-qty').innerText = `${totalSqs.toFixed(2)} SQs`;
             document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal + miscMatTotal);
 
-            document.getElementById('print-table-starter-qty').innerText = `${starterText} (${calc.baseStarterLF.toFixed(1)} LF)`;
+            document.getElementById('print-table-starter-qty').innerText = `${starterText} (${calc.starterLFWasteTotal.toFixed(1)} LF w/ waste)`;
             document.getElementById('print-table-starter-cost').innerText = fmt(starterBundleCostTotal);
 
-            document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${calc.baseRidgeLF.toFixed(1)} LF)`;
+            document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${calc.ridgeLFWasteTotal.toFixed(1)} LF w/ waste)`;
             document.getElementById('print-table-ridge-cost').innerText = fmt(ridgeBundleCostTotal);
 
             document.getElementById('print-table-valley-qty').innerText = `${valleyText} (${calc.totalValleyLF.toFixed(1)} LF)`;
@@ -2731,7 +2760,6 @@
                 printPitchRow.classList.add('hidden');
             }
 
-            // Print table additional non-shingle roofs only (since shingle roofs are combined in the main scope)
             const printAddlTbody = document.getElementById('print-additional-roofs-tbody');
             if (printAddlTbody) {
                 printAddlTbody.innerHTML = '';
