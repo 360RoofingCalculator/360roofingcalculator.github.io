@@ -261,6 +261,7 @@
                                 </div>
                             </div>
 
+                            <!-- Other Direct Costs with Inline Rename -->
                             <div>
                                 <div class="flex items-center justify-between mb-1">
                                     <div id="container-other-direct-label" class="flex items-center gap-1.5">
@@ -308,9 +309,21 @@
                                 <input type="text" id="cost-base-material" value="92.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
-                            <!-- 2. Misc Material Cost -->
+                            <!-- 2. Misc Material Cost with Inline Rename -->
                             <div>
-                                <label class="block font-medium text-slate-600 mb-1">Misc Material Cost ($)</label>
+                                <div class="flex items-center justify-between mb-1">
+                                    <div id="container-misc-material-label" class="flex items-center gap-1.5">
+                                        <span id="label-misc-material-text" class="font-medium text-slate-600">Misc. Materials ($)</span>
+                                        <button type="button" onclick="startRenamingMiscMaterial(event)" class="text-slate-400 hover:text-amber-600 transition p-0.5 rounded cursor-pointer" title="Click to rename Misc. Materials field">
+                                            <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                    <div id="container-misc-material-edit" class="hidden flex items-center gap-1 w-full max-w-[210px]">
+                                        <input type="text" id="input-rename-misc-material" onkeydown="handleRenameMiscKeydown(event)" class="text-xs border border-amber-400 rounded px-1.5 py-0.5 w-full font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500" placeholder="Custom label">
+                                        <button type="button" onclick="saveRenamedMiscMaterial()" class="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded font-bold hover:bg-emerald-500 shadow-sm" title="Save">✓</button>
+                                        <button type="button" onclick="cancelRenamingMiscMaterial()" class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold hover:bg-slate-300" title="Cancel">✕</button>
+                                    </div>
+                                </div>
                                 <input type="text" id="cost-misc-material" value="0.00" placeholder="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
@@ -410,7 +423,7 @@
                 <!-- RIGHT COLUMN: OUTPUTS & CHART -->
                 <div class="lg:col-span-5 space-y-6">
 
-                    <!-- MEASUREMENT OUTPUTS CARD (RESTORED CLEAN STRUCTURE) -->
+                    <!-- MEASUREMENT OUTPUTS CARD -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
                             <span>Measurement Outputs</span>
@@ -452,7 +465,7 @@
                         </div>
                     </div>
 
-                    <!-- COST BREAKDOWN OUTPUTS CARD (DRIP EDGE DIRECTLY UNDER STARTER) -->
+                    <!-- COST BREAKDOWN OUTPUTS CARD (ZERO VALUES AUTOMATICALLY HIDDEN) -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
                             <span>Cost Breakdown Outputs</span>
@@ -460,7 +473,7 @@
                         </h3>
 
                         <div class="space-y-2 text-xs">
-                            <div class="flex justify-between text-slate-700 font-medium">
+                            <div class="flex justify-between text-slate-700 font-medium" id="row-labor-card">
                                 <span>Crew Labor Total:</span>
                                 <span class="font-bold text-slate-900" id="out-labor-total">$0.00</span>
                             </div>
@@ -470,15 +483,15 @@
                                 <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider text-sky-700">Materials</div>
                                 
                                 <div class="pl-3 space-y-1 text-[11px] text-slate-600">
-                                    <div class="flex justify-between">
+                                    <div class="flex justify-between" id="row-base-mat-card">
                                         <span>Base Materials Total:</span>
                                         <span class="font-medium text-slate-800" id="out-base-mat-total">$0.00</span>
                                     </div>
-                                    <div class="flex justify-between">
-                                        <span>Misc. Materials Total:</span>
+                                    <div class="flex justify-between" id="row-misc-mat-card">
+                                        <span id="display-label-misc-card">Misc. Materials Total:</span>
                                         <span class="font-medium text-slate-800" id="out-misc-mat-total">$0.00</span>
                                     </div>
-                                    <div class="flex justify-between">
+                                    <div class="flex justify-between" id="row-starter-bundles">
                                         <span id="label-starter-bundles">Starter Bundles Cost (0 bundles):</span>
                                         <span class="font-medium text-slate-800" id="out-starter-bundle-cost">$0.00</span>
                                     </div>
@@ -487,7 +500,7 @@
                                         <span id="label-drip-bundles">Drip Edge Cost (0 sticks @ $0.00/stick):</span>
                                         <span class="font-medium text-slate-800" id="out-drip-bundle-cost">$0.00</span>
                                     </div>
-                                    <div class="flex justify-between">
+                                    <div class="flex justify-between" id="row-ridge-bundles">
                                         <span id="label-ridge-bundles">Hip & Ridge Bundles Cost (0 bundles):</span>
                                         <span class="font-medium text-slate-800" id="out-ridge-bundle-cost">$0.00</span>
                                     </div>
@@ -523,7 +536,7 @@
                             </div>
 
                             <!-- Commission Line -->
-                            <div class="flex justify-between text-slate-700 font-medium pt-1">
+                            <div class="flex justify-between text-slate-700 font-medium pt-1" id="row-commission-card">
                                 <span>Commission:</span>
                                 <span class="font-bold text-slate-900" id="out-card-commission-total">$0.00</span>
                             </div>
@@ -676,7 +689,7 @@
 
             </div>
 
-            <!-- PRINT-ONLY PROPOSAL SHEET -->
+            <!-- PRINT-ONLY PROPOSAL SHEET (Zero Items & Site Logistics Automatically Removed) -->
             <div id="print-proposal-document" class="hidden print-only mt-6 border-2 border-slate-300 rounded-2xl p-6 bg-white space-y-6 page-break-avoid">
                 
                 <div class="flex justify-between items-start border-b-2 border-slate-800 pb-4">
@@ -718,19 +731,19 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-slate-800" id="print-line-items-body">
-                        <tr>
+                        <tr id="print-row-base-mat">
                             <td class="py-2 px-3 font-semibold">Base Roofing Material</td>
                             <td class="py-2 px-3" id="print-table-mat-spec">Main Roof Material</td>
                             <td class="py-2 px-3 text-right" id="print-table-mat-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-mat-subtotal">-</td>
                         </tr>
-                        <tr>
-                            <td class="py-2 px-3 font-semibold">Misc. Job Materials</td>
+                        <tr id="print-row-misc-mat">
+                            <td class="py-2 px-3 font-semibold" id="print-table-misc-label">Misc. Materials</td>
                             <td class="py-2 px-3">Lump-Sum Direct Materials</td>
                             <td class="py-2 px-3 text-right">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-misc-subtotal">-</td>
                         </tr>
-                        <tr>
+                        <tr id="print-row-starter">
                             <td class="py-2 px-3 font-semibold">Perimeter Starter Shingles</td>
                             <td class="py-2 px-3">Starter Course Bundles (incl. waste)</td>
                             <td class="py-2 px-3 text-right" id="print-table-starter-qty">-</td>
@@ -742,7 +755,7 @@
                             <td class="py-2 px-3 text-right" id="print-table-drip-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-drip-cost">-</td>
                         </tr>
-                        <tr>
+                        <tr id="print-row-ridge">
                             <td class="py-2 px-3 font-semibold">Hip & Ridge Cap Shingles</td>
                             <td class="py-2 px-3">Hip & Ridge Capping Bundles (incl. waste)</td>
                             <td class="py-2 px-3 text-right" id="print-table-ridge-qty">-</td>
@@ -761,15 +774,15 @@
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-pitch-cost">-</td>
                         </tr>
                         <tbody id="print-additional-roofs-tbody" class="divide-y divide-slate-200"></tbody>
-                        <tr>
+                        <tr id="print-row-labor">
                             <td class="py-2 px-3 font-semibold">Labor & Crew Allocation</td>
                             <td class="py-2 px-3" id="print-table-crews">Assigned Crew Leads</td>
                             <td class="py-2 px-3 text-right" id="print-table-crew-rate">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-labor-subtotal">-</td>
                         </tr>
-                        <tr>
-                            <td class="py-2 px-3 font-semibold" id="print-table-other-label">Site Logistics & Disposal</td>
-                            <td class="py-2 px-3">Permits, Dumpsters & Direct Expenses</td>
+                        <tr id="print-row-other-direct" class="hidden">
+                            <td class="py-2 px-3 font-semibold" id="print-table-other-label">Other Direct Costs</td>
+                            <td class="py-2 px-3">Allocated Direct Expenses</td>
                             <td class="py-2 px-3 text-right">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-other-cost">-</td>
                         </tr>
@@ -1436,6 +1449,7 @@
             jobMode: 'insurance',
             isOverrideLocked: false,
             otherDirectLabel: 'Other Direct Costs',
+            miscMaterialLabel: 'Misc. Materials',
             materials: loadStoredMaterials(),
             crewLeaders: loadStoredCrews(),
             bundleSpecs: loadStoredBundleSpecs(),
@@ -1543,7 +1557,6 @@
                 if (isShingle) {
                     dynamicFieldsHTML = `
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
-                            <!-- 1. Roof Squares -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Roof Squares</label>
                                 <input type="text" value="${roof.sqs}" 
@@ -1554,7 +1567,6 @@
                                     onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'sqs', 1)" 
                                     class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
-                            <!-- 2. Perimeter LF (Starter/Drip Edge) -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Starter/Drip Edge)</label>
                                 <input type="text" value="${roof.starter}" 
@@ -1565,7 +1577,6 @@
                                     onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'starter', 5)" 
                                     class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
-                            <!-- 3. Hip & Ridge LF -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Hip & Ridge LF</label>
                                 <input type="text" value="${roof.ridge}" 
@@ -1576,7 +1587,6 @@
                                     onkeydown="handleKeydownRoof(event, this, '${roof.id}', 'ridge', 5)" 
                                     class="w-full border border-sky-300 bg-sky-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
-                            <!-- 4. Valley LF -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Valley LF</label>
                                 <input type="text" value="${roof.valley}" 
@@ -1824,6 +1834,7 @@
             calculateEstimate();
         }
 
+        // --- RELIABLE INLINE RENAMING FOR OTHER DIRECT COSTS ---
         function startRenamingOtherDirect(e) {
             if (e) e.stopPropagation();
             document.getElementById('container-other-direct-label').classList.add('hidden');
@@ -1869,6 +1880,53 @@
             const dispSummaryEl = document.getElementById('display-label-other-direct-summary');
             if (dispSummaryEl) dispSummaryEl.innerText = `${lbl}:`;
             const printEl = document.getElementById('print-table-other-label');
+            if (printEl) printEl.innerText = lbl;
+        }
+
+        // --- EDITABLE MISC MATERIAL LABEL HANDLERS ---
+        function startRenamingMiscMaterial(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('container-misc-material-label').classList.add('hidden');
+            const editContainer = document.getElementById('container-misc-material-edit');
+            editContainer.classList.remove('hidden');
+            const input = document.getElementById('input-rename-misc-material');
+            input.value = state.miscMaterialLabel || "Misc. Materials";
+            input.focus();
+            input.select();
+        }
+
+        function saveRenamedMiscMaterial() {
+            const input = document.getElementById('input-rename-misc-material');
+            const val = input.value.trim();
+            if (val) {
+                state.miscMaterialLabel = val;
+            }
+            document.getElementById('container-misc-material-edit').classList.add('hidden');
+            document.getElementById('container-misc-material-label').classList.remove('hidden');
+            updateMiscMaterialLabelsDisplay();
+            calculateEstimate();
+        }
+
+        function cancelRenamingMiscMaterial() {
+            document.getElementById('container-misc-material-edit').classList.add('hidden');
+            document.getElementById('container-misc-material-label').classList.remove('hidden');
+        }
+
+        function handleRenameMiscKeydown(e) {
+            if (e.key === 'Enter') {
+                saveRenamedMiscMaterial();
+            } else if (e.key === 'Escape') {
+                cancelRenamingMiscMaterial();
+            }
+        }
+
+        function updateMiscMaterialLabelsDisplay() {
+            const lbl = state.miscMaterialLabel || "Misc. Materials";
+            const textEl = document.getElementById('label-misc-material-text');
+            if (textEl) textEl.innerText = `${lbl} ($)`;
+            const dispCardEl = document.getElementById('display-label-misc-card');
+            if (dispCardEl) dispCardEl.innerText = `${lbl} Total:`;
+            const printEl = document.getElementById('print-table-misc-label');
             if (printEl) printEl.innerText = lbl;
         }
 
@@ -2068,6 +2126,7 @@
 
         function triggerPrintQuote() {
             switchTab('calculator');
+            calculateEstimate();
             const printElement = document.getElementById('print-proposal-document');
             if (!printElement) return;
 
@@ -2167,6 +2226,7 @@
             return {
                 jobMode: state.jobMode,
                 otherDirectLabel: state.otherDirectLabel,
+                miscMaterialLabel: state.miscMaterialLabel,
                 clientName: document.getElementById('client-name').value,
                 quoteDate: document.getElementById('quote-date').value,
                 brand: document.getElementById('select-brand').value,
@@ -2201,7 +2261,9 @@
         function loadSnapshotData(d) {
             state.jobMode = d.jobMode || 'insurance';
             state.otherDirectLabel = d.otherDirectLabel || 'Other Direct Costs';
+            state.miscMaterialLabel = d.miscMaterialLabel || 'Misc. Materials';
             updateOtherDirectLabelsDisplay();
+            updateMiscMaterialLabelsDisplay();
 
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
@@ -2309,7 +2371,9 @@
             document.getElementById('cost-target-margin').value = "35.00";
 
             state.otherDirectLabel = "Other Direct Costs";
+            state.miscMaterialLabel = "Misc. Materials";
             updateOtherDirectLabelsDisplay();
+            updateMiscMaterialLabelsDisplay();
 
             setJobMode('insurance');
 
@@ -2327,6 +2391,7 @@
             showToast("Started a fresh job calculation!");
         }
 
+        // RESET BUTTON: Reverts custom names to original and restores assumptions from saved Supabase/cloud data
         function resetCalculator() {
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
@@ -2347,24 +2412,31 @@
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
 
-            document.getElementById('cost-misc-material').value = "0.00";
+            // Restore editable labels to original default names
+            state.otherDirectLabel = "Other Direct Costs";
+            state.miscMaterialLabel = "Misc. Materials";
+            updateOtherDirectLabelsDisplay();
+            updateMiscMaterialLabelsDisplay();
+
+            // Populate production assumptions strictly from Supabase cloud / stored settings
             const starterInput = document.getElementById('starter-cost-bundle');
-            if (starterInput) starterInput.value = (state.bundleSpecs.starterPriceBundle || 50.00).toFixed(2);
+            if (starterInput) starterInput.value = (state.bundleSpecs.starterPriceBundle !== undefined ? state.bundleSpecs.starterPriceBundle : 50.00).toFixed(2);
+            
             const dripInput = document.getElementById('drip-cost-stick');
-            if (dripInput) dripInput.value = (state.bundleSpecs.dripEdgeCostBundle || 15.00).toFixed(2);
+            if (dripInput) dripInput.value = (state.bundleSpecs.dripEdgeCostBundle !== undefined ? state.bundleSpecs.dripEdgeCostBundle : 15.00).toFixed(2);
+            
             document.getElementById('ridge-cost-sq').value = (state.bundleSpecs.ridgePriceSq || 125.85).toFixed(2);
+            document.getElementById('cost-misc-material').value = "0.00";
             document.getElementById('valley-cost-bundle').value = "55.00";
             document.getElementById('cost-target-margin').value = "35.00";
 
-            state.otherDirectLabel = "Other Direct Costs";
-            updateOtherDirectLabelsDisplay();
+            if (state.materials && state.materials.length > 0) {
+                const currentMatId = document.getElementById('select-material').value || state.materials[0].id;
+                const activeMat = state.materials.find(m => m.id === currentMatId) || state.materials[0];
+                document.getElementById('cost-base-material').value = activeMat.cost.toFixed(2);
+            }
 
             setJobMode('insurance');
-
-            if (state.materials && state.materials.length > 0) {
-                document.getElementById('select-material').value = state.materials[0].id;
-                document.getElementById('cost-base-material').value = state.materials[0].cost.toFixed(2);
-            }
 
             state.crewLeaders.forEach((leader, idx) => {
                 leader.selected = (idx === 0);
@@ -2372,7 +2444,7 @@
             renderCrewLeaderMultiSelect();
 
             calculateEstimate();
-            showToast("Job inputs & assumptions reset!");
+            showToast("Job inputs & assumptions reset to saved cloud values!");
         }
 
         async function openHistoryModal() {
@@ -2748,7 +2820,6 @@
             }
         }
 
-        // --- QUANTITY ENGINE: DYNAMICALLY READS FROM BUNDLE SPECS TAB ---
         function computeTotalSquaresAndBundles() {
             const mainBaseSqs = parseCleanFloat(document.getElementById('input-sqs')?.value);
             const starterLF = parseCleanFloat(document.getElementById('input-starter')?.value);
@@ -2773,7 +2844,7 @@
             let totalWasteRidgeSqs = (ridgeLF / ridgeLFPerSq) * mainWastePct;
 
             let totalValleyLF = valleyLF;
-            let totalDripEdgeLF = totalStarterLFWaste; // Perimeter LF is shared for starter & drip edge
+            let totalDripEdgeLF = totalStarterLFWaste;
             let nonShingleExtraSqs = 0;
             let nonShingleExtraCost = 0;
             let additionalPitchSurcharges = 0;
@@ -2930,7 +3001,7 @@
             const ridgeBundles = Math.ceil(calc.totalRidgeLFWaste / ridgeCoverageLF);
             const ridgeBundleCostTotal = ridgeBundles * ridgeCostBundle;
 
-            // Drip edge is calculated using total perimeter LF (including waste) divided by 10 LF sticks
+            // Drip edge calculated using total perimeter LF with waste divided by 10 LF stick coverage
             const dripEdgeSticks = calc.totalDripEdgeLF > 0 ? Math.ceil(calc.totalDripEdgeLF / dripEdgeCoverageLF) : 0;
             const dripEdgeCostTotal = dripEdgeSticks * dripEdgeCostStick;
 
@@ -2948,27 +3019,94 @@
             const dripText = dripEdgeSticks === 1 ? '1 stick' : `${dripEdgeSticks} sticks`;
             const valleyText = valleyRolls === 1 ? '1 roll' : `${valleyRolls} rolls`;
 
-            const lblStarter = document.getElementById('label-starter-bundles');
-            if (lblStarter) lblStarter.innerText = `Starter Bundles Cost (${starterText} @ $${starterCostBundle.toFixed(2)}/bndl):`;
-            
-            const lblDrip = document.getElementById('label-drip-bundles');
-            const outDrip = document.getElementById('out-drip-bundle-cost');
-            if (lblDrip && outDrip) {
-                lblDrip.innerText = `Drip Edge Cost (${dripText} @ $${dripEdgeCostStick.toFixed(2)}/stick):`;
-                outDrip.innerText = fmt(dripEdgeCostTotal);
+            function fmt(n) {
+                return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
+            // --- LIVE BREAKDOWN ROW VISIBILITY & LABELS (Omitting 0 Qty or $0 Costs) ---
+            const rowStarter = document.getElementById('row-starter-bundles');
+            const lblStarter = document.getElementById('label-starter-bundles');
+            if (rowStarter && lblStarter) {
+                if (starterBundles > 0 && starterBundleCostTotal > 0) {
+                    rowStarter.classList.remove('hidden');
+                    lblStarter.innerText = `Starter Bundles Cost (${starterText} @ $${starterCostBundle.toFixed(2)}/bndl):`;
+                    document.getElementById('out-starter-bundle-cost').innerText = fmt(starterBundleCostTotal);
+                } else {
+                    rowStarter.classList.add('hidden');
+                }
+            }
+
+            const rowDrip = document.getElementById('row-drip-bundles');
+            const lblDrip = document.getElementById('label-drip-bundles');
+            const outDrip = document.getElementById('out-drip-bundle-cost');
+            if (rowDrip && lblDrip && outDrip) {
+                if (dripEdgeSticks > 0 && dripEdgeCostTotal > 0) {
+                    rowDrip.classList.remove('hidden');
+                    lblDrip.innerText = `Drip Edge Cost (${dripText} @ $${dripEdgeCostStick.toFixed(2)}/stick):`;
+                    outDrip.innerText = fmt(dripEdgeCostTotal);
+                } else {
+                    rowDrip.classList.add('hidden');
+                }
+            }
+
+            const rowRidge = document.getElementById('row-ridge-bundles');
             const lblRidge = document.getElementById('label-ridge-bundles');
-            if (lblRidge) lblRidge.innerText = `Hip & Ridge Bundles Cost (${ridgeText} @ $${ridgeCostBundle.toFixed(2)}/bndl):`;
+            if (rowRidge && lblRidge) {
+                if (ridgeBundles > 0 && ridgeBundleCostTotal > 0) {
+                    rowRidge.classList.remove('hidden');
+                    lblRidge.innerText = `Hip & Ridge Bundles Cost (${ridgeText} @ $${ridgeCostBundle.toFixed(2)}/bndl):`;
+                    document.getElementById('out-ridge-bundle-cost').innerText = fmt(ridgeBundleCostTotal);
+                } else {
+                    rowRidge.classList.add('hidden');
+                }
+            }
 
+            const rowValley = document.getElementById('row-valley-bundles');
             const lblValley = document.getElementById('label-valley-bundles');
-            if (lblValley) lblValley.innerText = `Valley Rolls Cost (${valleyText}):`;
+            if (rowValley && lblValley) {
+                if (valleyRolls > 0 && valleyRollCostTotal > 0) {
+                    rowValley.classList.remove('hidden');
+                    lblValley.innerText = `Valley Rolls Cost (${valleyText}):`;
+                    document.getElementById('out-valley-bundle-cost').innerText = fmt(valleyRollCostTotal);
+                } else {
+                    rowValley.classList.add('hidden');
+                }
+            }
 
+            const rowBaseMatCard = document.getElementById('row-base-mat-card');
             const baseMatTotal = totalSqs * baseMatPerSq;
-            const miscMatTotal = flatMiscMatTotal;
-            const totalJobMaterialsCost = baseMatTotal + miscMatTotal + starterBundleCostTotal + dripEdgeCostTotal + ridgeBundleCostTotal + valleyRollCostTotal + pitchSurchargeCostTotal + calc.nonShingleExtraCost;
+            if (rowBaseMatCard) {
+                if (totalSqs > 0 && baseMatTotal > 0) {
+                    rowBaseMatCard.classList.remove('hidden');
+                    document.getElementById('out-base-mat-total').innerText = fmt(baseMatTotal);
+                } else {
+                    rowBaseMatCard.classList.add('hidden');
+                }
+            }
 
+            const rowMiscMatCard = document.getElementById('row-misc-mat-card');
+            const miscMatTotal = flatMiscMatTotal;
+            if (rowMiscMatCard) {
+                if (miscMatTotal > 0) {
+                    rowMiscMatCard.classList.remove('hidden');
+                    document.getElementById('out-misc-mat-total').innerText = fmt(miscMatTotal);
+                } else {
+                    rowMiscMatCard.classList.add('hidden');
+                }
+            }
+
+            const rowLaborCard = document.getElementById('row-labor-card');
             const crewLaborTotal = totalSqs * effectiveCrewRatePerSq;
+            if (rowLaborCard) {
+                if (crewLaborTotal > 0) {
+                    rowLaborCard.classList.remove('hidden');
+                    document.getElementById('out-labor-total').innerText = fmt(crewLaborTotal);
+                } else {
+                    rowLaborCard.classList.add('hidden');
+                }
+            }
+
+            const totalJobMaterialsCost = baseMatTotal + miscMatTotal + starterBundleCostTotal + dripEdgeCostTotal + ridgeBundleCostTotal + valleyRollCostTotal + pitchSurchargeCostTotal + calc.nonShingleExtraCost;
             const subtotalBeforeCommission = totalJobMaterialsCost + crewLaborTotal + otherDirectCosts;
 
             let contractPrice = totalSqs * sellingPricePerSq;
@@ -2983,6 +3121,16 @@
             }
 
             const commissionAmount = contractPrice * commissionRate;
+            const rowCommissionCard = document.getElementById('row-commission-card');
+            if (rowCommissionCard) {
+                if (commissionAmount > 0) {
+                    rowCommissionCard.classList.remove('hidden');
+                    document.getElementById('out-card-commission-total').innerText = fmt(commissionAmount);
+                } else {
+                    rowCommissionCard.classList.add('hidden');
+                }
+            }
+
             const totalJobCost = subtotalBeforeCommission + commissionAmount;
             const profitAmount = contractPrice - totalJobCost;
             const grossMarginPct = contractPrice > 0 ? (profitAmount / contractPrice) * 100 : 0;
@@ -2998,9 +3146,6 @@
                 : 0;
 
             const targetContractPrice = totalSqs * targetPricePerSq;
-            function fmt(n) {
-                return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            }
 
             const elMainSqs = document.getElementById('out-main-sqs');
             if (elMainSqs) elMainSqs.innerText = calc.mainWithWaste.toFixed(2);
@@ -3030,14 +3175,6 @@
             const elTotalSqs = document.getElementById('out-total-sqs');
             if (elTotalSqs) elTotalSqs.innerText = totalSqs.toFixed(2);
 
-            document.getElementById('out-labor-total').innerText = fmt(crewLaborTotal);
-            document.getElementById('out-base-mat-total').innerText = fmt(baseMatTotal);
-            document.getElementById('out-misc-mat-total').innerText = fmt(miscMatTotal);
-            document.getElementById('out-starter-bundle-cost').innerText = fmt(starterBundleCostTotal);
-            document.getElementById('out-drip-bundle-cost').innerText = fmt(dripEdgeCostTotal);
-            document.getElementById('out-ridge-bundle-cost').innerText = fmt(ridgeBundleCostTotal);
-            document.getElementById('out-valley-bundle-cost').innerText = fmt(valleyRollCostTotal);
-
             const rowExtraCostCard = document.getElementById('row-extra-roof-cost-card');
             if (rowExtraCostCard) {
                 if (calc.nonShingleExtraCost > 0) {
@@ -3059,7 +3196,6 @@
             }
 
             document.getElementById('out-total-mat-costs').innerText = fmt(totalJobMaterialsCost);
-            document.getElementById('out-card-commission-total').innerText = fmt(commissionAmount);
             document.getElementById('out-overall-job-total').innerText = fmt(totalJobCost);
 
             const cardOtherRow = document.getElementById('row-other-direct-card');
@@ -3159,7 +3295,7 @@
             renderScenarioTable(totalSqs, subtotalBeforeCommission, sellingPricePerSq, commissionRate);
             updateChart(totalJobMaterialsCost, crewLaborTotal, commissionAmount, profitAmount);
 
-            // Sync Print Proposal Sheet
+            // --- SYNC PRINT PROPOSAL SHEET (Hiding All Zero-Dollar Rows & Removed Site Logistics) ---
             const clientVal = document.getElementById('client-name')?.value || '-';
             const quoteDateVal = document.getElementById('quote-date')?.value || '-';
             const matSelect = document.getElementById('select-material');
@@ -3173,27 +3309,81 @@
             document.getElementById('print-sheet-brand').innerText = brandVal;
             document.getElementById('print-sheet-sqs').innerText = `${totalSqs.toFixed(2)} SQs`;
 
-            document.getElementById('print-table-mat-spec').innerText = `${matText}`;
-            document.getElementById('print-table-mat-qty').innerText = `${totalSqs.toFixed(2)} SQs`;
-            document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal);
-            document.getElementById('print-table-misc-subtotal').innerText = fmt(miscMatTotal);
-
-            document.getElementById('print-table-starter-qty').innerText = `${starterText} (${calc.totalStarterLFWaste.toFixed(1)} LF w/ waste)`;
-            document.getElementById('print-table-starter-cost').innerText = fmt(starterBundleCostTotal);
-
-            const printDripRow = document.getElementById('print-row-drip');
-            if (printDripRow) {
-                document.getElementById('print-table-drip-spec').innerText = `Perimeter Drip Edge Metal (${calc.totalDripEdgeLF.toFixed(1)} LF w/ waste)`;
-                document.getElementById('print-table-drip-qty').innerText = `${dripText}`;
-                document.getElementById('print-table-drip-cost').innerText = fmt(dripEdgeCostTotal);
+            // Base material row
+            const pRowBaseMat = document.getElementById('print-row-base-mat');
+            if (pRowBaseMat) {
+                if (baseMatTotal > 0 && totalSqs > 0) {
+                    pRowBaseMat.classList.remove('hidden');
+                    document.getElementById('print-table-mat-spec').innerText = `${matText}`;
+                    document.getElementById('print-table-mat-qty').innerText = `${totalSqs.toFixed(2)} SQs`;
+                    document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal);
+                } else {
+                    pRowBaseMat.classList.add('hidden');
+                }
             }
 
-            document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${calc.totalRidgeLFWaste.toFixed(1)} LF w/ waste)`;
-            document.getElementById('print-table-ridge-cost').innerText = fmt(ridgeBundleCostTotal);
+            // Misc material row
+            const pRowMisc = document.getElementById('print-row-misc-mat');
+            if (pRowMisc) {
+                if (miscMatTotal > 0) {
+                    pRowMisc.classList.remove('hidden');
+                    document.getElementById('print-table-misc-label').innerText = state.miscMaterialLabel || "Misc. Materials";
+                    document.getElementById('print-table-misc-subtotal').innerText = fmt(miscMatTotal);
+                } else {
+                    pRowMisc.classList.add('hidden');
+                }
+            }
 
-            document.getElementById('print-table-valley-qty').innerText = `${valleyText} (${calc.totalValleyLF.toFixed(1)} LF)`;
-            document.getElementById('print-table-valley-cost').innerText = fmt(valleyRollCostTotal);
+            // Starter row
+            const pRowStarter = document.getElementById('print-row-starter');
+            if (pRowStarter) {
+                if (starterBundles > 0 && starterBundleCostTotal > 0) {
+                    pRowStarter.classList.remove('hidden');
+                    document.getElementById('print-table-starter-qty').innerText = `${starterText} (${calc.totalStarterLFWaste.toFixed(1)} LF w/ waste)`;
+                    document.getElementById('print-table-starter-cost').innerText = fmt(starterBundleCostTotal);
+                } else {
+                    pRowStarter.classList.add('hidden');
+                }
+            }
 
+            // Drip edge row
+            const printDripRow = document.getElementById('print-row-drip');
+            if (printDripRow) {
+                if (dripEdgeSticks > 0 && dripEdgeCostTotal > 0) {
+                    printDripRow.classList.remove('hidden');
+                    document.getElementById('print-table-drip-spec').innerText = `Perimeter Drip Edge Metal (${calc.totalDripEdgeLF.toFixed(1)} LF w/ waste)`;
+                    document.getElementById('print-table-drip-qty').innerText = `${dripText}`;
+                    document.getElementById('print-table-drip-cost').innerText = fmt(dripEdgeCostTotal);
+                } else {
+                    printDripRow.classList.add('hidden');
+                }
+            }
+
+            // Ridge row
+            const pRowRidge = document.getElementById('print-row-ridge');
+            if (pRowRidge) {
+                if (ridgeBundles > 0 && ridgeBundleCostTotal > 0) {
+                    pRowRidge.classList.remove('hidden');
+                    document.getElementById('print-table-ridge-qty').innerText = `${ridgeText} (${calc.totalRidgeLFWaste.toFixed(1)} LF w/ waste)`;
+                    document.getElementById('print-table-ridge-cost').innerText = fmt(ridgeBundleCostTotal);
+                } else {
+                    pRowRidge.classList.add('hidden');
+                }
+            }
+
+            // Valley row
+            const pRowValley = document.getElementById('print-row-valley');
+            if (pRowValley) {
+                if (valleyRolls > 0 && valleyRollCostTotal > 0) {
+                    pRowValley.classList.remove('hidden');
+                    document.getElementById('print-table-valley-qty').innerText = `${valleyText} (${calc.totalValleyLF.toFixed(1)} LF)`;
+                    document.getElementById('print-table-valley-cost').innerText = fmt(valleyRollCostTotal);
+                } else {
+                    pRowValley.classList.add('hidden');
+                }
+            }
+
+            // Pitch surcharge row
             const printPitchRow = document.getElementById('print-row-pitch-surcharge');
             if (printPitchRow) {
                 if (pitchSurchargeCostTotal > 0) {
@@ -3206,6 +3396,7 @@
                 }
             }
 
+            // Additional non-shingle roofs
             const printAddlTbody = document.getElementById('print-additional-roofs-tbody');
             if (printAddlTbody) {
                 printAddlTbody.innerHTML = '';
@@ -3214,36 +3405,58 @@
                     const matObj = state.materials.find(m => m.id === r.type);
                     const matCostPerSq = matObj ? matObj.cost : 100.00;
                     const rSqs = parseCleanFloat(r.sqs);
+                    const directCost = parseCleanFloat(r.directCost);
+                    const finalCost = isModBit ? (rSqs * matCostPerSq) : (directCost > 0 ? directCost : rSqs * matCostPerSq);
 
-                    if (isModBit) {
-                        const modCost = (rSqs * matCostPerSq);
-                        printAddlTbody.innerHTML += `
-                            <tr>
-                                <td class="py-2 px-3 font-semibold">Flat Roof (${r.label} - Mod. Bitumen)</td>
-                                <td class="py-2 px-3">${r.dripEdgeLF ? parseCleanFloat(r.dripEdgeLF).toFixed(2) + ' LF Perimeter' : 'Mod. Bitumen Membrane'}</td>
-                                <td class="py-2 px-3 text-right">${rSqs.toFixed(2)} SQs</td>
-                                <td class="py-2 px-3 text-right font-semibold">$${modCost.toFixed(2)}</td>
-                            </tr>
-                        `;
-                    } else {
-                        const directCost = parseCleanFloat(r.directCost);
-                        printAddlTbody.innerHTML += `
-                            <tr>
-                                <td class="py-2 px-3 font-semibold">Specialty Roof (${r.label} - ${matObj ? formatMaterialLabel(matObj) : 'Metal/Flat'})</td>
-                                <td class="py-2 px-3">Direct Package Expense</td>
-                                <td class="py-2 px-3 text-right">${rSqs > 0 ? rSqs.toFixed(2) + ' SQs' : '-'}</td>
-                                <td class="py-2 px-3 text-right font-semibold">$${(directCost > 0 ? directCost : rSqs * matCostPerSq).toFixed(2)}</td>
-                            </tr>
-                        `;
+                    if (finalCost > 0) {
+                        if (isModBit) {
+                            printAddlTbody.innerHTML += `
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold">Flat Roof (${r.label} - Mod. Bitumen)</td>
+                                    <td class="py-2 px-3">${r.dripEdgeLF ? parseCleanFloat(r.dripEdgeLF).toFixed(2) + ' LF Perimeter' : 'Mod. Bitumen Membrane'}</td>
+                                    <td class="py-2 px-3 text-right">${rSqs.toFixed(2)} SQs</td>
+                                    <td class="py-2 px-3 text-right font-semibold">$${finalCost.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        } else {
+                            printAddlTbody.innerHTML += `
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold">Specialty Roof (${r.label} - ${matObj ? formatMaterialLabel(matObj) : 'Metal/Flat'})</td>
+                                    <td class="py-2 px-3">Direct Package Expense</td>
+                                    <td class="py-2 px-3 text-right">${rSqs > 0 ? rSqs.toFixed(2) + ' SQs' : '-'}</td>
+                                    <td class="py-2 px-3 text-right font-semibold">$${finalCost.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        }
                     }
                 });
             }
 
-            document.getElementById('print-table-crews').innerText = selectedLeaders.map(l => l.name).join(', ') || 'Standard Subcontractor';
-            document.getElementById('print-table-crew-rate').innerText = `@ ${fmt(effectiveCrewRatePerSq)} / SQ`;
-            document.getElementById('print-table-labor-subtotal').innerText = fmt(crewLaborTotal);
+            // Labor row
+            const pRowLabor = document.getElementById('print-row-labor');
+            if (pRowLabor) {
+                if (crewLaborTotal > 0) {
+                    pRowLabor.classList.remove('hidden');
+                    document.getElementById('print-table-crews').innerText = selectedLeaders.map(l => l.name).join(', ') || 'Standard Subcontractor';
+                    document.getElementById('print-table-crew-rate').innerText = `@ ${fmt(effectiveCrewRatePerSq)} / SQ`;
+                    document.getElementById('print-table-labor-subtotal').innerText = fmt(crewLaborTotal);
+                } else {
+                    pRowLabor.classList.add('hidden');
+                }
+            }
 
-            document.getElementById('print-table-other-cost').innerText = fmt(otherDirectCosts);
+            // Other direct costs row (Only shown if cost > 0; generic Site Logistics & Disposal is eliminated)
+            const pRowOtherDirect = document.getElementById('print-row-other-direct');
+            if (pRowOtherDirect) {
+                if (otherDirectCosts > 0) {
+                    pRowOtherDirect.classList.remove('hidden');
+                    document.getElementById('print-table-other-label').innerText = state.otherDirectLabel || "Other Direct Costs";
+                    document.getElementById('print-table-other-cost').innerText = fmt(otherDirectCosts);
+                } else {
+                    pRowOtherDirect.classList.add('hidden');
+                }
+            }
+
             document.getElementById('print-table-contract-total').innerText = fmt(contractPrice);
         }
 
