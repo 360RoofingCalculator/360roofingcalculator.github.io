@@ -280,7 +280,7 @@
                     <!-- CONTAINER FOR DYNAMIC ADDITIONAL ROOFS (2A, 2B, 2C, 2D, 2E) -->
                     <div id="additional-roofs-container" class="space-y-4"></div>
 
-                    <!-- CARD 3: MATERIAL & PRODUCTION ASSUMPTIONS -->
+                    <!-- CARD 3: MATERIAL & PRODUCTION ASSUMPTIONS (UPDATED) -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-200 space-y-4">
                         <div class="flex items-center justify-between border-b pb-3">
                             <h2 class="font-semibold text-amber-900 flex items-center gap-2">
@@ -297,18 +297,18 @@
                             </div>
 
                             <div>
-                                <label class="block font-medium text-slate-600 mb-1">Misc Material / SQ ($)</label>
-                                <input type="text" id="cost-misc-material" value="20.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <label class="block font-medium text-slate-600 mb-1">Misc Material Cost ($)</label>
+                                <input type="text" id="cost-misc-material" value="0.00" placeholder="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <div>
-                                <label class="block font-medium text-slate-600 mb-1">Starter Cost / Bundle ($)</label>
-                                <input type="text" id="starter-cost-bundle" value="50.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <label class="block font-medium text-slate-600 mb-1">Starter Cost / SQ ($)</label>
+                                <input type="text" id="starter-cost-sq" value="150.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800" title="Starter price per square. Bundle cost is calculated as $/SQ ÷ 3">
                             </div>
 
                             <div>
-                                <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Cost / Bundle ($)</label>
-                                <input type="text" id="ridge-cost-bundle" value="65.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <label class="block font-medium text-slate-600 mb-1">Hip & Ridge Cost / SQ ($)</label>
+                                <input type="text" id="ridge-cost-sq" value="125.85" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800" title="Hip & Ridge price per square. Bundle cost is calculated as $/SQ ÷ 3">
                             </div>
 
                             <div>
@@ -691,10 +691,16 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-slate-800" id="print-line-items-body">
                         <tr>
-                            <td class="py-2 px-3 font-semibold">Base & Misc Roofing Material</td>
+                            <td class="py-2 px-3 font-semibold">Base Roofing Material</td>
                             <td class="py-2 px-3" id="print-table-mat-spec">Main Roof Material</td>
                             <td class="py-2 px-3 text-right" id="print-table-mat-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-mat-subtotal">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-semibold">Misc. Job Materials</td>
+                            <td class="py-2 px-3">Lump-Sum Direct Materials</td>
+                            <td class="py-2 px-3 text-right">-</td>
+                            <td class="py-2 px-3 text-right font-semibold" id="print-table-misc-subtotal">-</td>
                         </tr>
                         <tr>
                             <td class="py-2 px-3 font-semibold">Perimeter Starter Shingles</td>
@@ -797,7 +803,7 @@
                     </table>
                 </div>
 
-                <!-- BUNDLE LOGIC COVERAGE & CONVERSIONS -->
+                <!-- BUNDLE LOGIC COVERAGE & CONVERSIONS (UPDATED WITH $/SQ PRICES) -->
                 <div class="border-t pt-6 space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <div>
@@ -805,7 +811,7 @@
                                 <i data-lucide="sliders" class="w-4 h-4 text-amber-600"></i>
                                 Bundle Logic & Coverage Specifications
                             </h3>
-                            <p class="text-xs text-slate-500">Configure coverage per bundle and LF conversions for Starter, Hip & Ridge caps, and Valleys.</p>
+                            <p class="text-xs text-slate-500">Configure coverage per bundle, LF conversions, and default $/SQ pricing for Starter, Hip & Ridge, and Valleys.</p>
                         </div>
                         <button onclick="saveBundleSettings()" class="px-3.5 py-1.5 text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg flex items-center space-x-1.5 transition shadow">
                             <i data-lucide="save" class="w-3.5 h-3.5"></i>
@@ -814,10 +820,11 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Starter Box -->
                         <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
                             <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
                                 <i data-lucide="box" class="w-3.5 h-3.5 text-amber-600"></i>
-                                Starter Shingles Coverage
+                                Starter Shingles Specs
                             </h4>
                             <div class="space-y-3 text-xs">
                                 <div>
@@ -828,13 +835,18 @@
                                     <label class="block font-medium text-slate-600 mb-1">Starter LF / SQ Equivalent</label>
                                     <input type="text" id="tab-bundle-starter-equiv" value="225.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
+                                <div>
+                                    <label class="block font-medium text-amber-900 mb-1">Default Starter Price / SQ ($)</label>
+                                    <input type="text" id="tab-bundle-starter-price-sq" value="150.00" oninput="onTabBundlePriceChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-400 bg-white rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-500" title="Updates Starter Cost / SQ in Assumptions and cloud sync">
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Hip & Ridge Box -->
                         <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
                             <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
                                 <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-600"></i>
-                                Hip & Ridge Caps Coverage
+                                Hip & Ridge Caps Specs
                             </h4>
                             <div class="space-y-3 text-xs">
                                 <div>
@@ -845,9 +857,14 @@
                                     <label class="block font-medium text-slate-600 mb-1">Hip & Ridge LF / SQ Equivalent</label>
                                     <input type="text" id="tab-bundle-ridge-equiv" value="72.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
                                 </div>
+                                <div>
+                                    <label class="block font-medium text-amber-900 mb-1">Default Hip & Ridge Price / SQ ($)</label>
+                                    <input type="text" id="tab-bundle-ridge-price-sq" value="125.85" oninput="onTabBundlePriceChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-400 bg-white rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-500" title="Updates Hip & Ridge Cost / SQ in Assumptions and cloud sync">
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Valley Box -->
                         <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
                             <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
                                 <i data-lucide="git-commit" class="w-3.5 h-3.5 text-amber-600"></i>
@@ -1199,7 +1216,6 @@
             }
         }
 
-        // --- ADDITIONAL ROOFS INTERACTIVE EVENT HANDLERS ---
         function updateRoofProp(id, prop, val) {
             const roof = state.additionalRoofs.find(r => r.id === id);
             if (roof) {
@@ -1279,8 +1295,10 @@
         const DEFAULT_BUNDLE_SPECS = {
             starterCoverage: 120.00,
             starterEquiv: 225.00,
+            starterPriceSq: 150.00,
             ridgeCoverage: 24.00,
             ridgeEquiv: 72.00,
+            ridgePriceSq: 125.85,
             valleyCoverage: 50.00
         };
 
@@ -1315,6 +1333,8 @@
                 const stored = localStorage.getItem('360_roofing_bundle_specs');
                 const parsed = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
                 if (!parsed.valleyCoverage) parsed.valleyCoverage = 50.00;
+                if (!parsed.starterPriceSq) parsed.starterPriceSq = 150.00;
+                if (!parsed.ridgePriceSq) parsed.ridgePriceSq = 125.85;
                 return parsed;
             } catch (e) {
                 return JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
@@ -1356,6 +1376,13 @@
             renderCrewTable();
             renderCrewLeaderMultiSelect();
             initChart();
+
+            if (state.bundleSpecs.starterPriceSq) {
+                document.getElementById('starter-cost-sq').value = Number(state.bundleSpecs.starterPriceSq).toFixed(2);
+            }
+            if (state.bundleSpecs.ridgePriceSq) {
+                document.getElementById('ridge-cost-sq').value = Number(state.bundleSpecs.ridgePriceSq).toFixed(2);
+            }
 
             setJobMode('insurance');
             checkURLParamsForSharedQuote();
@@ -1616,6 +1643,14 @@
                     renderMasterTable();
                     renderCrewTable();
                     renderCrewLeaderMultiSelect();
+
+                    if (state.bundleSpecs.starterPriceSq) {
+                        document.getElementById('starter-cost-sq').value = Number(state.bundleSpecs.starterPriceSq).toFixed(2);
+                    }
+                    if (state.bundleSpecs.ridgePriceSq) {
+                        document.getElementById('ridge-cost-sq').value = Number(state.bundleSpecs.ridgePriceSq).toFixed(2);
+                    }
+
                     calculateEstimate();
                 }
             } catch (e) {
@@ -1822,25 +1857,44 @@
             const b = state.bundleSpecs;
             document.getElementById('tab-bundle-starter-coverage').value = b.starterCoverage.toFixed(2);
             document.getElementById('tab-bundle-starter-equiv').value = b.starterEquiv.toFixed(2);
+            document.getElementById('tab-bundle-starter-price-sq').value = (b.starterPriceSq || 150.00).toFixed(2);
             document.getElementById('tab-bundle-ridge-coverage').value = b.ridgeCoverage.toFixed(2);
             document.getElementById('tab-bundle-ridge-equiv').value = b.ridgeEquiv.toFixed(2);
+            document.getElementById('tab-bundle-ridge-price-sq').value = (b.ridgePriceSq || 125.85).toFixed(2);
             document.getElementById('tab-bundle-valley-coverage').value = (b.valleyCoverage || 50.00).toFixed(2);
+        }
+
+        function onTabBundlePriceChange() {
+            const starterPriceSq = parseCleanFloat(document.getElementById('tab-bundle-starter-price-sq').value);
+            const ridgePriceSq = parseCleanFloat(document.getElementById('tab-bundle-ridge-price-sq').value);
+            
+            document.getElementById('starter-cost-sq').value = starterPriceSq.toFixed(2);
+            document.getElementById('ridge-cost-sq').value = ridgePriceSq.toFixed(2);
+            
+            calculateEstimate();
         }
 
         async function saveBundleSettings() {
             state.bundleSpecs = {
                 starterCoverage: parseCleanFloat(document.getElementById('tab-bundle-starter-coverage').value) || 120.00,
                 starterEquiv: parseCleanFloat(document.getElementById('tab-bundle-starter-equiv').value) || 225.00,
+                starterPriceSq: parseCleanFloat(document.getElementById('tab-bundle-starter-price-sq').value) || 150.00,
                 ridgeCoverage: parseCleanFloat(document.getElementById('tab-bundle-ridge-coverage').value) || 24.00,
                 ridgeEquiv: parseCleanFloat(document.getElementById('tab-bundle-ridge-equiv').value) || 72.00,
+                ridgePriceSq: parseCleanFloat(document.getElementById('tab-bundle-ridge-price-sq').value) || 125.85,
                 valleyCoverage: parseCleanFloat(document.getElementById('tab-bundle-valley-coverage').value) || 50.00
             };
+            
+            // Sync with Card 3 inputs
+            document.getElementById('starter-cost-sq').value = state.bundleSpecs.starterPriceSq.toFixed(2);
+            document.getElementById('ridge-cost-sq').value = state.bundleSpecs.ridgePriceSq.toFixed(2);
+
             try {
                 localStorage.setItem('360_roofing_bundle_specs', JSON.stringify(state.bundleSpecs));
             } catch (e) {}
             await pushGlobalSettingsToCloud();
             calculateEstimate();
-            showToast('Bundle Coverage Specs Saved to Cloud!');
+            showToast('Bundle Coverage & Price Specs Saved to Cloud!');
         }
 
         function triggerPrintQuote() {
@@ -1963,8 +2017,8 @@
                 crewCalcMode: document.getElementById('select-crew-calc-mode').value,
                 baseMaterialCost: document.getElementById('cost-base-material').value,
                 miscMaterialCost: document.getElementById('cost-misc-material').value,
-                starterCostBundle: document.getElementById('starter-cost-bundle').value,
-                ridgeCostBundle: document.getElementById('ridge-cost-bundle').value,
+                starterCostSq: document.getElementById('starter-cost-sq').value,
+                ridgeCostSq: document.getElementById('ridge-cost-sq').value,
                 valleyCostBundle: document.getElementById('valley-cost-bundle').value,
                 targetMargin: document.getElementById('cost-target-margin').value,
                 bundleSpecs: JSON.parse(JSON.stringify(state.bundleSpecs)),
@@ -2004,9 +2058,9 @@
             document.getElementById('select-crew-calc-mode').value = d.crewCalcMode || 'average';
 
             document.getElementById('cost-base-material').value = d.baseMaterialCost || '92.00';
-            document.getElementById('cost-misc-material').value = d.miscMaterialCost || '20.00';
-            document.getElementById('starter-cost-bundle').value = d.starterCostBundle || '50.00';
-            document.getElementById('ridge-cost-bundle').value = d.ridgeCostBundle || '65.00';
+            document.getElementById('cost-misc-material').value = d.miscMaterialCost !== undefined ? d.miscMaterialCost : '0.00';
+            document.getElementById('starter-cost-sq').value = d.starterCostSq || (d.starterCostBundle ? (parseCleanFloat(d.starterCostBundle) * 3).toFixed(2) : '150.00');
+            document.getElementById('ridge-cost-sq').value = d.ridgeCostSq || (d.ridgeCostBundle ? (parseCleanFloat(d.ridgeCostBundle) * 3).toFixed(2) : '125.85');
             document.getElementById('valley-cost-bundle').value = d.valleyCostBundle || '55.00';
             document.getElementById('cost-target-margin').value = d.targetMargin || '35.00';
 
@@ -2059,9 +2113,9 @@
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
 
-            document.getElementById('cost-misc-material').value = "20.00";
-            document.getElementById('starter-cost-bundle').value = "50.00";
-            document.getElementById('ridge-cost-bundle').value = "65.00";
+            document.getElementById('cost-misc-material').value = "0.00";
+            document.getElementById('starter-cost-sq').value = (state.bundleSpecs.starterPriceSq || 150.00).toFixed(2);
+            document.getElementById('ridge-cost-sq').value = (state.bundleSpecs.ridgePriceSq || 125.85).toFixed(2);
             document.getElementById('valley-cost-bundle').value = "55.00";
             document.getElementById('cost-target-margin').value = "35.00";
 
@@ -2104,9 +2158,9 @@
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
 
-            document.getElementById('cost-misc-material').value = "20.00";
-            document.getElementById('starter-cost-bundle').value = "50.00";
-            document.getElementById('ridge-cost-bundle').value = "65.00";
+            document.getElementById('cost-misc-material').value = "0.00";
+            document.getElementById('starter-cost-sq').value = (state.bundleSpecs.starterPriceSq || 150.00).toFixed(2);
+            document.getElementById('ridge-cost-sq').value = (state.bundleSpecs.ridgePriceSq || 125.85).toFixed(2);
             document.getElementById('valley-cost-bundle').value = "55.00";
             document.getElementById('cost-target-margin').value = "35.00";
 
@@ -2464,7 +2518,6 @@
         }
 
         // --- CORE REUSABLE AGGREGATION ENGINE ---
-        // Seamlessly combines Main Roof and ALL Additional Roofs (2A to 2E) into common totals
         function computeTotalSquaresAndBundles() {
             const mainBaseSqs = parseCleanFloat(document.getElementById('input-sqs')?.value);
             const ridgeLF = parseCleanFloat(document.getElementById('input-ridge')?.value);
@@ -2495,7 +2548,7 @@
             let nonShingleExtraCost = 0;
             let additionalPitchSurcharges = 0;
 
-            // Iterate over all active additional roofs (2A to 2E) and add directly into line items
+            // Iterate over all active additional roofs (2A to 2E)
             state.additionalRoofs.forEach(r => {
                 const isShingle = isShingleType(r.type);
                 const isModBit = (r.type === 'mod_bit' || r.type.includes('modified') || r.type.includes('bitumen'));
@@ -2612,9 +2665,14 @@
 
             // Material Assumptions
             const baseMatPerSq = parseCleanFloat(document.getElementById('cost-base-material')?.value);
-            const miscMatPerSq = parseCleanFloat(document.getElementById('cost-misc-material')?.value);
-            const starterCostBundle = parseCleanFloat(document.getElementById('starter-cost-bundle')?.value);
-            const ridgeCostBundle = parseCleanFloat(document.getElementById('ridge-cost-bundle')?.value);
+            const flatMiscMatTotal = parseCleanFloat(document.getElementById('cost-misc-material')?.value);
+            
+            // Starter & Hip/Ridge: input in $/SQ, converted to bundle cost by dividing by 3
+            const starterPriceSq = parseCleanFloat(document.getElementById('starter-cost-sq')?.value);
+            const ridgePriceSq = parseCleanFloat(document.getElementById('ridge-cost-sq')?.value);
+            const starterCostBundle = starterPriceSq > 0 ? (starterPriceSq / 3) : 0;
+            const ridgeCostBundle = ridgePriceSq > 0 ? (ridgePriceSq / 3) : 0;
+
             const valleyCostBundle = parseCleanFloat(document.getElementById('valley-cost-bundle')?.value);
             const targetMargin = (parseCleanFloat(document.getElementById('cost-target-margin')?.value) || 35.0) / 100;
 
@@ -2670,15 +2728,15 @@
             const valleyText = valleyBundles === 1 ? '1 bundle' : `${valleyBundles} bundles`;
 
             const lblStarter = document.getElementById('label-starter-bundles');
-            if (lblStarter) lblStarter.innerText = `Starter Bundles Cost (${starterText}):`;
+            if (lblStarter) lblStarter.innerText = `Starter Bundles Cost (${starterText} @ $${starterCostBundle.toFixed(2)}/bndl):`;
             const lblRidge = document.getElementById('label-ridge-bundles');
-            if (lblRidge) lblRidge.innerText = `Hip & Ridge Bundles Cost (${ridgeText}):`;
+            if (lblRidge) lblRidge.innerText = `Hip & Ridge Bundles Cost (${ridgeText} @ $${ridgeCostBundle.toFixed(2)}/bndl):`;
             const lblValley = document.getElementById('label-valley-bundles');
             if (lblValley) lblValley.innerText = `Valley Bundles Cost (${valleyText}):`;
 
             // Material Totals
             const baseMatTotal = totalSqs * baseMatPerSq;
-            const miscMatTotal = totalSqs * miscMatPerSq;
+            const miscMatTotal = flatMiscMatTotal; // Flat entered lump sum directly
             const totalJobMaterialsCost = baseMatTotal + miscMatTotal + starterBundleCostTotal + ridgeBundleCostTotal + valleyBundleCostTotal + pitchSurchargeCostTotal + calc.nonShingleExtraCost;
 
             // Labor & Costs
@@ -2715,7 +2773,7 @@
             const targetContractPrice = totalSqs * targetPricePerSq;
             const fmt = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            // UI Updates - Measurement Outputs (All Additional Roofs aggregated directly into lines)
+            // UI Updates - Measurement Outputs
             const elMainSqs = document.getElementById('out-main-sqs');
             if (elMainSqs) elMainSqs.innerText = calc.mainWithWaste.toFixed(2);
             const elMainDetail = document.getElementById('out-main-sqs-detail');
@@ -2889,7 +2947,8 @@
 
             document.getElementById('print-table-mat-spec').innerText = `${matText} (${brandVal})`;
             document.getElementById('print-table-mat-qty').innerText = `${totalSqs.toFixed(2)} SQs`;
-            document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal + miscMatTotal);
+            document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal);
+            document.getElementById('print-table-misc-subtotal').innerText = fmt(miscMatTotal);
 
             document.getElementById('print-table-starter-qty').innerText = `${starterText} (${calc.totalStarterLFWaste.toFixed(1)} LF w/ waste)`;
             document.getElementById('print-table-starter-cost').innerText = fmt(starterBundleCostTotal);
