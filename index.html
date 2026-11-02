@@ -65,7 +65,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight">360 Roofing Price Calculator</h1>
-                    <p class="text-xs text-slate-400">Precision Roof Price, Materials & Bundle Engine</p>
+                    <p class="text-xs text-slate-400">Precision Roof Price, Materials & Production Engine</p>
                 </div>
             </div>
 
@@ -86,7 +86,13 @@
             </nav>
 
             <div class="flex items-center space-x-2">
-                <button onclick="newCalculation()" class="px-2.5 py-1.5 text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Start a fresh clear job">
+                <button onclick="undo()" class="px-2 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center space-x-1 transition border border-slate-700" title="Undo (Ctrl + Z)">
+                    <i data-lucide="undo" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="redo()" class="px-2 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center space-x-1 transition border border-slate-700" title="Redo (Ctrl + Y)">
+                    <i data-lucide="redo" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="newCalculation()" class="px-2.5 py-1.5 text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Start fresh clear job">
                     <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
                     <span>New</span>
                 </button>
@@ -94,7 +100,7 @@
                     <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
                     <span>Save to Cloud</span>
                 </button>
-                <button onclick="openHistoryModal()" class="px-2.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="View cloud saved calculation history">
+                <button onclick="openHistoryModal()" class="px-2.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="View cloud calculation history">
                     <i data-lucide="history" class="w-3.5 h-3.5"></i>
                     <span>History</span>
                 </button>
@@ -130,11 +136,11 @@
                 <div class="flex flex-wrap items-center gap-3 text-xs flex-1 max-w-2xl">
                     <div class="flex-1 min-w-[180px]">
                         <label class="block text-slate-500 font-medium mb-0.5">Customer - Address</label>
-                        <input type="text" id="client-name" value="(Type Customer's Name & Address)" placeholder="(Type Customer's Name & Address)" oninput="calculateEstimate()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                        <input type="text" id="client-name" value="(Type Customer's Name & Address)" placeholder="(Type Customer's Name & Address)" oninput="handleParamChange()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
                     </div>
                     <div class="w-36">
                         <label class="block text-slate-500 font-medium mb-0.5">Quote Date</label>
-                        <input type="date" id="quote-date" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                        <input type="date" id="quote-date" onchange="handleParamChange()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
                     </div>
                 </div>
 
@@ -150,33 +156,20 @@
                 <!-- LEFT COLUMN -->
                 <div class="lg:col-span-7 space-y-6">
 
-                    <!-- CARD 1: BRAND & MATERIAL TYPE -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                    <!-- CARD 1: ROOF SPECS (Component brand removed & simplified) -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
                         <div class="flex items-center justify-between border-b pb-3">
                             <h2 class="font-semibold text-slate-800 flex items-center gap-2">
                                 <i data-lucide="layers" class="w-5 h-5 text-sky-600"></i>
-                                1. Roof Material & Brand Component
+                                1. Roof Specifications
                             </h2>
                             <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">System Specs</span>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Component Brand</label>
-                                <select id="select-brand" onchange="calculateEstimate()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                                    <option value="IKO Cambridge">IKO Cambridge</option>
-                                    <option value="CertainTeed">CertainTeed</option>
-                                    <option value="Owens Corning">Owens Corning</option>
-                                    <option value="GAF">GAF Materials</option>
-                                    <option value="Generic Metal">Generic Metal / Rollformer</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Type of Roof</label>
-                                <select id="select-material" onchange="onMaterialChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                                </select>
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Roof Specs</label>
+                            <select id="select-material" onchange="onMaterialChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            </select>
                         </div>
                     </div>
 
@@ -200,30 +193,30 @@
                             <!-- 1. Main Roof Squares -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Main Roof Squares</label>
-                                <input type="text" id="input-sqs" value="20.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <input type="text" id="input-sqs" value="20.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
 
                             <!-- 2. Perimeter LF (Starter/Drip Edge) -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Perimeter LF (Starter/Drip Edge)</label>
-                                <input type="text" id="input-starter" value="250.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <input type="text" id="input-starter" value="250.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
 
                             <!-- 3. Hip & Ridge LF -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Hip & Ridge LF</label>
-                                <input type="text" id="input-ridge" value="180.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <input type="text" id="input-ridge" value="180.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             </div>
 
                             <!-- 4. Valley LF -->
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Valley LF</label>
-                                <input type="text" id="input-valley" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
+                                <input type="text" id="input-valley" value="0.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Roof Pitch</label>
-                                <select id="select-roof-pitch" onchange="calculateEstimate()" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-2 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <select id="select-roof-pitch" onchange="handleParamChange()" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl px-2 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                     <option value="pitch_0_2">0/12 - 2/12 (Flat / Low Slope)</option>
                                     <option value="pitch_3_6" selected>3/12 - 6/12 (Walkable / Standard)</option>
                                     <option value="pitch_7_9">7/12 - 9/12 (Steep Slope)</option>
@@ -234,13 +227,13 @@
 
                             <div id="container-pitch-sqs" class="hidden">
                                 <label class="block text-xs font-medium text-amber-700 mb-1">Affected Pitch SQs</label>
-                                <input type="text" id="input-pitch-sqs" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/50 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Leave blank or 0 to apply pitch charge to total roof squares">
+                                <input type="text" id="input-pitch-sqs" value="0.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/50 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Leave blank or 0 to apply pitch charge to total roof squares">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Waste %</label>
                                 <div class="relative">
-                                    <input type="text" id="input-waste" value="10.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <input type="text" id="input-waste" value="10.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                     <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
                                 </div>
                             </div>
@@ -256,7 +249,7 @@
                             <div>
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Sales Commission %</label>
                                 <div class="relative">
-                                    <input type="text" id="input-commission-rate" value="15.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <input type="text" id="input-commission-rate" value="15.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                     <span class="absolute right-3 top-2.5 text-xs text-slate-400">%</span>
                                 </div>
                             </div>
@@ -278,13 +271,13 @@
                                 </div>
                                 <div class="relative">
                                     <span class="absolute left-3 top-2 text-xs text-slate-400">$</span>
-                                    <input type="text" id="input-other-direct" value="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                    <input type="text" id="input-other-direct" value="0.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-emerald-300 bg-emerald-50/40 rounded-xl pl-7 pr-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                 </div>
                             </div>
 
                             <div class="col-span-2 md:col-span-3">
                                 <label class="block text-xs font-medium text-slate-600 mb-1">Project Notes</label>
-                                <input type="text" id="input-notes" value="Standard replacement" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                                <input type="text" id="input-notes" value="Standard replacement" oninput="handleParamChange()" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
                             </div>
                         </div>
                     </div>
@@ -306,7 +299,7 @@
                             <!-- 1. Base Material / SQ -->
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Base Material / SQ ($)</label>
-                                <input type="text" id="cost-base-material" value="92.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="cost-base-material" value="92.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <!-- 2. Misc Material Cost with Inline Rename -->
@@ -324,7 +317,7 @@
                                         <button type="button" onclick="cancelRenamingMiscMaterial()" class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold hover:bg-slate-300" title="Cancel">✕</button>
                                     </div>
                                 </div>
-                                <input type="text" id="cost-misc-material" value="0.00" placeholder="0.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="cost-misc-material" value="0.00" placeholder="0.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 25)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 25)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <!-- 3. Starter Cost / Bundle -->
@@ -348,14 +341,14 @@
                             <!-- 6. Valley Cost / Roll -->
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Valley Cost / Roll ($)</label>
-                                <input type="text" id="valley-cost-bundle" value="55.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="valley-cost-bundle" value="55.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
                             </div>
 
                             <!-- Target Margin % -->
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Target Margin %</label>
                                 <div class="relative">
-                                    <input type="text" id="cost-target-margin" value="35.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-800">
+                                    <input type="text" id="cost-target-margin" value="35.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 1)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 1)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl pl-3 pr-8 py-2 text-sm font-bold text-slate-800">
                                     <span class="absolute right-3 top-2 text-xs text-slate-400">%</span>
                                 </div>
                             </div>
@@ -371,7 +364,7 @@
                             </h2>
                             <div class="flex items-center space-x-2">
                                 <label for="select-crew-calc-mode" class="text-xs text-slate-500 font-medium hidden sm:inline">Calculation Mode:</label>
-                                <select id="select-crew-calc-mode" onchange="calculateEstimate()" class="text-xs bg-sky-50 text-sky-900 border border-sky-200 rounded-lg px-2 py-1 font-bold focus:outline-none">
+                                <select id="select-crew-calc-mode" onchange="handleParamChange()" class="text-xs bg-sky-50 text-sky-900 border border-sky-200 rounded-lg px-2 py-1 font-bold focus:outline-none">
                                     <option value="average">Average Selected Rates</option>
                                     <option value="cumulative">Combined / Cumulative Rates</option>
                                 </select>
@@ -423,7 +416,7 @@
                 <!-- RIGHT COLUMN: OUTPUTS & CHART -->
                 <div class="lg:col-span-5 space-y-6">
 
-                    <!-- MEASUREMENT OUTPUTS CARD -->
+                    <!-- MEASUREMENT OUTPUTS CARD (WITH MANUAL CALIBRATION / VARIANCE INPUT) -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
                             <span>Measurement Outputs</span>
@@ -459,7 +452,18 @@
                                 <span class="font-bold text-slate-900" id="out-extra-sqs">0.00</span>
                             </div>
 
-                            <div class="flex justify-between font-extrabold text-slate-900 bg-slate-100 p-2 rounded-lg text-sm mt-1">
+                            <!-- TECHNICAL MANUAL SQUARES CALIBRATION / VARIANCE -->
+                            <div class="flex justify-between items-center bg-sky-50/50 p-2 rounded-xl border border-sky-100">
+                                <div>
+                                    <span class="font-bold text-slate-700 block">Manual Squares Calibration (Variance)</span>
+                                    <span class="text-[10px] text-slate-400">Add (+) or deduct (-) SQs to match target total</span>
+                                </div>
+                                <div class="w-24">
+                                    <input type="text" id="input-sq-calibration" value="0.00" placeholder="0.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 0.33)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 0.33)" class="w-full text-right border border-sky-300 bg-white rounded-lg px-2 py-1 text-xs font-black text-sky-900 focus:outline-none focus:ring-1 focus:ring-sky-500">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between font-extrabold text-slate-900 bg-slate-100 p-2.5 rounded-lg text-sm mt-1">
                                 <span>TOTAL SQUARES:</span><span id="out-total-sqs">26.66</span>
                             </div>
                         </div>
@@ -709,10 +713,6 @@
                     <div>
                         <span class="block text-slate-500 font-medium">Selected Material:</span>
                         <span class="font-bold text-slate-900" id="print-sheet-mat">-</span>
-                    </div>
-                    <div>
-                        <span class="block text-slate-500 font-medium">Component Brand:</span>
-                        <span class="font-bold text-slate-900" id="print-sheet-brand">-</span>
                     </div>
                     <div>
                         <span class="block text-slate-500 font-medium">Total Work Squares:</span>
@@ -1093,6 +1093,68 @@
         const SUPABASE_KEY = "sb_publishable_sP5Uzrl2cRF06qIUVqXbSA_-Id9Rv9d";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // --- UNDO / REDO STATE STACK ---
+        const undoStack = [];
+        const redoStack = [];
+        let isUndoRedoAction = false;
+        let snapshotDebounce = null;
+
+        function recordSnapshot() {
+            if (isUndoRedoAction) return;
+            clearTimeout(snapshotDebounce);
+            snapshotDebounce = setTimeout(() => {
+                const snapshot = JSON.stringify(getSnapshotData());
+                if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== snapshot) {
+                    undoStack.push(snapshot);
+                    if (undoStack.length > 50) undoStack.shift();
+                    redoStack.length = 0;
+                }
+            }, 250);
+        }
+
+        function undo() {
+            if (undoStack.length <= 1) {
+                showToast("Nothing to undo.");
+                return;
+            }
+            const current = undoStack.pop();
+            redoStack.push(current);
+            const prev = undoStack[undoStack.length - 1];
+            isUndoRedoAction = true;
+            loadSnapshotData(JSON.parse(prev));
+            isUndoRedoAction = false;
+            showToast("Undo performed");
+        }
+
+        function redo() {
+            if (redoStack.length === 0) {
+                showToast("Nothing to redo.");
+                return;
+            }
+            const next = redoStack.pop();
+            undoStack.push(next);
+            isUndoRedoAction = true;
+            loadSnapshotData(JSON.parse(next));
+            isUndoRedoAction = false;
+            showToast("Redo performed");
+        }
+
+        // Keyboard Shortcut Listener for Ctrl+Z and Ctrl+Y
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                if (e.shiftKey) {
+                    e.preventDefault();
+                    redo();
+                } else {
+                    e.preventDefault();
+                    undo();
+                }
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+                e.preventDefault();
+                redo();
+            }
+        });
+
         function handleInputFocus(el) {
             if (!el) return;
             const val = el.value ? el.value.trim() : "";
@@ -1160,12 +1222,17 @@
             }
         }
 
+        function handleParamChange() {
+            calculateEstimate();
+            recordSnapshot();
+        }
+
         function evaluateMathExpression(el) {
             if (!el || !el.value) return;
             let val = el.value.trim().toLowerCase().replace(/x/g, '*').replace(/,/g, '');
             const result = safeComputeMath(val);
             el.value = result.toFixed(2);
-            calculateEstimate();
+            handleParamChange();
         }
 
         function evaluateMathExpressionInEl(el) {
@@ -1182,10 +1249,10 @@
             if (event.deltaY < 0) {
                 currentVal += step;
             } else if (event.deltaY > 0) {
-                currentVal = Math.max(0, currentVal - step);
+                currentVal = currentVal - step;
             }
             el.value = currentVal.toFixed(2);
-            calculateEstimate();
+            handleParamChange();
         }
 
         function handleWheelScrollOverride(event, el, step) {
@@ -1201,6 +1268,7 @@
             state.isOverrideLocked = true;
             document.getElementById('chk-lock-contract').checked = true;
             evaluateOverrideMath();
+            recordSnapshot();
         }
 
         function handleWheelScrollSellingPriceOutput(event, el, step) {
@@ -1221,12 +1289,12 @@
                 event.preventDefault();
                 let currentVal = parseCleanFloat(el.value) + step;
                 el.value = currentVal.toFixed(2);
-                calculateEstimate();
+                handleParamChange();
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
-                let currentVal = Math.max(0, parseCleanFloat(el.value) - step);
+                let currentVal = parseCleanFloat(el.value) - step;
                 el.value = currentVal.toFixed(2);
-                calculateEstimate();
+                handleParamChange();
             } else if (event.key === 'Enter') {
                 evaluateMathExpression(el);
             }
@@ -1288,7 +1356,7 @@
             const roof = state.additionalRoofs.find(r => r.id === id);
             if (roof) {
                 roof[prop] = val;
-                calculateEstimate();
+                handleParamChange();
             }
         }
 
@@ -1334,7 +1402,7 @@
             if (roof) {
                 roof.pitchKey = pitchKey;
                 renderAdditionalRoofsUI();
-                calculateEstimate();
+                handleParamChange();
             }
         }
 
@@ -1490,6 +1558,7 @@
             checkURLParamsForSharedQuote();
 
             await syncGlobalSettingsFromCloud();
+            recordSnapshot();
         });
 
         const ROOF_LETTERS = ['2A', '2B', '2C', '2D', '2E'];
@@ -1519,7 +1588,7 @@
 
             state.additionalRoofs.push(newRoof);
             renderAdditionalRoofsUI();
-            calculateEstimate();
+            handleParamChange();
             showToast(`Added Roof Section ${nextLetter}`);
         }
 
@@ -1529,7 +1598,7 @@
                 r.label = ROOF_LETTERS[idx];
             });
             renderAdditionalRoofsUI();
-            calculateEstimate();
+            handleParamChange();
             showToast("Additional roof removed.");
         }
 
@@ -1722,7 +1791,7 @@
             if (roof) {
                 roof.type = newType;
                 renderAdditionalRoofsUI();
-                calculateEstimate();
+                handleParamChange();
             }
         }
 
@@ -1810,31 +1879,34 @@
             }
         }
 
-        function setJobMode(mode) {
+        function setJobMode(mode, preservePrices = false) {
             state.jobMode = mode;
-            state.isOverrideLocked = false;
-            document.getElementById('chk-lock-contract').checked = false;
-
             const retailBtn = document.getElementById('mode-retail');
             const insuranceBtn = document.getElementById('mode-insurance');
-            const targetMarginInput = document.getElementById('cost-target-margin');
-            const sellingPriceInput = document.getElementById('input-selling-price');
 
             if (mode === 'retail') {
                 retailBtn.className = "px-4 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-sky-700 transition";
                 insuranceBtn.className = "px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition";
-                targetMarginInput.value = "30.00";
-                sellingPriceInput.value = "425.00";
+                if (!preservePrices) {
+                    document.getElementById('cost-target-margin').value = "30.00";
+                    document.getElementById('input-selling-price').value = "425.00";
+                }
             } else {
                 insuranceBtn.className = "px-4 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-emerald-700 transition";
                 retailBtn.className = "px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition";
-                targetMarginInput.value = "35.00";
-                sellingPriceInput.value = "450.00";
+                if (!preservePrices) {
+                    document.getElementById('cost-target-margin').value = "35.00";
+                    document.getElementById('input-selling-price').value = "450.00";
+                }
             }
-            calculateEstimate();
+
+            if (!preservePrices) {
+                state.isOverrideLocked = false;
+                document.getElementById('chk-lock-contract').checked = false;
+                handleParamChange();
+            }
         }
 
-        // --- RELIABLE INLINE RENAMING FOR OTHER DIRECT COSTS ---
         function startRenamingOtherDirect(e) {
             if (e) e.stopPropagation();
             document.getElementById('container-other-direct-label').classList.add('hidden');
@@ -1855,7 +1927,7 @@
             document.getElementById('container-other-direct-edit').classList.add('hidden');
             document.getElementById('container-other-direct-label').classList.remove('hidden');
             updateOtherDirectLabelsDisplay();
-            calculateEstimate();
+            handleParamChange();
         }
 
         function cancelRenamingOtherDirect() {
@@ -1904,7 +1976,7 @@
             document.getElementById('container-misc-material-edit').classList.add('hidden');
             document.getElementById('container-misc-material-label').classList.remove('hidden');
             updateMiscMaterialLabelsDisplay();
-            calculateEstimate();
+            handleParamChange();
         }
 
         function cancelRenamingMiscMaterial() {
@@ -1934,7 +2006,7 @@
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
             document.getElementById('input-selling-price').value = price.toFixed(2);
-            calculateEstimate();
+            handleParamChange();
             showToast(`Applied $${price.toFixed(2)} / SQ to Selling Price!`);
         }
 
@@ -1943,7 +2015,7 @@
             if (checked) {
                 evaluateOverrideMath();
             } else {
-                calculateEstimate();
+                handleParamChange();
             }
         }
 
@@ -1953,13 +2025,14 @@
             state.isOverrideLocked = true;
             document.getElementById('chk-lock-contract').checked = true;
             evaluateOverrideMath();
+            recordSnapshot();
         }
 
         function onSellingPriceInputBlur(el) {
             evaluateMathExpressionInEl(el);
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
-            calculateEstimate();
+            handleParamChange();
         }
 
         function onSellingPriceOutputBlur(el) {
@@ -1968,7 +2041,7 @@
             document.getElementById('input-selling-price').value = val.toFixed(2);
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
-            calculateEstimate();
+            handleParamChange();
         }
 
         function evaluateOverrideMath() {
@@ -2037,7 +2110,7 @@
             if (matObj) {
                 document.getElementById('cost-base-material').value = matObj.cost.toFixed(2);
             }
-            calculateEstimate();
+            handleParamChange();
         }
 
         function syncBundleTabUI() {
@@ -2077,7 +2150,7 @@
             const tabDrip = document.getElementById('tab-bundle-drip-cost');
             if (tabDrip) tabDrip.value = val.toFixed(2);
             state.bundleSpecs.dripEdgeCostBundle = val;
-            calculateEstimate();
+            handleParamChange();
         }
 
         function onStarterCostInputChange() {
@@ -2085,7 +2158,7 @@
             const tabStarter = document.getElementById('tab-bundle-starter-price-bundle');
             if (tabStarter) tabStarter.value = val.toFixed(2);
             state.bundleSpecs.starterPriceBundle = val;
-            calculateEstimate();
+            handleParamChange();
         }
 
         function onRidgeCostInputChange() {
@@ -2093,7 +2166,7 @@
             const tabRidge = document.getElementById('tab-bundle-ridge-price-sq');
             if (tabRidge) tabRidge.value = val.toFixed(2);
             state.bundleSpecs.ridgePriceSq = val;
-            calculateEstimate();
+            handleParamChange();
         }
 
         async function saveBundleSettings() {
@@ -2225,14 +2298,16 @@
         function getSnapshotData() {
             return {
                 jobMode: state.jobMode,
+                isOverrideLocked: state.isOverrideLocked,
+                overrideContractPrice: document.getElementById('override-contract-price')?.value || '0.00',
                 otherDirectLabel: state.otherDirectLabel,
                 miscMaterialLabel: state.miscMaterialLabel,
                 clientName: document.getElementById('client-name').value,
                 quoteDate: document.getElementById('quote-date').value,
-                brand: document.getElementById('select-brand').value,
                 material: document.getElementById('select-material').value,
                 pitchKey: document.getElementById('select-roof-pitch').value,
                 pitchSqs: document.getElementById('input-pitch-sqs').value,
+                sqCalibration: document.getElementById('input-sq-calibration')?.value || '0.00',
                 sqs: document.getElementById('input-sqs').value,
                 starter: document.getElementById('input-starter').value,
                 ridge: document.getElementById('input-ridge').value,
@@ -2258,29 +2333,40 @@
             };
         }
 
+        // --- RELIABLE LOAD SNAPSHOT DATA (NO ACCIDENTAL OVERWRITES) ---
         function loadSnapshotData(d) {
-            state.jobMode = d.jobMode || 'insurance';
+            // 1. Set mode UI styling without resetting price/margins
+            setJobMode(d.jobMode || 'insurance', true);
+
+            // 2. Set Labels
             state.otherDirectLabel = d.otherDirectLabel || 'Other Direct Costs';
             state.miscMaterialLabel = d.miscMaterialLabel || 'Misc. Materials';
             updateOtherDirectLabelsDisplay();
             updateMiscMaterialLabelsDisplay();
 
-            state.isOverrideLocked = false;
-            document.getElementById('chk-lock-contract').checked = false;
+            // 3. Inputs
             document.getElementById('client-name').value = d.clientName || "(Type Customer's Name & Address)";
             document.getElementById('quote-date').value = d.quoteDate || new Date().toISOString().split('T')[0];
-            document.getElementById('select-brand').value = d.brand || 'IKO Cambridge';
             document.getElementById('select-roof-pitch').value = d.pitchKey || 'pitch_3_6';
-            if (d.pitchSqs) {
-                document.getElementById('input-pitch-sqs').value = d.pitchSqs;
-            }
+            document.getElementById('input-pitch-sqs').value = d.pitchSqs || '0.00';
+            document.getElementById('input-sq-calibration').value = d.sqCalibration || '0.00';
             document.getElementById('input-sqs').value = d.sqs || '0.00';
             document.getElementById('input-starter').value = d.starter || '0.00';
             document.getElementById('input-ridge').value = d.ridge || '0.00';
             document.getElementById('input-valley').value = d.valley || '0.00';
             document.getElementById('input-waste').value = d.waste || '10.00';
-            document.getElementById('input-selling-price').value = d.sellingPrice || '450.00';
-            document.getElementById('input-commission-rate').value = d.commissionRate || '15.00';
+            
+            // Selling price and target margin explicitly preserved
+            document.getElementById('input-selling-price').value = d.sellingPrice !== undefined ? d.sellingPrice : '450.00';
+            document.getElementById('cost-target-margin').value = d.targetMargin !== undefined ? d.targetMargin : '35.00';
+            document.getElementById('input-commission-rate').value = d.commissionRate !== undefined ? d.commissionRate : '15.00';
+
+            // Override state
+            state.isOverrideLocked = !!d.isOverrideLocked;
+            document.getElementById('chk-lock-contract').checked = state.isOverrideLocked;
+            if (d.overrideContractPrice) {
+                document.getElementById('override-contract-price').value = d.overrideContractPrice;
+            }
 
             if (d.materials) {
                 state.materials = d.materials.map(sanitizeMaterialItem);
@@ -2310,7 +2396,6 @@
             }
             document.getElementById('ridge-cost-sq').value = d.ridgeCostSq || '125.85';
             document.getElementById('valley-cost-bundle').value = d.valleyCostBundle || '55.00';
-            document.getElementById('cost-target-margin').value = d.targetMargin || '35.00';
 
             if (d.bundleSpecs) {
                 state.bundleSpecs = JSON.parse(JSON.stringify(d.bundleSpecs));
@@ -2328,7 +2413,6 @@
                 renderCrewLeaderMultiSelect();
             }
 
-            setJobMode(state.jobMode);
             calculateEstimate();
         }
 
@@ -2351,6 +2435,7 @@
             document.getElementById('input-valley').value = "0.00";
             document.getElementById('select-roof-pitch').value = "pitch_3_6";
             document.getElementById('input-pitch-sqs').value = "0.00";
+            document.getElementById('input-sq-calibration').value = "0.00";
             document.getElementById('input-waste').value = "10.00";
             document.getElementById('input-commission-rate').value = "15.00";
 
@@ -2387,11 +2472,10 @@
             });
             renderCrewLeaderMultiSelect();
 
-            calculateEstimate();
-            showToast("Started a fresh job calculation!");
+            handleParamChange();
+            showToast("Started fresh calculation!");
         }
 
-        // RESET BUTTON: Reverts custom names to original and restores assumptions from saved Supabase/cloud data
         function resetCalculator() {
             state.isOverrideLocked = false;
             document.getElementById('chk-lock-contract').checked = false;
@@ -2402,6 +2486,7 @@
             document.getElementById('input-valley').value = "0.00";
             document.getElementById('select-roof-pitch').value = "pitch_3_6";
             document.getElementById('input-pitch-sqs').value = "0.00";
+            document.getElementById('input-sq-calibration').value = "0.00";
             document.getElementById('input-waste').value = "10.00";
             document.getElementById('input-commission-rate').value = "15.00";
 
@@ -2412,13 +2497,11 @@
             document.getElementById('input-notes').value = "Standard replacement";
             document.getElementById('select-crew-calc-mode').value = "average";
 
-            // Restore editable labels to original default names
             state.otherDirectLabel = "Other Direct Costs";
             state.miscMaterialLabel = "Misc. Materials";
             updateOtherDirectLabelsDisplay();
             updateMiscMaterialLabelsDisplay();
 
-            // Populate production assumptions strictly from Supabase cloud / stored settings
             const starterInput = document.getElementById('starter-cost-bundle');
             if (starterInput) starterInput.value = (state.bundleSpecs.starterPriceBundle !== undefined ? state.bundleSpecs.starterPriceBundle : 50.00).toFixed(2);
             
@@ -2443,7 +2526,7 @@
             });
             renderCrewLeaderMultiSelect();
 
-            calculateEstimate();
+            handleParamChange();
             showToast("Job inputs & assumptions reset to saved cloud values!");
         }
 
@@ -2521,6 +2604,7 @@
 
             loadSnapshotData(item.quote_data);
             closeHistoryModal();
+            recordSnapshot();
             showToast(`Loaded calculation for "${item.customer_name}"!`);
         }
 
@@ -2749,14 +2833,14 @@
 
         function toggleCrewLeaderSelection(index, isChecked) {
             state.crewLeaders[index].selected = isChecked;
-            calculateEstimate();
+            handleParamChange();
         }
 
         function updateCrewLeaderRate(index, val) {
             state.crewLeaders[index].rate = parseCleanFloat(val);
             renderCrewTable();
             renderCrewLeaderMultiSelect();
-            calculateEstimate();
+            handleParamChange();
         }
 
         function updateCrewLeaderName(index, val) {
@@ -2825,6 +2909,7 @@
             const starterLF = parseCleanFloat(document.getElementById('input-starter')?.value);
             const ridgeLF = parseCleanFloat(document.getElementById('input-ridge')?.value);
             const valleyLF = parseCleanFloat(document.getElementById('input-valley')?.value);
+            const sqCalibration = parseCleanFloat(document.getElementById('input-sq-calibration')?.value);
             const mainWastePct = parseCleanFloat(document.getElementById('input-waste')?.value) / 100;
 
             const starterLFPerSq = parseCleanFloat(document.getElementById('tab-bundle-starter-equiv')?.value) || state.bundleSpecs.starterEquiv || 225.00;
@@ -2914,7 +2999,8 @@
             const starterWithWaste = roundUpThirdSquare(rawStarterWithWaste);
             const ridgeWithWaste = roundUpThirdSquare(rawRidgeWithWaste);
 
-            const totalSqs = parseFloat((mainWithWaste + starterWithWaste + ridgeWithWaste + nonShingleExtraSqs).toFixed(2));
+            // Total squares sums the rounded sub-squares + non-shingle SQs + manual variance adjustment
+            const totalSqs = parseFloat((mainWithWaste + starterWithWaste + ridgeWithWaste + nonShingleExtraSqs + sqCalibration).toFixed(2));
 
             return {
                 totalBaseMainSqs,
@@ -2935,6 +3021,7 @@
                 nonShingleExtraSqs,
                 nonShingleExtraCost,
                 additionalPitchSurcharges,
+                sqCalibration,
                 totalSqs
             };
         }
@@ -3001,7 +3088,6 @@
             const ridgeBundles = Math.ceil(calc.totalRidgeLFWaste / ridgeCoverageLF);
             const ridgeBundleCostTotal = ridgeBundles * ridgeCostBundle;
 
-            // Drip edge calculated using total perimeter LF with waste divided by 10 LF stick coverage
             const dripEdgeSticks = calc.totalDripEdgeLF > 0 ? Math.ceil(calc.totalDripEdgeLF / dripEdgeCoverageLF) : 0;
             const dripEdgeCostTotal = dripEdgeSticks * dripEdgeCostStick;
 
@@ -3023,7 +3109,7 @@
                 return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
-            // --- LIVE BREAKDOWN ROW VISIBILITY & LABELS (Omitting 0 Qty or $0 Costs) ---
+            // --- LIVE BREAKDOWN ROW VISIBILITY & LABELS (Hide if 0 Qty or $0 Cost) ---
             const rowStarter = document.getElementById('row-starter-bundles');
             const lblStarter = document.getElementById('label-starter-bundles');
             if (rowStarter && lblStarter) {
@@ -3300,16 +3386,13 @@
             const quoteDateVal = document.getElementById('quote-date')?.value || '-';
             const matSelect = document.getElementById('select-material');
             const matText = matSelect && matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '-';
-            const brandVal = document.getElementById('select-brand')?.value || '-';
 
             document.getElementById('print-sheet-client').innerText = `Client: ${clientVal}`;
             document.getElementById('print-sheet-date').innerText = `Date: ${quoteDateVal}`;
             document.getElementById('print-sheet-mode').innerText = `Mode: ${state.jobMode.toUpperCase()}`;
             document.getElementById('print-sheet-mat').innerText = matText;
-            document.getElementById('print-sheet-brand').innerText = brandVal;
             document.getElementById('print-sheet-sqs').innerText = `${totalSqs.toFixed(2)} SQs`;
 
-            // Base material row
             const pRowBaseMat = document.getElementById('print-row-base-mat');
             if (pRowBaseMat) {
                 if (baseMatTotal > 0 && totalSqs > 0) {
@@ -3322,7 +3405,6 @@
                 }
             }
 
-            // Misc material row
             const pRowMisc = document.getElementById('print-row-misc-mat');
             if (pRowMisc) {
                 if (miscMatTotal > 0) {
@@ -3334,7 +3416,6 @@
                 }
             }
 
-            // Starter row
             const pRowStarter = document.getElementById('print-row-starter');
             if (pRowStarter) {
                 if (starterBundles > 0 && starterBundleCostTotal > 0) {
@@ -3346,7 +3427,6 @@
                 }
             }
 
-            // Drip edge row
             const printDripRow = document.getElementById('print-row-drip');
             if (printDripRow) {
                 if (dripEdgeSticks > 0 && dripEdgeCostTotal > 0) {
@@ -3359,7 +3439,6 @@
                 }
             }
 
-            // Ridge row
             const pRowRidge = document.getElementById('print-row-ridge');
             if (pRowRidge) {
                 if (ridgeBundles > 0 && ridgeBundleCostTotal > 0) {
@@ -3371,7 +3450,6 @@
                 }
             }
 
-            // Valley row
             const pRowValley = document.getElementById('print-row-valley');
             if (pRowValley) {
                 if (valleyRolls > 0 && valleyRollCostTotal > 0) {
@@ -3383,7 +3461,6 @@
                 }
             }
 
-            // Pitch surcharge row
             const printPitchRow = document.getElementById('print-row-pitch-surcharge');
             if (printPitchRow) {
                 if (pitchSurchargeCostTotal > 0) {
@@ -3396,7 +3473,6 @@
                 }
             }
 
-            // Additional non-shingle roofs
             const printAddlTbody = document.getElementById('print-additional-roofs-tbody');
             if (printAddlTbody) {
                 printAddlTbody.innerHTML = '';
@@ -3432,7 +3508,6 @@
                 });
             }
 
-            // Labor row
             const pRowLabor = document.getElementById('print-row-labor');
             if (pRowLabor) {
                 if (crewLaborTotal > 0) {
@@ -3445,7 +3520,6 @@
                 }
             }
 
-            // Other direct costs row (Only shown if cost > 0; generic Site Logistics & Disposal is eliminated)
             const pRowOtherDirect = document.getElementById('print-row-other-direct');
             if (pRowOtherDirect) {
                 if (otherDirectCosts > 0) {
@@ -3597,7 +3671,6 @@
             const date = document.getElementById('quote-date').value || new Date().toISOString().split('T')[0];
             const matSelect = document.getElementById('select-material');
             const mat = matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : 'Standard Roof';
-            const brand = document.getElementById('select-brand').value;
             const pitchSelect = document.getElementById('select-roof-pitch');
             const pitchText = pitchSelect.options[pitchSelect.selectedIndex].text;
             const sqs = document.getElementById('out-total-sqs').innerText;
@@ -3616,8 +3689,7 @@
 ⚙️ MODE: ${state.jobMode.toUpperCase()}
 ----------------------------------------
 📦 SPECIFICATIONS
-- Material: ${mat}
-- Component Brand: ${brand}
+- Roof Specs: ${mat}
 - Roof Pitch: ${pitchText}
 - Additional Roofs Included: ${state.additionalRoofs.length > 0 ? state.additionalRoofs.map(r => r.label).join(', ') : 'None'}
 - Total Work Squares: ${sqs} SQs
