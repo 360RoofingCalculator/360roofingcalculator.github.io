@@ -86,12 +86,6 @@
             </nav>
 
             <div class="flex items-center space-x-2">
-                <button onclick="undo()" class="px-2 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center space-x-1 transition border border-slate-700" title="Undo (Ctrl + Z)">
-                    <i data-lucide="undo" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="redo()" class="px-2 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center space-x-1 transition border border-slate-700" title="Redo (Ctrl + Y)">
-                    <i data-lucide="redo" class="w-3.5 h-3.5"></i>
-                </button>
                 <button onclick="newCalculation()" class="px-2.5 py-1.5 text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg flex items-center space-x-1 transition shadow-sm" title="Start fresh clear job">
                     <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
                     <span>New</span>
@@ -156,7 +150,7 @@
                 <!-- LEFT COLUMN -->
                 <div class="lg:col-span-7 space-y-6">
 
-                    <!-- CARD 1: ROOF SPECS (Component brand removed & simplified) -->
+                    <!-- CARD 1: ROOF SPECS -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">
                         <div class="flex items-center justify-between border-b pb-3">
                             <h2 class="font-semibold text-slate-800 flex items-center gap-2">
@@ -341,7 +335,7 @@
                             <!-- 6. Valley Cost / Roll -->
                             <div>
                                 <label class="block font-medium text-slate-600 mb-1">Valley Cost / Roll ($)</label>
-                                <input type="text" id="valley-cost-bundle" value="55.00" oninput="handleParamChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800">
+                                <input type="text" id="valley-cost-bundle" value="55.00" oninput="onValleyCostInputChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl px-3 py-2 text-sm font-bold text-slate-800" title="Valley metal/lining price per roll charged by supplier.">
                             </div>
 
                             <!-- Target Margin % -->
@@ -416,7 +410,7 @@
                 <!-- RIGHT COLUMN: OUTPUTS & CHART -->
                 <div class="lg:col-span-5 space-y-6">
 
-                    <!-- MEASUREMENT OUTPUTS CARD (WITH MANUAL CALIBRATION / VARIANCE INPUT) -->
+                    <!-- MEASUREMENT OUTPUTS CARD -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
                             <span>Measurement Outputs</span>
@@ -469,7 +463,7 @@
                         </div>
                     </div>
 
-                    <!-- COST BREAKDOWN OUTPUTS CARD (ZERO VALUES AUTOMATICALLY HIDDEN) -->
+                    <!-- COST BREAKDOWN OUTPUTS CARD -->
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                         <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
                             <span>Cost Breakdown Outputs</span>
@@ -499,7 +493,6 @@
                                         <span id="label-starter-bundles">Starter Bundles Cost (0 bundles):</span>
                                         <span class="font-medium text-slate-800" id="out-starter-bundle-cost">$0.00</span>
                                     </div>
-                                    <!-- Drip Edge Sticks line item directly below Starter -->
                                     <div class="flex justify-between" id="row-drip-bundles">
                                         <span id="label-drip-bundles">Drip Edge Cost (0 sticks @ $0.00/stick):</span>
                                         <span class="font-medium text-slate-800" id="out-drip-bundle-cost">$0.00</span>
@@ -693,9 +686,8 @@
 
             </div>
 
-            <!-- PRINT-ONLY PROPOSAL SHEET (Zero Items & Site Logistics Automatically Removed) -->
+            <!-- PRINT-ONLY PROPOSAL SHEET -->
             <div id="print-proposal-document" class="hidden print-only mt-6 border-2 border-slate-300 rounded-2xl p-6 bg-white space-y-6 page-break-avoid">
-                
                 <div class="flex justify-between items-start border-b-2 border-slate-800 pb-4">
                     <div>
                         <h2 class="text-xl font-black text-slate-900 uppercase">360 Roofing Proposal</h2>
@@ -803,7 +795,6 @@
                     <p class="font-bold text-slate-700">Terms & Authorization:</p>
                     <p>This estimate is based on precise roof measurement specifications and active material pricing at the date of issuance. Changes to original scope will be quoted prior to work execution.</p>
                 </div>
-
             </div>
 
         </div>
@@ -932,7 +923,7 @@
                             </div>
                         </div>
 
-                        <!-- Valley Box -->
+                        <!-- Valley Box (WITH LINKED UNIT PRICE) -->
                         <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-3">
                             <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
                                 <i data-lucide="git-commit" class="w-3.5 h-3.5 text-amber-600"></i>
@@ -942,6 +933,10 @@
                                 <div>
                                     <label class="block font-medium text-slate-600 mb-1">Valley Coverage / Roll (LF)</label>
                                     <input type="text" id="tab-bundle-valley-coverage" value="50.00" oninput="calculateEstimate()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-300 rounded-lg px-2.5 py-1.5 text-sm font-bold bg-white focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-medium text-amber-900 mb-1">Default Valley Price / Roll ($)</label>
+                                    <input type="text" id="tab-bundle-valley-cost-roll" value="55.00" oninput="onTabValleyCostChange()" onwheel="handleWheelScroll(event, this, 5)" onfocus="handleInputFocus(this)" onblur="evaluateMathExpression(this)" onkeydown="handleInputKeydown(event, this, 5)" class="w-full border border-amber-400 bg-white rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-500" title="Updates Valley Cost / Roll in Assumptions">
                                 </div>
                                 <p class="text-[11px] text-amber-700 italic">Default standard: 50 LF = 1 Roll of valley lining/flashing.</p>
                             </div>
@@ -1139,7 +1134,7 @@
             showToast("Redo performed");
         }
 
-        // Keyboard Shortcut Listener for Ctrl+Z and Ctrl+Y
+        // Keyboard Shortcut Listener for Ctrl+Z and Ctrl+Y (Preserved)
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                 if (e.shiftKey) {
@@ -1450,7 +1445,8 @@
             ridgePriceSq: 125.85,
             dripEdgeCoverage: 10.00,
             dripEdgeCostBundle: 15.00,
-            valleyCoverage: 50.00
+            valleyCoverage: 50.00,
+            valleyPriceBundle: 55.00
         };
 
         const DEFAULT_PITCH_RATES = {
@@ -1492,6 +1488,7 @@
                 const stored = localStorage.getItem('360_roofing_bundle_specs');
                 const parsed = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_BUNDLE_SPECS));
                 if (!parsed.valleyCoverage) parsed.valleyCoverage = 50.00;
+                if (parsed.valleyPriceBundle === undefined) parsed.valleyPriceBundle = 55.00;
                 if (parsed.starterPriceBundle === undefined) {
                     parsed.starterPriceBundle = parsed.starterPriceSq ? parsed.starterPriceSq / 3 : 50.00;
                 }
@@ -1552,6 +1549,10 @@
             if (state.bundleSpecs.ridgePriceSq) {
                 const ridgeInput = document.getElementById('ridge-cost-sq');
                 if (ridgeInput) ridgeInput.value = Number(state.bundleSpecs.ridgePriceSq).toFixed(2);
+            }
+            if (state.bundleSpecs.valleyPriceBundle !== undefined) {
+                const valleyInput = document.getElementById('valley-cost-bundle');
+                if (valleyInput) valleyInput.value = Number(state.bundleSpecs.valleyPriceBundle).toFixed(2);
             }
 
             setJobMode('insurance');
@@ -1828,6 +1829,10 @@
                     if (state.bundleSpecs.ridgePriceSq) {
                         const ridgeInput = document.getElementById('ridge-cost-sq');
                         if (ridgeInput) ridgeInput.value = Number(state.bundleSpecs.ridgePriceSq).toFixed(2);
+                    }
+                    if (state.bundleSpecs.valleyPriceBundle !== undefined) {
+                        const valleyInput = document.getElementById('valley-cost-bundle');
+                        if (valleyInput) valleyInput.value = Number(state.bundleSpecs.valleyPriceBundle).toFixed(2);
                     }
 
                     calculateEstimate();
@@ -2124,6 +2129,7 @@
             document.getElementById('tab-bundle-drip-coverage').value = (b.dripEdgeCoverage || 10.00).toFixed(2);
             document.getElementById('tab-bundle-drip-cost').value = (b.dripEdgeCostBundle || 15.00).toFixed(2);
             document.getElementById('tab-bundle-valley-coverage').value = (b.valleyCoverage || 50.00).toFixed(2);
+            document.getElementById('tab-bundle-valley-cost-roll').value = (b.valleyPriceBundle !== undefined ? b.valleyPriceBundle : 55.00).toFixed(2);
         }
 
         function onTabBundlePriceChange() {
@@ -2169,6 +2175,22 @@
             handleParamChange();
         }
 
+        function onTabValleyCostChange() {
+            const valleyCostRoll = parseCleanFloat(document.getElementById('tab-bundle-valley-cost-roll').value);
+            const valleyInput = document.getElementById('valley-cost-bundle');
+            if (valleyInput) valleyInput.value = valleyCostRoll.toFixed(2);
+            state.bundleSpecs.valleyPriceBundle = valleyCostRoll;
+            calculateEstimate();
+        }
+
+        function onValleyCostInputChange() {
+            const val = parseCleanFloat(document.getElementById('valley-cost-bundle').value);
+            const tabValley = document.getElementById('tab-bundle-valley-cost-roll');
+            if (tabValley) tabValley.value = val.toFixed(2);
+            state.bundleSpecs.valleyPriceBundle = val;
+            handleParamChange();
+        }
+
         async function saveBundleSettings() {
             state.bundleSpecs = {
                 starterCoverage: parseCleanFloat(document.getElementById('tab-bundle-starter-coverage').value) || 120.00,
@@ -2179,7 +2201,8 @@
                 ridgePriceSq: parseCleanFloat(document.getElementById('tab-bundle-ridge-price-sq').value) || 125.85,
                 dripEdgeCoverage: parseCleanFloat(document.getElementById('tab-bundle-drip-coverage').value) || 10.00,
                 dripEdgeCostBundle: parseCleanFloat(document.getElementById('tab-bundle-drip-cost').value) || 15.00,
-                valleyCoverage: parseCleanFloat(document.getElementById('tab-bundle-valley-coverage').value) || 50.00
+                valleyCoverage: parseCleanFloat(document.getElementById('tab-bundle-valley-coverage').value) || 50.00,
+                valleyPriceBundle: parseCleanFloat(document.getElementById('tab-bundle-valley-cost-roll').value) || 55.00
             };
             
             const starterInput = document.getElementById('starter-cost-bundle');
@@ -2188,6 +2211,8 @@
             if (dripInput) dripInput.value = state.bundleSpecs.dripEdgeCostBundle.toFixed(2);
             const ridgeInput = document.getElementById('ridge-cost-sq');
             if (ridgeInput) ridgeInput.value = state.bundleSpecs.ridgePriceSq.toFixed(2);
+            const valleyInput = document.getElementById('valley-cost-bundle');
+            if (valleyInput) valleyInput.value = state.bundleSpecs.valleyPriceBundle.toFixed(2);
 
             try {
                 localStorage.setItem('360_roofing_bundle_specs', JSON.stringify(state.bundleSpecs));
@@ -2324,7 +2349,7 @@
                 starterCostBundle: document.getElementById('starter-cost-bundle')?.value || '50.00',
                 dripCostStick: document.getElementById('drip-cost-stick')?.value || '15.00',
                 ridgeCostSq: document.getElementById('ridge-cost-sq').value,
-                valleyCostBundle: document.getElementById('valley-cost-bundle').value,
+                valleyCostBundle: document.getElementById('valley-cost-bundle')?.value || '55.00',
                 targetMargin: document.getElementById('cost-target-margin').value,
                 bundleSpecs: JSON.parse(JSON.stringify(state.bundleSpecs)),
                 pitchRates: JSON.parse(JSON.stringify(state.pitchRates)),
@@ -2333,18 +2358,14 @@
             };
         }
 
-        // --- RELIABLE LOAD SNAPSHOT DATA (NO ACCIDENTAL OVERWRITES) ---
         function loadSnapshotData(d) {
-            // 1. Set mode UI styling without resetting price/margins
             setJobMode(d.jobMode || 'insurance', true);
 
-            // 2. Set Labels
             state.otherDirectLabel = d.otherDirectLabel || 'Other Direct Costs';
             state.miscMaterialLabel = d.miscMaterialLabel || 'Misc. Materials';
             updateOtherDirectLabelsDisplay();
             updateMiscMaterialLabelsDisplay();
 
-            // 3. Inputs
             document.getElementById('client-name').value = d.clientName || "(Type Customer's Name & Address)";
             document.getElementById('quote-date').value = d.quoteDate || new Date().toISOString().split('T')[0];
             document.getElementById('select-roof-pitch').value = d.pitchKey || 'pitch_3_6';
@@ -2356,12 +2377,10 @@
             document.getElementById('input-valley').value = d.valley || '0.00';
             document.getElementById('input-waste').value = d.waste || '10.00';
             
-            // Selling price and target margin explicitly preserved
             document.getElementById('input-selling-price').value = d.sellingPrice !== undefined ? d.sellingPrice : '450.00';
             document.getElementById('cost-target-margin').value = d.targetMargin !== undefined ? d.targetMargin : '35.00';
             document.getElementById('input-commission-rate').value = d.commissionRate !== undefined ? d.commissionRate : '15.00';
 
-            // Override state
             state.isOverrideLocked = !!d.isOverrideLocked;
             document.getElementById('chk-lock-contract').checked = state.isOverrideLocked;
             if (d.overrideContractPrice) {
@@ -2395,7 +2414,11 @@
                 dripInput.value = d.dripCostStick || '15.00';
             }
             document.getElementById('ridge-cost-sq').value = d.ridgeCostSq || '125.85';
-            document.getElementById('valley-cost-bundle').value = d.valleyCostBundle || '55.00';
+            
+            const valleyInput = document.getElementById('valley-cost-bundle');
+            if (valleyInput) {
+                valleyInput.value = d.valleyCostBundle || '55.00';
+            }
 
             if (d.bundleSpecs) {
                 state.bundleSpecs = JSON.parse(JSON.stringify(d.bundleSpecs));
@@ -2452,7 +2475,10 @@
             const dripInput = document.getElementById('drip-cost-stick');
             if (dripInput) dripInput.value = (state.bundleSpecs.dripEdgeCostBundle || 15.00).toFixed(2);
             document.getElementById('ridge-cost-sq').value = (state.bundleSpecs.ridgePriceSq || 125.85).toFixed(2);
-            document.getElementById('valley-cost-bundle').value = "55.00";
+            
+            const valleyInput = document.getElementById('valley-cost-bundle');
+            if (valleyInput) valleyInput.value = (state.bundleSpecs.valleyPriceBundle || 55.00).toFixed(2);
+            
             document.getElementById('cost-target-margin').value = "35.00";
 
             state.otherDirectLabel = "Other Direct Costs";
@@ -2510,7 +2536,10 @@
             
             document.getElementById('ridge-cost-sq').value = (state.bundleSpecs.ridgePriceSq || 125.85).toFixed(2);
             document.getElementById('cost-misc-material').value = "0.00";
-            document.getElementById('valley-cost-bundle').value = "55.00";
+            
+            const valleyInput = document.getElementById('valley-cost-bundle');
+            if (valleyInput) valleyInput.value = (state.bundleSpecs.valleyPriceBundle !== undefined ? state.bundleSpecs.valleyPriceBundle : 55.00).toFixed(2);
+            
             document.getElementById('cost-target-margin').value = "35.00";
 
             if (state.materials && state.materials.length > 0) {
@@ -2999,7 +3028,6 @@
             const starterWithWaste = roundUpThirdSquare(rawStarterWithWaste);
             const ridgeWithWaste = roundUpThirdSquare(rawRidgeWithWaste);
 
-            // Total squares sums the rounded sub-squares + non-shingle SQs + manual variance adjustment
             const totalSqs = parseFloat((mainWithWaste + starterWithWaste + ridgeWithWaste + nonShingleExtraSqs + sqCalibration).toFixed(2));
 
             return {
@@ -3109,7 +3137,7 @@
                 return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
-            // --- LIVE BREAKDOWN ROW VISIBILITY & LABELS (Hide if 0 Qty or $0 Cost) ---
+            // --- LIVE BREAKDOWN ROW VISIBILITY & LABELS ---
             const rowStarter = document.getElementById('row-starter-bundles');
             const lblStarter = document.getElementById('label-starter-bundles');
             if (rowStarter && lblStarter) {
@@ -3366,22 +3394,25 @@
                 statusBadge.className = 'text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-400/30';
                 profitEl.classList.add('text-emerald-400');
                 marginEl.classList.add('text-emerald-400');
+                profitBox.classList.add('bg-emerald-950/20', 'border', 'border-emerald-500/30');
             } else if (grossMarginPct >= 27.1) {
                 statusBadge.innerText = 'FAIR';
                 statusBadge.className = 'text-[10px] font-extrabold uppercase bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full border border-amber-400/30';
                 profitEl.classList.add('text-amber-400');
                 marginEl.classList.add('text-amber-400');
+                profitBox.classList.add('bg-amber-950/20', 'border', 'border-amber-500/30');
             } else {
                 statusBadge.innerText = 'LOW MARGIN';
                 statusBadge.className = 'text-[10px] font-extrabold uppercase bg-rose-500/20 text-rose-300 px-2.5 py-1 rounded-full border border-rose-400/30';
                 profitEl.classList.add('text-rose-400');
                 marginEl.classList.add('text-rose-400');
+                profitBox.classList.add('bg-rose-950/20', 'border', 'border-rose-500/30');
             }
 
             renderScenarioTable(totalSqs, subtotalBeforeCommission, sellingPricePerSq, commissionRate);
             updateChart(totalJobMaterialsCost, crewLaborTotal, commissionAmount, profitAmount);
 
-            // --- SYNC PRINT PROPOSAL SHEET (Hiding All Zero-Dollar Rows & Removed Site Logistics) ---
+            // --- SYNC PRINT PROPOSAL SHEET ---
             const clientVal = document.getElementById('client-name')?.value || '-';
             const quoteDateVal = document.getElementById('quote-date')?.value || '-';
             const matSelect = document.getElementById('select-material');
