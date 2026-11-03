@@ -481,9 +481,10 @@
                                 <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider text-sky-700">Materials</div>
                                 
                                 <div class="pl-3 space-y-1 text-[11px] text-slate-600">
+                                    <!-- DYNAMIC LINE ITEM: Replaces Base Materials Total -->
                                     <div class="flex justify-between" id="row-base-mat-card">
-                                        <span>Base Materials Total:</span>
-                                        <span class="font-medium text-slate-800" id="out-base-mat-total">$0.00</span>
+                                        <span id="label-base-mat-card" class="pr-2">Shingles Cost:</span>
+                                        <span class="font-medium text-slate-800 whitespace-nowrap" id="out-base-mat-total">$0.00</span>
                                     </div>
                                     <div class="flex justify-between" id="row-misc-mat-card">
                                         <span id="display-label-misc-card">Misc. Materials Total:</span>
@@ -724,7 +725,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-200 text-slate-800" id="print-line-items-body">
                         <tr id="print-row-base-mat">
-                            <td class="py-2 px-3 font-semibold">Base Roofing Material</td>
+                            <td class="py-2 px-3 font-semibold" id="print-table-mat-title">Base Roofing Material</td>
                             <td class="py-2 px-3" id="print-table-mat-spec">Main Roof Material</td>
                             <td class="py-2 px-3 text-right" id="print-table-mat-qty">-</td>
                             <td class="py-2 px-3 text-right font-semibold" id="print-table-mat-subtotal">-</td>
@@ -2720,21 +2721,25 @@
             state.materials[index].name = val;
             renderMaterialDropdown();
             renderAdditionalRoofsUI();
+            calculateEstimate();
         }
         function updateMaterialBrand(index, val) { 
             state.materials[index].brand = val; 
             renderMaterialDropdown();
             renderAdditionalRoofsUI();
+            calculateEstimate();
         }
         function updateMaterialModel(index, val) { 
             state.materials[index].model = val; 
             renderMaterialDropdown();
             renderAdditionalRoofsUI();
+            calculateEstimate();
         }
         function updateMaterialColor(index, val) { 
             state.materials[index].color = val; 
             renderMaterialDropdown();
             renderAdditionalRoofsUI();
+            calculateEstimate();
         }
         function updateMaterialCost(index, val) { 
             state.materials[index].cost = parseCleanFloat(val); 
@@ -3110,6 +3115,27 @@
             const calc = computeTotalSquaresAndBundles();
             const totalSqs = calc.totalSqs;
 
+            // --- DYNAMIC ROOF SPEC FIRST LINE ITEM CALCULATIONS ---
+            const currentMatId = document.getElementById('select-material')?.value;
+            const activeMatObj = state.materials.find(m => m.id === currentMatId) || state.materials[0];
+            const activeMatLabel = formatMaterialLabel(activeMatObj);
+            const activeIsShingle = isShingleType(activeMatObj?.name || activeMatObj?.id || currentMatId);
+
+            let mainRoofMatCostTotal = 0;
+            let dynamicLineLabel = "";
+
+            if (activeIsShingle) {
+                // 3 bundles per square standard for shingles
+                const shingleBundles = Math.ceil(calc.mainWithWaste * 3);
+                const shingleBundlePrice = baseMatPerSq / 3;
+                mainRoofMatCostTotal = shingleBundles * shingleBundlePrice;
+                const bundleWord = shingleBundles === 1 ? 'bundle' : 'bundles';
+                dynamicLineLabel = `${activeMatLabel} (${shingleBundles} ${bundleWord} @ $${shingleBundlePrice.toFixed(2)}/bndl):`;
+            } else {
+                mainRoofMatCostTotal = calc.mainWithWaste * baseMatPerSq;
+                dynamicLineLabel = `${activeMatLabel} (${calc.mainWithWaste.toFixed(2)} SQs @ $${baseMatPerSq.toFixed(2)}/SQ):`;
+            }
+
             const starterBundles = Math.ceil(calc.totalStarterLFWaste / starterCoverageLF);
             const starterBundleCostTotal = starterBundles * starterCostBundle;
 
@@ -3138,6 +3164,18 @@
             }
 
             // --- LIVE BREAKDOWN ROW VISIBILITY & LABELS ---
+            const rowBaseMatCard = document.getElementById('row-base-mat-card');
+            const lblBaseMatCard = document.getElementById('label-base-mat-card');
+            if (rowBaseMatCard && lblBaseMatCard) {
+                if (mainRoofMatCostTotal > 0 || calc.mainWithWaste > 0) {
+                    rowBaseMatCard.classList.remove('hidden');
+                    lblBaseMatCard.innerText = dynamicLineLabel;
+                    document.getElementById('out-base-mat-total').innerText = fmt(mainRoofMatCostTotal);
+                } else {
+                    rowBaseMatCard.classList.add('hidden');
+                }
+            }
+
             const rowStarter = document.getElementById('row-starter-bundles');
             const lblStarter = document.getElementById('label-starter-bundles');
             if (rowStarter && lblStarter) {
@@ -3187,17 +3225,6 @@
                 }
             }
 
-            const rowBaseMatCard = document.getElementById('row-base-mat-card');
-            const baseMatTotal = totalSqs * baseMatPerSq;
-            if (rowBaseMatCard) {
-                if (totalSqs > 0 && baseMatTotal > 0) {
-                    rowBaseMatCard.classList.remove('hidden');
-                    document.getElementById('out-base-mat-total').innerText = fmt(baseMatTotal);
-                } else {
-                    rowBaseMatCard.classList.add('hidden');
-                }
-            }
-
             const rowMiscMatCard = document.getElementById('row-misc-mat-card');
             const miscMatTotal = flatMiscMatTotal;
             if (rowMiscMatCard) {
@@ -3220,7 +3247,7 @@
                 }
             }
 
-            const totalJobMaterialsCost = baseMatTotal + miscMatTotal + starterBundleCostTotal + dripEdgeCostTotal + ridgeBundleCostTotal + valleyRollCostTotal + pitchSurchargeCostTotal + calc.nonShingleExtraCost;
+            const totalJobMaterialsCost = mainRoofMatCostTotal + miscMatTotal + starterBundleCostTotal + dripEdgeCostTotal + ridgeBundleCostTotal + valleyRollCostTotal + pitchSurchargeCostTotal + calc.nonShingleExtraCost;
             const subtotalBeforeCommission = totalJobMaterialsCost + crewLaborTotal + otherDirectCosts;
 
             let contractPrice = totalSqs * sellingPricePerSq;
@@ -3415,22 +3442,26 @@
             // --- SYNC PRINT PROPOSAL SHEET ---
             const clientVal = document.getElementById('client-name')?.value || '-';
             const quoteDateVal = document.getElementById('quote-date')?.value || '-';
-            const matSelect = document.getElementById('select-material');
-            const matText = matSelect && matSelect.options[matSelect.selectedIndex] ? matSelect.options[matSelect.selectedIndex].text : '-';
 
             document.getElementById('print-sheet-client').innerText = `Client: ${clientVal}`;
             document.getElementById('print-sheet-date').innerText = `Date: ${quoteDateVal}`;
             document.getElementById('print-sheet-mode').innerText = `Mode: ${state.jobMode.toUpperCase()}`;
-            document.getElementById('print-sheet-mat').innerText = matText;
+            document.getElementById('print-sheet-mat').innerText = activeMatLabel;
             document.getElementById('print-sheet-sqs').innerText = `${totalSqs.toFixed(2)} SQs`;
 
             const pRowBaseMat = document.getElementById('print-row-base-mat');
             if (pRowBaseMat) {
-                if (baseMatTotal > 0 && totalSqs > 0) {
+                if (mainRoofMatCostTotal > 0 || calc.mainWithWaste > 0) {
                     pRowBaseMat.classList.remove('hidden');
-                    document.getElementById('print-table-mat-spec').innerText = `${matText}`;
-                    document.getElementById('print-table-mat-qty').innerText = `${totalSqs.toFixed(2)} SQs`;
-                    document.getElementById('print-table-mat-subtotal').innerText = fmt(baseMatTotal);
+                    document.getElementById('print-table-mat-title').innerText = activeMatObj ? activeMatObj.name : 'Roofing Material';
+                    document.getElementById('print-table-mat-spec').innerText = activeMatLabel;
+                    if (activeIsShingle) {
+                        const mShingleBundles = Math.ceil(calc.mainWithWaste * 3);
+                        document.getElementById('print-table-mat-qty').innerText = `${mShingleBundles} bundles (${calc.mainWithWaste.toFixed(2)} SQs)`;
+                    } else {
+                        document.getElementById('print-table-mat-qty').innerText = `${calc.mainWithWaste.toFixed(2)} SQs`;
+                    }
+                    document.getElementById('print-table-mat-subtotal').innerText = fmt(mainRoofMatCostTotal);
                 } else {
                     pRowBaseMat.classList.add('hidden');
                 }
