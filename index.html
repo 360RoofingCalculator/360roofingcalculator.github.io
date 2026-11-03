@@ -1135,7 +1135,7 @@
             showToast("Redo performed");
         }
 
-        // Keyboard Shortcut Listener for Ctrl+Z and Ctrl+Y (Preserved)
+        // Keyboard Shortcut Listener for Ctrl+Z and Ctrl+Y
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                 if (e.shiftKey) {
@@ -1402,10 +1402,35 @@
             }
         }
 
-        function isShingleType(type) {
-            if (!type) return false;
-            const lower = String(type).toLowerCase();
-            return lower === 'shingles' || lower.includes('shingle');
+        // --- ENHANCED SHINGLE TYPE DETECTOR ---
+        function isShingleType(val) {
+            if (!val) return false;
+
+            // Direct object inspection
+            if (typeof val === 'object' && val !== null) {
+                const nameLower = String(val.name || '').trim().toLowerCase();
+                const idLower = String(val.id || '').trim().toLowerCase();
+                return nameLower.includes('shingle') || idLower.includes('shingle');
+            }
+
+            const strVal = String(val).trim().toLowerCase();
+
+            // 1. Literal string check
+            if (strVal.includes('shingle')) return true;
+
+            // 2. ID lookup across materials array
+            if (state && Array.isArray(state.materials)) {
+                const match = state.materials.find(m => m.id === val);
+                if (match) {
+                    const matName = String(match.name || '').trim().toLowerCase();
+                    const matId = String(match.id || '').trim().toLowerCase();
+                    if (matName.includes('shingle') || matId.includes('shingle')) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         function formatMaterialLabel(m) {
@@ -1604,6 +1629,7 @@
             showToast("Additional roof removed.");
         }
 
+        // --- DYNAMIC ROOF UI ENGINE (UPDATED TO DETECT CUSTOM SHINGLES) ---
         function renderAdditionalRoofsUI() {
             const container = document.getElementById('additional-roofs-container');
             container.innerHTML = '';
@@ -1619,8 +1645,23 @@
                     optionsHTML += `<option value="${m.id}" ${roof.type === m.id ? 'selected' : ''}>${formattedName}</option>`;
                 });
 
-                const isShingle = isShingleType(roof.type);
-                const isModBit = (roof.type === 'mod_bit' || roof.type.includes('modified') || roof.type.includes('bitumen'));
+                // Match material definition from state
+                const matObj = state.materials.find(m => m.id === roof.type);
+                const matNameLower = matObj ? String(matObj.name || '').trim().toLowerCase() : '';
+                const matIdLower = String(roof.type || '').trim().toLowerCase();
+
+                // Robust check for shingles: covers direct ID, material object, or material name containing 'shingle'
+                const isShingle = isShingleType(roof.type) || isShingleType(matObj) || matNameLower.startsWith('shingle');
+                
+                // Mod bit check
+                const isModBit = (
+                    matIdLower === 'mod_bit' ||
+                    matIdLower.includes('modified') ||
+                    matIdLower.includes('bitumen') ||
+                    matNameLower.includes('modified') ||
+                    matNameLower.includes('bitumen')
+                );
+                
                 const isSteep = (roof.pitchKey === 'pitch_7_9' || roof.pitchKey === 'pitch_10_12' || roof.pitchKey === 'pitch_13_plus');
 
                 let dynamicFieldsHTML = '';
@@ -1729,7 +1770,6 @@
                         </div>
                     `;
                 } else {
-                    const matObj = state.materials.find(m => m.id === roof.type);
                     const matName = matObj ? matObj.name : 'Material';
                     dynamicFieldsHTML = `
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
@@ -1961,7 +2001,6 @@
             if (printEl) printEl.innerText = lbl;
         }
 
-        // --- EDITABLE MISC MATERIAL LABEL HANDLERS ---
         function startRenamingMiscMaterial(e) {
             if (e) e.stopPropagation();
             document.getElementById('container-misc-material-label').classList.add('hidden');
@@ -2969,9 +3008,19 @@
             let additionalPitchSurcharges = 0;
 
             state.additionalRoofs.forEach(r => {
-                const isShingle = isShingleType(r.type);
-                const isModBit = (r.type === 'mod_bit' || r.type.includes('modified') || r.type.includes('bitumen'));
                 const matObj = state.materials.find(m => m.id === r.type);
+                const matNameLower = matObj ? String(matObj.name || '').trim().toLowerCase() : '';
+                const matIdLower = String(r.type || '').trim().toLowerCase();
+
+                const isShingle = isShingleType(r.type) || isShingleType(matObj) || matNameLower.startsWith('shingle');
+                const isModBit = (
+                    matIdLower === 'mod_bit' ||
+                    matIdLower.includes('modified') ||
+                    matIdLower.includes('bitumen') ||
+                    matNameLower.includes('modified') ||
+                    matNameLower.includes('bitumen')
+                );
+
                 const matCostPerSq = matObj ? matObj.cost : 100.00;
                 const rSqs = parseCleanFloat(r.sqs);
 
@@ -3119,13 +3168,12 @@
             const currentMatId = document.getElementById('select-material')?.value;
             const activeMatObj = state.materials.find(m => m.id === currentMatId) || state.materials[0];
             const activeMatLabel = formatMaterialLabel(activeMatObj);
-            const activeIsShingle = isShingleType(activeMatObj?.name || activeMatObj?.id || currentMatId);
+            const activeIsShingle = isShingleType(activeMatObj);
 
             let mainRoofMatCostTotal = 0;
             let dynamicLineLabel = "";
 
             if (activeIsShingle) {
-                // 3 bundles per square standard for shingles
                 const shingleBundles = Math.ceil(calc.mainWithWaste * 3);
                 const shingleBundlePrice = baseMatPerSq / 3;
                 mainRoofMatCostTotal = shingleBundles * shingleBundlePrice;
@@ -3539,8 +3587,18 @@
             if (printAddlTbody) {
                 printAddlTbody.innerHTML = '';
                 state.additionalRoofs.filter(r => !isShingleType(r.type)).forEach(r => {
-                    const isModBit = (r.type === 'mod_bit' || r.type.includes('modified') || r.type.includes('bitumen'));
                     const matObj = state.materials.find(m => m.id === r.type);
+                    const matNameLower = matObj ? String(matObj.name || '').trim().toLowerCase() : '';
+                    const matIdLower = String(r.type || '').trim().toLowerCase();
+
+                    const isModBit = (
+                        matIdLower === 'mod_bit' ||
+                        matIdLower.includes('modified') ||
+                        matIdLower.includes('bitumen') ||
+                        matNameLower.includes('modified') ||
+                        matNameLower.includes('bitumen')
+                    );
+
                     const matCostPerSq = matObj ? matObj.cost : 100.00;
                     const rSqs = parseCleanFloat(r.sqs);
                     const directCost = parseCleanFloat(r.directCost);
